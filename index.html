@@ -16,6 +16,38 @@
     h1 { margin-bottom: 4px; }
     .subtitle { color: #999; margin-bottom: 24px; font-size: 14px; }
 
+    .discord-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #5865F2;
+      color: #fff;
+      text-decoration: none;
+      padding: 8px 14px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 600;
+      margin-bottom: 24px;
+    }
+    .discord-link:hover { background: #4752c4; }
+
+    .leaderboard-frame {
+      width: 100%;
+      height: 800px;
+      border: none;
+      border-radius: 8px;
+      background: #111;
+      margin-bottom: 32px;
+    }
+
+    h2.section-title {
+      font-size: 20px;
+      margin-top: 0;
+      margin-bottom: 12px;
+      padding-top: 16px;
+      border-top: 1px solid #333;
+    }
+
     #back-btn {
       display: none;
       background: #2a2a2a;
@@ -74,6 +106,19 @@
   <h1>Race Results</h1>
   <div class="subtitle">GT3forc3.com</div>
 
+  <div>
+    <a class="discord-link" href="https://discord.gg/edVd7RMfpH" target="_blank" rel="noopener">
+      Join our Discord
+    </a>
+  </div>
+
+  <iframe
+    class="leaderboard-frame"
+    src="https://ca.assettohosting.com:10647/leaderboards/embed/1bb39366-c808-4171-94bb-af286353e2f6"
+    loading="lazy">
+  </iframe>
+
+  <h2 class="section-title">Session History</h2>
   <button id="back-btn">&larr; Back to sessions</button>
   <div id="status"></div>
   <div id="content"></div>
