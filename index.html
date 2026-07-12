@@ -132,8 +132,8 @@
   </style>
 </head>
 <body>
-  <h1>Race Results</h1>
-  <div class="subtitle">GT3forc3.com</div>
+  <h1>GT3FORC3.COM</h1>
+  <div class="subtitle" id="page-subtitle">Race Results</div>
 
   <div>
     <a class="discord-link" href="https://discord.gg/edVd7RMfpH" target="_blank" rel="noopener">
@@ -291,7 +291,33 @@
       }
     }
 
+    async function loadCurrentTrack() {
+      const subtitleEl = document.getElementById("page-subtitle");
+      try {
+        const listRes = await fetch(WORKER_URL + "/api/v1/results");
+        if (!listRes.ok) throw new Error("Server returned " + listRes.status);
+        const listData = await listRes.json();
+
+        const sessions = (listData.results || []).slice().sort(
+          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
+        );
+        if (sessions.length === 0) return;
+
+        const latestRes = await fetch(WORKER_URL + sessions[0].download_url);
+        if (!latestRes.ok) throw new Error("Server returned " + latestRes.status);
+        const latest = await latestRes.json();
+
+        const trackParts = [latest.track_name, latest.track_layout_name].filter(Boolean);
+        if (trackParts.length > 0) {
+          subtitleEl.textContent = `Race Results - ${trackParts.join(" – ")}`;
+        }
+      } catch (err) {
+        // Leave the default "Race Results" text if this fails silently
+      }
+    }
+
     loadCountries();
+    loadCurrentTrack();
 
     document.getElementById("copyright").textContent =
       `© ${new Date().getFullYear()} GT3forc3.com`;
