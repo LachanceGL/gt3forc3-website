@@ -43,55 +43,45 @@
     h2.section-title {
       font-size: 20px;
       margin-top: 0;
-      margin-bottom: 12px;
+      margin-bottom: 4px;
       padding-top: 16px;
       border-top: 1px solid #333;
     }
-
-    #back-btn {
-      display: none;
-      background: #2a2a2a;
-      color: #eee;
-      border: 1px solid #444;
-      padding: 8px 14px;
-      border-radius: 6px;
-      cursor: pointer;
+    .section-subtitle {
+      color: #999;
+      font-size: 13px;
       margin-bottom: 16px;
-      font-size: 14px;
     }
-    #back-btn:hover { background: #333; }
 
-    table {
-      width: 100%;
-      border-collapse: collapse;
+    .country-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 10px;
     }
-    th, td {
-      padding: 10px 8px;
-      border-bottom: 1px solid #333;
-      text-align: left;
-      font-size: 14px;
-    }
-    th {
+    .country-card {
       background: #2a2a2a;
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .country-flag {
+      font-size: 28px;
+      line-height: 1;
+    }
+    .country-info {
+      display: flex;
+      flex-direction: column;
+    }
+    .country-code {
       font-weight: 600;
+      font-size: 14px;
     }
-
-    .session-row {
-      cursor: pointer;
-    }
-    .session-row:hover {
-      background: #242424;
-    }
-
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 10px;
+    .country-count {
+      color: #999;
       font-size: 12px;
-      font-weight: 600;
     }
-    .badge-race { background: #4a2a2a; color: #ff8080; }
-    .badge-qualify { background: #2a3a4a; color: #80c0ff; }
 
     #status {
       color: #999;
@@ -118,198 +108,114 @@
     loading="lazy">
   </iframe>
 
-  <h2 class="section-title">Session History</h2>
-  <button id="back-btn">&larr; Back to sessions</button>
+  <h2 class="section-title">Where Our Drivers Race From</h2>
+  <div class="section-subtitle">Countries represented across recent sessions</div>
   <div id="status"></div>
   <div id="content"></div>
 
   <script>
     const WORKER_URL = "https://raspy-salad-d894.contact-eb9.workers.dev";
+    const SESSIONS_TO_SCAN = 30; // how many recent sessions to pull driver data from
 
     const statusEl = document.getElementById("status");
     const contentEl = document.getElementById("content");
-    const backBtn = document.getElementById("back-btn");
 
-    backBtn.addEventListener("click", loadSessionList);
+    // Maps IOC/nation codes (as used by this data) to flag emoji.
+    // Falls back to showing the code with no flag if not found here.
+    const NATION_FLAGS = {
+      USA: "🇺🇸", CAN: "🇨🇦", MEX: "🇲🇽", BRA: "🇧🇷", ARG: "🇦🇷",
+      GBR: "🇬🇧", IRL: "🇮🇪", FRA: "🇫🇷", DEU: "🇩🇪", ESP: "🇪🇸",
+      ITA: "🇮🇹", POR: "🇵🇹", NED: "🇳🇱", BEL: "🇧🇪", SUI: "🇨🇭",
+      AUT: "🇦🇹", POL: "🇵🇱", HUN: "🇭🇺", CZE: "🇨🇿", SVK: "🇸🇰",
+      SVN: "🇸🇮", CRO: "🇭🇷", ROU: "🇷🇴", BUL: "🇧🇬", GRE: "🇬🇷",
+      SWE: "🇸🇪", NOR: "🇳🇴", DEN: "🇩🇰", FIN: "🇫🇮", ISL: "🇮🇸",
+      RUS: "🇷🇺", UKR: "🇺🇦", TUR: "🇹🇷", ISR: "🇮🇱", SRB: "🇷🇸",
+      KOR: "🇰🇷", JPN: "🇯🇵", CHN: "🇨🇳", TPE: "🇹🇼", HKG: "🇭🇰",
+      IND: "🇮🇳", AUS: "🇦🇺", NZL: "🇳🇿", ZAF: "🇿🇦", GHA: "🇬🇭",
+      NGA: "🇳🇬", EGY: "🇪🇬", MAR: "🇲🇦", SAU: "🇸🇦", UAE: "🇦🇪",
+      THA: "🇹🇭", PHI: "🇵🇭", MAS: "🇲🇾", SGP: "🇸🇬", IDN: "🇮🇩",
+      VIE: "🇻🇳", COL: "🇨🇴", CHI: "🇨🇱", PER: "🇵🇪", PSE: "🇵🇸",
+      LAT: "🇱🇻", LTU: "🇱🇹", EST: "🇪🇪"
+    };
 
-    function formatTimestamp(ts) {
-      const date = new Date(ts);
-      return date.toLocaleString(undefined, {
-        month: "short",
-        day: "numeric",
-        hour: "numeric",
-        minute: "2-digit"
-      });
+    function flagFor(code) {
+      return NATION_FLAGS[code] || "🏁";
     }
 
-    async function loadSessionList() {
-      backBtn.style.display = "none";
-      statusEl.textContent = "Loading sessions...";
+    async function loadCountries() {
+      statusEl.textContent = "Loading driver data...";
       statusEl.className = "";
       contentEl.innerHTML = "";
 
       try {
-        const res = await fetch(WORKER_URL + "/api/v1/results");
-        if (!res.ok) throw new Error("Server returned " + res.status);
-        const data = await res.json();
+        const listRes = await fetch(WORKER_URL + "/api/v1/results");
+        if (!listRes.ok) throw new Error("Server returned " + listRes.status);
+        const listData = await listRes.json();
 
-        const sessions = (data.results || []).slice().sort(
-          (a, b) => new Date(b.timestamp) - new Date(a.timestamp)
-        );
+        const sessions = (listData.results || [])
+          .slice()
+          .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+          .slice(0, SESSIONS_TO_SCAN);
 
         if (sessions.length === 0) {
-          statusEl.textContent = "No sessions found.";
+          statusEl.textContent = "No session data found.";
+          return;
+        }
+
+        const detailResults = await Promise.allSettled(
+          sessions.map(s => fetch(WORKER_URL + s.download_url).then(r => r.json()))
+        );
+
+        // Dedupe drivers by player_id, tally by nation
+        const seenPlayers = new Set();
+        const nationCounts = {};
+
+        detailResults.forEach(result => {
+          if (result.status !== "fulfilled") return;
+          const drivers = result.value.drivers || [];
+          drivers.forEach(driver => {
+            const key = driver.player_id || `${driver.first_name}-${driver.last_name}`;
+            if (seenPlayers.has(key)) return;
+            seenPlayers.add(key);
+
+            const nation = driver.nation || "Unknown";
+            nationCounts[nation] = (nationCounts[nation] || 0) + 1;
+          });
+        });
+
+        const nations = Object.entries(nationCounts).sort((a, b) => b[1] - a[1]);
+
+        if (nations.length === 0) {
+          statusEl.textContent = "No driver nation data found.";
           return;
         }
 
         statusEl.textContent = "";
 
-        const table = document.createElement("table");
-        table.innerHTML = `
-          <thead>
-            <tr>
-              <th>Date</th>
-              <th>Type</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        `;
-        const tbody = table.querySelector("tbody");
+        const grid = document.createElement("div");
+        grid.className = "country-grid";
 
-        sessions.forEach(session => {
-          const tr = document.createElement("tr");
-          tr.className = "session-row";
-          const badgeClass = session.session_type === "Race" ? "badge-race" : "badge-qualify";
-          tr.innerHTML = `
-            <td>${formatTimestamp(session.timestamp)}</td>
-            <td><span class="badge ${badgeClass}">${session.session_type}</span></td>
+        nations.forEach(([code, count]) => {
+          const card = document.createElement("div");
+          card.className = "country-card";
+          card.innerHTML = `
+            <div class="country-flag">${flagFor(code)}</div>
+            <div class="country-info">
+              <div class="country-code">${code}</div>
+              <div class="country-count">${count} driver${count === 1 ? "" : "s"}</div>
+            </div>
           `;
-          tr.addEventListener("click", () => loadSessionDetail(session));
-          tbody.appendChild(tr);
+          grid.appendChild(card);
         });
 
-        contentEl.appendChild(table);
+        contentEl.appendChild(grid);
       } catch (err) {
-        statusEl.textContent = "Error loading sessions: " + err.message;
+        statusEl.textContent = "Error loading driver data: " + err.message;
         statusEl.className = "error";
       }
     }
 
-    async function loadSessionDetail(session) {
-      backBtn.style.display = "inline-block";
-      statusEl.textContent = "Loading results...";
-      statusEl.className = "";
-      contentEl.innerHTML = "";
-
-      try {
-        const res = await fetch(WORKER_URL + session.download_url.replace(/^\/api\/v1/, "/api/v1"));
-        if (!res.ok) throw new Error("Server returned " + res.status);
-        const data = await res.json();
-
-        statusEl.textContent = "";
-        renderSessionDetail(session, data);
-      } catch (err) {
-        statusEl.textContent = "Error loading session detail: " + err.message;
-        statusEl.className = "error";
-      }
-    }
-
-    function guidsMatch(g1, g2) {
-      if (!g1 || !g2) return false;
-      return g1.a === g2.a && g1.b === g2.b;
-    }
-
-    function formatLapTime(ms) {
-      if (ms === null || ms === undefined || ms <= 0 || ms === Infinity) return "-";
-      const totalSeconds = ms / 1000;
-      const minutes = Math.floor(totalSeconds / 60);
-      const seconds = (totalSeconds % 60).toFixed(3).padStart(6, "0");
-      return `${minutes}:${seconds}`;
-    }
-
-    function renderSessionDetail(session, data) {
-      const heading = document.createElement("h2");
-      heading.textContent = `${session.session_type} — ${formatTimestamp(session.timestamp)}`;
-      contentEl.appendChild(heading);
-
-      const meta = document.createElement("div");
-      meta.style.color = "#999";
-      meta.style.fontSize = "13px";
-      meta.style.marginBottom = "16px";
-      meta.textContent = `${data.track_name || ""} ${data.track_layout_name ? "– " + data.track_layout_name : ""}`;
-      contentEl.appendChild(meta);
-
-      const driverStandings = data.driver_standings || [];
-
-      if (driverStandings.length === 0) {
-        const p = document.createElement("p");
-        p.style.color = "#999";
-        p.textContent = "No results recorded for this session (no drivers set laps).";
-        contentEl.appendChild(p);
-        return;
-      }
-
-      const table = document.createElement("table");
-      table.innerHTML = `
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Driver</th>
-            <th>Car</th>
-            <th>Nation</th>
-            <th>Best Lap</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      `;
-      const tbody = table.querySelector("tbody");
-
-      driverStandings.forEach((driverGuid, i) => {
-        const driver = (data.drivers || []).find(d => guidsMatch(d.guid, driverGuid));
-        const carStanding = (data.car_standings || [])[i];
-        const car = carStanding
-          ? (data.cars || []).find(c => guidsMatch(c.car_id, carStanding.car_id || carStanding))
-          : null;
-
-        // Find this driver's best lap from the laps array, if present
-        const driverLaps = (data.laps || []).filter(lap =>
-          guidsMatch(lap.driver_guid || lap.driver, driverGuid)
-        );
-        const bestLapMs = driverLaps.length
-          ? Math.min(...driverLaps.map(l => l.lap_time_ms || l.laptime_ms || l.time_ms || Infinity))
-          : null;
-
-        const driverName = driver
-          ? `${driver.first_name || ""} ${driver.last_name || ""}`.trim()
-          : "-";
-        const carName = car ? (car.model_displayname || "-") : "-";
-        const nation = driver ? (driver.nation || "-") : "-";
-
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-          <td>${i + 1}</td>
-          <td>${driverName || "-"}</td>
-          <td>${carName}</td>
-          <td>${nation}</td>
-          <td>${formatLapTime(bestLapMs)}</td>
-        `;
-        tbody.appendChild(tr);
-      });
-
-      contentEl.appendChild(table);
-
-      // Note if lap timing data wasn't present at all
-      if (!data.laps || data.laps.length === 0) {
-        const note = document.createElement("p");
-        note.style.color = "#999";
-        note.style.fontSize = "13px";
-        note.style.marginTop = "12px";
-        note.textContent = "Lap time data wasn't available in this session's results.";
-        contentEl.appendChild(note);
-      }
-    }
-
-    loadSessionList();
+    loadCountries();
   </script>
 </body>
 </html>
