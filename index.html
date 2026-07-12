@@ -67,8 +67,10 @@
       gap: 10px;
     }
     .country-flag {
-      font-size: 28px;
-      line-height: 1;
+      width: 30px;
+      height: 20px;
+      border-radius: 2px;
+      flex-shrink: 0;
     }
     .country-info {
       display: flex;
@@ -120,26 +122,28 @@
     const statusEl = document.getElementById("status");
     const contentEl = document.getElementById("content");
 
-    // Maps IOC/nation codes (as used by this data) to flag emoji.
-    // Falls back to showing the code with no flag if not found here.
-    const NATION_FLAGS = {
-      USA: "🇺🇸", CAN: "🇨🇦", MEX: "🇲🇽", BRA: "🇧🇷", ARG: "🇦🇷",
-      GBR: "🇬🇧", IRL: "🇮🇪", FRA: "🇫🇷", DEU: "🇩🇪", ESP: "🇪🇸",
-      ITA: "🇮🇹", POR: "🇵🇹", NED: "🇳🇱", BEL: "🇧🇪", SUI: "🇨🇭",
-      AUT: "🇦🇹", POL: "🇵🇱", HUN: "🇭🇺", CZE: "🇨🇿", SVK: "🇸🇰",
-      SVN: "🇸🇮", CRO: "🇭🇷", ROU: "🇷🇴", BUL: "🇧🇬", GRE: "🇬🇷",
-      SWE: "🇸🇪", NOR: "🇳🇴", DEN: "🇩🇰", FIN: "🇫🇮", ISL: "🇮🇸",
-      RUS: "🇷🇺", UKR: "🇺🇦", TUR: "🇹🇷", ISR: "🇮🇱", SRB: "🇷🇸",
-      KOR: "🇰🇷", JPN: "🇯🇵", CHN: "🇨🇳", TPE: "🇹🇼", HKG: "🇭🇰",
-      IND: "🇮🇳", AUS: "🇦🇺", NZL: "🇳🇿", ZAF: "🇿🇦", GHA: "🇬🇭",
-      NGA: "🇳🇬", EGY: "🇪🇬", MAR: "🇲🇦", SAU: "🇸🇦", UAE: "🇦🇪",
-      THA: "🇹🇭", PHI: "🇵🇭", MAS: "🇲🇾", SGP: "🇸🇬", IDN: "🇮🇩",
-      VIE: "🇻🇳", COL: "🇨🇴", CHI: "🇨🇱", PER: "🇵🇪", PSE: "🇵🇸",
-      LAT: "🇱🇻", LTU: "🇱🇹", EST: "🇪🇪"
+    // Maps this data's nation codes (IOC-style, 3-letter) to ISO 3166-1
+    // alpha-2 codes, which is what HLTV's flag images use.
+    const NATION_TO_ISO2 = {
+      USA: "US", CAN: "CA", MEX: "MX", BRA: "BR", ARG: "AR",
+      GBR: "GB", IRL: "IE", FRA: "FR", DEU: "DE", ESP: "ES",
+      ITA: "IT", POR: "PT", NED: "NL", BEL: "BE", SUI: "CH",
+      AUT: "AT", POL: "PL", HUN: "HU", CZE: "CZ", SVK: "SK",
+      SVN: "SI", CRO: "HR", ROU: "RO", BUL: "BG", GRE: "GR",
+      SWE: "SE", NOR: "NO", DEN: "DK", FIN: "FI", ISL: "IS",
+      RUS: "RU", UKR: "UA", TUR: "TR", ISR: "IL", SRB: "RS",
+      KOR: "KR", JPN: "JP", CHN: "CN", TPE: "TW", HKG: "HK",
+      IND: "IN", AUS: "AU", NZL: "NZ", ZAF: "ZA", GHA: "GH",
+      NGA: "NG", EGY: "EG", MAR: "MA", SAU: "SA", UAE: "AE",
+      THA: "TH", PHI: "PH", MAS: "MY", SGP: "SG", IDN: "ID",
+      VIE: "VN", COL: "CO", CHI: "CL", PER: "PE", PSE: "PS",
+      LAT: "LV", LTU: "LT", EST: "EE"
     };
 
-    function flagFor(code) {
-      return NATION_FLAGS[code] || "🏁";
+    function flagImgFor(code) {
+      const iso2 = NATION_TO_ISO2[code];
+      if (!iso2) return null;
+      return `https://www.hltv.org/img/static/flags/30x20/${iso2}.gif`;
     }
 
     async function loadCountries() {
@@ -198,8 +202,12 @@
         nations.forEach(([code, count]) => {
           const card = document.createElement("div");
           card.className = "country-card";
+          const flagUrl = flagImgFor(code);
+          const flagHtml = flagUrl
+            ? `<img class="country-flag" src="${flagUrl}" alt="${code}" onerror="this.style.display='none'">`
+            : `<div class="country-flag" style="display:flex;align-items:center;justify-content:center;background:#333;font-size:10px;">${code}</div>`;
           card.innerHTML = `
-            <div class="country-flag">${flagFor(code)}</div>
+            ${flagHtml}
             <div class="country-info">
               <div class="country-code">${code}</div>
               <div class="country-count">${count} driver${count === 1 ? "" : "s"}</div>
