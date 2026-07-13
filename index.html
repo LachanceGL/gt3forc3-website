@@ -447,6 +447,7 @@
     }
 
 
+    async function loadCurrentTrack() {
       const subtitleEl = document.getElementById("page-subtitle");
       try {
         const listRes = await fetch(WORKER_URL + "/api/v1/results");
