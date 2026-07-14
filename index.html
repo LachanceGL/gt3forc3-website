@@ -535,19 +535,20 @@
 
       if (sessions.length === 0) return {};
 
-      // Fetch in small batches rather than all at once — mobile browsers
-      // (especially iOS Safari/Chrome) can silently fail large numbers of
-      // simultaneous requests to the same host. Each request also gets a
-      // retry, since flaky mobile connections can drop individual requests
-      // even within a small batch.
-      const BATCH_SIZE = 12;
+      // Fetch one session at a time, sequentially, with a short gap between
+      // requests. A batch of parallel requests was failing entirely on some
+      // mobile networks/browsers even with retries — going fully sequential
+      // removes any "burst" pattern that a carrier, router, or content
+      // blocker might be flagging.
       const detailResults = [];
-      for (let i = 0; i < sessions.length; i += BATCH_SIZE) {
-        const batch = sessions.slice(i, i + BATCH_SIZE);
-        const batchResults = await Promise.allSettled(
-          batch.map(s => fetchWithRetry(WORKER_URL + s.download_url))
-        );
-        detailResults.push(...batchResults);
+      for (const session of sessions) {
+        try {
+          const value = await fetchWithRetry(WORKER_URL + session.download_url, 3);
+          detailResults.push({ status: "fulfilled", value });
+        } catch (err) {
+          detailResults.push({ status: "rejected", reason: err });
+        }
+        await new Promise(r => setTimeout(r, 30));
       }
 
       // Dedupe drivers by player_id, tally by nation
@@ -587,7 +588,7 @@
       if (cached && cached.nationCounts) {
         renderCountryData(cached.nationCounts);
       } else {
-        statusEl.textContent = "Loading driver data...";
+        statusEl.textContent = "Loading driver data... this can take a moment on first visit.";
         statusEl.className = "";
       }
 
