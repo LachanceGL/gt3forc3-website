@@ -17,7 +17,7 @@
       max-width: 900px;
       margin: 0 auto;
     }
-    h1 { margin-bottom: 4px; color: #e63946; }
+    h1 { margin-top: 0; margin-bottom: 4px; color: #e63946; }
     .subtitle { color: #999; margin-bottom: 24px; font-size: 14px; font-weight: 700; font-style: italic; }
 
     .header-row {
@@ -78,6 +78,35 @@
       color: #999;
       font-size: 13px;
       margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .live-badge {
+      display: none;
+      align-items: center;
+      gap: 5px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      color: #4ade80;
+    }
+    .live-badge.visible {
+      display: inline-flex;
+    }
+    .live-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #4ade80;
+      animation: live-pulse 1.6s ease-in-out infinite;
+    }
+    @keyframes live-pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
     }
 
     .leaderboard-frame {
@@ -214,18 +243,6 @@
       margin-top: 4px;
     }
 
-    .country-stats {
-      margin-bottom: 16px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #2e2e2e;
-    }
-    .country-stats-numbers {
-      font-size: 13px;
-      color: #999;
-    }
-    .country-stats-numbers strong {
-      color: #e63946;
-    }
     .country-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
@@ -361,7 +378,10 @@
     <a class="leaderboard-tab active" href="#nordschleife" data-track="nordschleife">Nordschleife</a>
     <a class="leaderboard-tab" href="#spa" data-track="spa">Spa-Francorchamps</a>
   </div>
-  <div class="leaderboard-server-name" id="leaderboard-server-name"></div>
+  <div class="leaderboard-server-name" id="leaderboard-server-name">
+    <span id="leaderboard-server-name-text"></span>
+    <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Live</span>
+  </div>
   <input
     type="text"
     id="leaderboard-search"
@@ -372,7 +392,7 @@
 
   <div class="section-box">
     <h2 class="section-title">GT3 FORC3 DRIVERS AROUND THE WORLD</h2>
-    <div class="section-subtitle">🌍 Countries represented</div>
+    <div class="section-subtitle" id="country-subtitle">🌍 Countries represented</div>
     <div id="status"></div>
     <div id="content"></div>
   </div>
@@ -449,12 +469,10 @@
       statusEl.textContent = "";
       contentEl.innerHTML = "";
 
-      const stats = document.createElement("div");
-      stats.className = "country-stats";
-      stats.innerHTML = `
-        <div class="country-stats-numbers">Drivers across <strong>${nations.length}</strong> countries</div>
-      `;
-      contentEl.appendChild(stats);
+      const subtitleEl = document.getElementById("country-subtitle");
+      if (subtitleEl) {
+        subtitleEl.textContent = `🌍 ${nations.length} Countries Represented`;
+      }
 
       const grid = document.createElement("div");
       grid.className = "country-grid";
@@ -715,10 +733,14 @@
     }
 
     async function loadServerName(track) {
-      const labelEl = document.getElementById("leaderboard-server-name");
+      const labelEl = document.getElementById("leaderboard-server-name-text");
+      const liveBadgeEl = document.getElementById("server-live-badge");
 
       if (serverNameCache[track]) {
-        if (activeTrack === track) labelEl.textContent = serverNameCache[track];
+        if (activeTrack === track) {
+          labelEl.textContent = serverNameCache[track];
+          liveBadgeEl.classList.add("visible");
+        }
         return;
       }
 
@@ -739,10 +761,13 @@
 
         if (latest.server_name) {
           serverNameCache[track] = latest.server_name;
-          if (activeTrack === track) labelEl.textContent = latest.server_name;
+          if (activeTrack === track) {
+            labelEl.textContent = latest.server_name;
+            liveBadgeEl.classList.add("visible");
+          }
         }
       } catch (err) {
-        // Silently leave the label blank if this fails
+        // Silently leave the label blank if this fails, and keep the Live badge hidden
       }
     }
 
@@ -751,7 +776,8 @@
       document.querySelectorAll(".leaderboard-tab").forEach(t => {
         t.classList.toggle("active", t.dataset.track === track);
       });
-      document.getElementById("leaderboard-server-name").textContent = serverNameCache[track] || "";
+      document.getElementById("leaderboard-server-name-text").textContent = serverNameCache[track] || "";
+      document.getElementById("server-live-badge").classList.toggle("visible", Boolean(serverNameCache[track]));
       loadLeaderboard(track);
       loadServerName(track);
     }
@@ -772,7 +798,7 @@
         t.classList.toggle("active", t.dataset.track === initialTrack);
       });
     }
-    document.getElementById("leaderboard-server-name").textContent = "";
+    document.getElementById("leaderboard-server-name-text").textContent = "";
     loadServerName(activeTrack);
 
     loadCountries();
