@@ -344,8 +344,8 @@
     .error {
       color: #ff8080;
     }
-    .loading {
-      color: #e63946;
+    #status.loading {
+      color: #ff8080;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.02em;
@@ -705,7 +705,7 @@
         loadedTrackData[trackId] = cached;
         recomputeAndRenderTrackData();
       } else {
-        statusEl.textContent = "Loading driver data... this can take a moment on first visit.";
+        statusEl.textContent = "Loading drivers data... this can take a moment on first visit.";
         statusEl.className = "loading";
       }
 
