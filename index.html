@@ -283,6 +283,16 @@
       font-weight: 600;
       text-decoration: none;
       display: inline-block;
+      text-align: center;
+    }
+    .leaderboard-tab-type {
+      display: block;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      opacity: 0.6;
+      margin-top: 2px;
     }
     .leaderboard-tab:hover {
       background: #333;
@@ -517,8 +527,14 @@
 
   <img class="game-logo" src="https://cdn2.steamgriddb.com/logo_thumb/fc01a2102f0e61c902da69e52aac5d0d.png" alt="Assetto Corsa EVO">
   <div class="leaderboard-tabs">
-    <a class="leaderboard-tab active" href="#nordschleife" data-track="nordschleife">Nordschleife</a>
-    <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">Red Bull Ring</a>
+    <a class="leaderboard-tab active" href="#nordschleife" data-track="nordschleife">
+      Nordschleife
+      <span class="leaderboard-tab-type">Hotlap</span>
+    </a>
+    <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">
+      Red Bull Ring
+      <span class="leaderboard-tab-type">Race</span>
+    </a>
   </div>
   <div class="leaderboard-server-name" id="leaderboard-server-name">
     <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
@@ -827,7 +843,7 @@
         workerPrefix: "/server2",
         shareKey: "13e1f53a-41d2-4e15-bb26-c123dc1a0558",
         displayName: "Red Bull Ring",
-        title: "Hotlap"
+        title: "Race"
       },
       kyalami: {
         workerPrefix: "/server2",
