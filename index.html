@@ -518,8 +518,7 @@
   <img class="game-logo" src="https://cdn2.steamgriddb.com/logo_thumb/fc01a2102f0e61c902da69e52aac5d0d.png" alt="Assetto Corsa EVO">
   <div class="leaderboard-tabs">
     <a class="leaderboard-tab active" href="#nordschleife" data-track="nordschleife">Nordschleife</a>
-    <a class="leaderboard-tab" href="#kyalami" data-track="kyalami">Kyalami</a>
-    <a class="leaderboard-tab" href="#spa" data-track="spa">Spa-Francorchamps</a>
+    <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">Red Bull Ring</a>
   </div>
   <div class="leaderboard-server-name" id="leaderboard-server-name">
     <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
@@ -824,30 +823,37 @@
         displayName: "Nordschleife",
         title: "Hotlap"
       },
+      redbullring: {
+        workerPrefix: "/server2",
+        shareKey: "13e1f53a-41d2-4e15-bb26-c123dc1a0558",
+        displayName: "Red Bull Ring",
+        title: "Hotlap"
+      },
       kyalami: {
         workerPrefix: "/server2",
         shareKey: "a6aea2bb-9846-446d-9987-7d64cbdd90e6",
         displayName: "Kyalami",
-        title: "Hotlap"
+        title: "Hotlap",
+        // Server 2 now runs Red Bull Ring, not Kyalami — same situation as
+        // Spa below. Frozen leaderboard, no live status of its own anymore.
+        legacy: true,
+        driverDataSource: "redbullring",
+        // Archived: kept fully configured (data, share key, everything) so
+        // it can come back instantly by just removing this flag — but its
+        // tab is hidden from the tab bar since the server's moved on.
+        archived: true
       },
       spa: {
         workerPrefix: "/server2",
         shareKey: "c8393a9b-16f2-4e29-9ddb-7de2ab3ad5ae",
         displayName: "Spa-Francorchamps",
         title: "Hotlap",
-        // Server 2 now runs Kyalami, not Spa — this leaderboard is frozen
-        // (still queried by its own share key, so it keeps showing whatever
-        // Spa data AssettoHosting last recorded), but there's no live status
-        // for it anymore. Force the badge to Offline instead of querying
-        // /server2's live status, which would now describe Kyalami.
+        // Server 2 has moved on again since (now runs Red Bull Ring) — still
+        // frozen, still no live status, just points its driver data at
+        // whichever track is actually live now instead of Kyalami.
         legacy: true,
-        // Driver/nation data for flags and the world map is fetched per
-        // server, not per track. Since Spa and Kyalami share the same
-        // physical server, point Spa at Kyalami's data instead of doing a
-        // separate (and now meaningless, since the server no longer runs
-        // Spa) fetch of its own — this also avoids double-counting the same
-        // live driver pool twice in the world map tally.
-        driverDataSource: "kyalami"
+        driverDataSource: "redbullring",
+        archived: true
       }
     };
 
