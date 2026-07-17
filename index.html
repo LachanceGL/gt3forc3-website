@@ -669,7 +669,7 @@
       return `https://www.hltv.org/img/static/flags/30x20/${iso2}.gif`;
     }
 
-    const COUNTRY_CACHE_KEY = "gt3_country_data_v6";
+    const COUNTRY_CACHE_KEY = "gt3_country_data_v7";
     const COUNTRY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
     function renderCountryData(nationCounts) {
@@ -728,7 +728,7 @@
     }
 
     // Nation codes to exclude entirely from the country grid.
-    const EXCLUDED_NATIONS = new Set(["REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN", "BES", "ATF", "GGY", "GIB", "BLM"]);
+    const EXCLUDED_NATIONS = new Set(["REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN", "BES", "ATF", "GGY", "GIB", "BLM", "NCL"]);
 
     // Fetches and tallies driver/nation data for ONE track's session pool.
     // Kept per-track (rather than one combined fetch across every track) so
