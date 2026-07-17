@@ -56,7 +56,7 @@
     .discord-header-block {
       display: flex;
       flex-direction: column;
-      align-items: flex-end;
+      align-items: flex-start;
       gap: 6px;
     }
     .discord-stats {
@@ -987,13 +987,15 @@
         workerPrefix: "/server1",
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
-        title: "Hotlap"
+        title: "Hotlap",
+        updateNote: "Ranking updated every 8 hours"
       },
       redbullring: {
         workerPrefix: "/server2",
         shareKey: "13e1f53a-41d2-4e15-bb26-c123dc1a0558",
         displayName: "Red Bull Ring",
         title: "Racing",
+        updateNote: "Ranking updated every race",
         // Race-type leaderboards get an extra Total Time column, sourced
         // from that race's own results file (time_standings), separately
         // from the public /rows leaderboard which only has best lap.
@@ -1124,9 +1126,9 @@
         return;
       }
 
-      const trackName = config.displayName || track;
+      const badgeText = config.updateNote || config.displayName || track;
       const label = config.title || "Hotlap";
-      titleEl.innerHTML = `${label} Top ${entryCount}<span class="leaderboard-track-badge">${trackName}</span>`;
+      titleEl.innerHTML = `${label} Top ${entryCount}<span class="leaderboard-track-badge">${badgeText}</span>`;
     }
 
     function renderLeaderboardRows(rows) {
