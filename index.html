@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GT3FORC3.COM / Sim Racing Community</title>
   <style>
+    :root {
+      /* Unified surface scale — used across the site instead of the
+         previous mix of ~8 slightly different greys, so every panel,
+         card, tab, input, and table header shares a consistent tone. */
+      --surface-1: #141414; /* deepest: frames, section boxes, badges */
+      --surface-2: #1e1e1e; /* base: tabs, table headers, inputs, cards */
+      --surface-3: #262626; /* hover state, one step lighter than base */
+      --surface-dim: #171717; /* extra-dim header cells (rank/session) */
+      --border-subtle: #333;
+    }
     html {
       background: linear-gradient(180deg, #000000 0%, #1a1a1a 600px, #1a1a1a 100%);
       background-attachment: fixed;
@@ -107,7 +117,7 @@
       gap: 8px;
     }
     .leaderboard-track-badge {
-      background: #1a1a1a;
+      background: var(--surface-1);
       color: #3a3a3a;
       font-size: 9px;
       font-weight: 700;
@@ -121,7 +131,7 @@
       width: 100%;
       max-width: 340px;
       margin-left: auto;
-      background: #2a2a2a;
+      background: var(--surface-2);
       border: none;
       color: #eee;
       padding: 8px 12px;
@@ -190,7 +200,7 @@
       max-height: 578px;
       overflow-y: auto;
       border-radius: 8px;
-      background: #111;
+      background: var(--surface-1);
       margin-bottom: 16px;
       scrollbar-width: thin;
       scrollbar-color: #444 #111;
@@ -199,7 +209,7 @@
       width: 8px;
     }
     .leaderboard-frame::-webkit-scrollbar-track {
-      background: #111;
+      background: var(--surface-1);
       border-radius: 8px;
     }
     .leaderboard-frame::-webkit-scrollbar-thumb {
@@ -214,19 +224,19 @@
       position: sticky;
       top: 0;
       z-index: 1;
-      background: #2a2a2a;
+      background: var(--surface-2);
     }
     .leaderboard-frame thead th {
       position: sticky;
       top: 0;
-      background: #2a2a2a;
+      background: var(--surface-2);
     }
     .leaderboard-frame thead th.lb-pos {
-      background: #202020;
+      background: var(--surface-dim);
       color: #888;
     }
     .leaderboard-frame thead th.lb-session {
-      background: #1b1b1b;
+      background: var(--surface-dim);
     }
     .leaderboard-frame thead th:nth-child(2),
     .leaderboard-frame thead th:nth-child(3) {
@@ -318,7 +328,7 @@
       margin-bottom: 10px;
     }
     .leaderboard-tab {
-      background: #2a2a2a;
+      background: var(--surface-2);
       color: #e63946;
       border: 2px solid #333;
       padding: 8px 16px;
@@ -340,16 +350,16 @@
       margin-top: 2px;
     }
     .leaderboard-tab:hover {
-      background: #333;
+      background: var(--surface-3);
       color: #eee;
     }
     .leaderboard-tab.leaderboard-tab-legacy {
-      background: #161616;
+      background: var(--surface-1);
       border-color: #262626;
       color: #666;
     }
     .leaderboard-tab.leaderboard-tab-legacy:hover {
-      background: #202020;
+      background: var(--surface-2);
     }
     .leaderboard-tab.active {
       background: #e63946;
@@ -382,7 +392,7 @@
     }
 
     .section-box {
-      background: #161616;
+      background: var(--surface-1);
       border: 1px solid #2e2e2e;
       border-radius: 10px;
       padding: 24px;
@@ -403,7 +413,7 @@
       gap: 6px;
     }
     .country-card {
-      background: #2a2a2a;
+      background: var(--surface-2);
       border-radius: 6px;
       padding: 8px 10px;
       display: flex;
@@ -446,7 +456,7 @@
       display: none;
       width: 100%;
       height: 8px;
-      background: #2a2a2a;
+      background: var(--surface-2);
       border-radius: 4px;
       overflow: hidden;
       margin-bottom: 12px;
@@ -493,14 +503,14 @@
       font-size: 13px;
     }
     th {
-      background: #2a2a2a;
+      background: var(--surface-2);
       font-weight: 600;
     }
     .session-row {
       cursor: pointer;
     }
     .session-row:hover {
-      background: #242424;
+      background: var(--surface-3);
     }
     .lb-podium-row {
       background: #1a0a0a;
@@ -528,7 +538,7 @@
       left: 0;
       right: 0;
       height: 1px;
-      background: #333;
+      background: var(--border-subtle);
     }
     footer::before {
       top: 0;
