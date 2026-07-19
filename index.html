@@ -1754,12 +1754,12 @@
           <div class="crash-stat-card">
             <div class="crash-stat-label">Most Incidents</div>
             <div class="crash-stat-value">${data.topDriver ? data.topDriver.count : "-"}</div>
-            <div class="crash-stat-detail">${data.topDriver ? `<span class="crash-stat-driver">${data.topDriver.name}</span> <span class="crash-stat-joke">← avoid this guy <span class="crash-stat-joke-emoji">${randomJokeEmoji()}</span></span>` : "-"}</div>
+            <div class="crash-stat-detail">${data.topDriver ? `<span class="crash-stat-driver">${data.topDriver.name}</span> <span class="crash-stat-joke">← avoid this driver <span class="crash-stat-joke-emoji">${randomJokeEmoji()}</span></span>` : "-"}</div>
           </div>
           <div class="crash-stat-card">
             <div class="crash-stat-label">Highest Impact</div>
             <div class="crash-stat-value">${data.highest ? Math.round(data.highest.relative_impact_kmh) + " km/h" : "-"}</div>
-            <div class="crash-stat-detail">${data.highest ? `<span class="crash-stat-driver">${data.highest.driverName}</span> <span class="crash-stat-joke">← avoid this guy <span class="crash-stat-joke-emoji">${randomJokeEmoji()}</span></span>` : "-"}</div>
+            <div class="crash-stat-detail">${data.highest ? `<span class="crash-stat-driver">${data.highest.driverName}</span> <span class="crash-stat-joke">← avoid this driver <span class="crash-stat-joke-emoji">${randomJokeEmoji()}</span></span>` : "-"}</div>
           </div>
         </div>
       `;
