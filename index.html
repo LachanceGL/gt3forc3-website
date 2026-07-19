@@ -119,6 +119,56 @@
       height: 15px;
     }
 
+    .admin-panel {
+      display: none;
+      max-width: 420px;
+      margin: 0 auto 30px;
+      background: var(--surface-1);
+      border: 1px solid #ff9900;
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .admin-panel.visible {
+      display: block;
+    }
+    .admin-panel-title {
+      margin: 0 0 6px;
+      font-size: 15px;
+      color: #ff9900;
+    }
+    .admin-panel-subtitle {
+      color: #999;
+      font-size: 12px;
+      margin: 0 0 16px;
+    }
+    .admin-panel-btn {
+      width: 100%;
+      background: #ff9900;
+      border: none;
+      color: #1a1a1a;
+      padding: 10px;
+      border-radius: 6px;
+      font-size: 14px;
+      font-weight: 700;
+      font-family: inherit;
+      cursor: pointer;
+    }
+    .admin-panel-btn:hover {
+      background: #ffad33;
+    }
+    .admin-panel-btn:disabled {
+      background: #555;
+      color: #999;
+      cursor: not-allowed;
+    }
+    .admin-panel-result {
+      margin-top: 12px;
+      font-size: 13px;
+      color: #ccc;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+
     .verify-modal-overlay {
       display: none;
       position: fixed;
@@ -972,6 +1022,21 @@
       Join our Discord
     </a>
   </footer>
+
+  <div class="admin-panel" id="admin-panel">
+    <h3 class="admin-panel-title">🔧 Admin · Notify Verified Driver</h3>
+    <p class="admin-panel-subtitle">Sends the "you're verified" DM via the Discord bot. Not linked anywhere — only visible with #admin in the URL.</p>
+    <div class="verify-field">
+      <label for="admin-username">Discord username</label>
+      <input type="text" id="admin-username" placeholder="exact or partial username" maxlength="100">
+    </div>
+    <div class="verify-field">
+      <label for="admin-secret">Admin Password</label>
+      <input type="password" id="admin-secret" placeholder="" maxlength="200">
+    </div>
+    <button type="button" class="admin-panel-btn" id="admin-notify-btn">Send Verified DM</button>
+    <div class="admin-panel-result" id="admin-panel-result"></div>
+  </div>
 
   <div class="verify-modal-overlay" id="verify-modal-overlay">
     <div class="verify-modal" role="dialog" aria-modal="true" aria-labelledby="verify-modal-title">
@@ -2496,6 +2561,48 @@
         verifySubmitBtn.textContent = "Submit Request";
       }
     });
+
+    // ---- Hidden admin panel (only reachable via #admin in the URL) ----
+    function updateAdminPanelVisibility() {
+      const panelEl = document.getElementById("admin-panel");
+      if (panelEl) panelEl.classList.toggle("visible", window.location.hash === "#admin");
+    }
+    updateAdminPanelVisibility();
+    window.addEventListener("hashchange", updateAdminPanelVisibility);
+
+    const adminNotifyBtn = document.getElementById("admin-notify-btn");
+    if (adminNotifyBtn) {
+      adminNotifyBtn.addEventListener("click", async () => {
+        const usernameEl = document.getElementById("admin-username");
+        const secretEl = document.getElementById("admin-secret");
+        const resultEl = document.getElementById("admin-panel-result");
+
+        const username = usernameEl.value.trim();
+        const secret = secretEl.value.trim();
+
+        if (!username || !secret) {
+          resultEl.textContent = "Enter both a username and the admin secret.";
+          return;
+        }
+
+        adminNotifyBtn.disabled = true;
+        adminNotifyBtn.textContent = "Sending...";
+        resultEl.textContent = "";
+
+        try {
+          const res = await fetch(
+            WORKER_URL + `/discord/notify-verified?username=${encodeURIComponent(username)}&secret=${encodeURIComponent(secret)}`
+          );
+          const text = await res.text();
+          resultEl.textContent = (res.ok ? "✅ " : "❌ ") + text;
+        } catch (err) {
+          resultEl.textContent = "❌ Request failed: " + err.message;
+        } finally {
+          adminNotifyBtn.disabled = false;
+          adminNotifyBtn.textContent = "Send Verified DM";
+        }
+      });
+    }
   </script>
 </body>
 </html>
