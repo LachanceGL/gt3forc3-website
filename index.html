@@ -1737,7 +1737,7 @@
 
       const trackConfig = LEADERBOARDS[activeTrack];
       const trackName = (trackConfig && trackConfig.displayName) || activeTrack;
-      subtitleEl.innerHTML = `Crash Report · 💥 <strong>${trackName}</strong> · Today · ${formatSessionDate(data.todayDate)}${data.sessionCount ? ` (${data.sessionCount} session${data.sessionCount === 1 ? "" : "s"})` : ""}`;
+      subtitleEl.innerHTML = `Crash Report · 💥 <strong>${trackName}</strong> · Today · ${formatSessionDate(data.todayDate)}`;
 
       if (!data.totalIncidents) {
         contentEl.innerHTML = `<div class="crash-report-empty">No significant incidents today. 🎉</div>`;
