@@ -1388,6 +1388,17 @@
     // time silently clobber another's for anyone who raced more than once.
     const raceTotalTimeData = {};
 
+    // When each track's total-time data was last successfully fetched, and
+    // any fetch currently in flight for it — mirrors the driver/country
+    // scan's own caching pattern. Without this, switching tabs back and
+    // forth re-downloads every race session's file from scratch on every
+    // single switch, even seconds apart, which is pure waste: a race
+    // result doesn't change once it's posted, so there's nothing new to
+    // find by re-fetching immediately.
+    const raceTotalTimeLoadedAt = {};
+    const pendingRaceTotalTimeFetch = {};
+    const RACE_TOTAL_TIME_TTL_MS = 3 * 60 * 1000; // 3 minutes
+
     // Add a driver's exact FullName here (as it appears on the leaderboard)
     // to show "Invalid" instead of a computed Total Time for them — for
     // cases where the name-match produced a wrong/broken value (e.g. a
@@ -1478,21 +1489,36 @@
       return nameToTotalTimesByDate;
     }
 
-    // Loads every race's total times for a track (no caching — always
-    // fetched fresh, since a new race can happen at any time). More
-    // requests than before now that every race session gets scanned rather
-    // than just the latest, but still cheap relative to the driver/country
-    // scan since race sessions are a small subset of all sessions.
+    // Loads every race's total times for a track. Cached in-memory for a
+    // few minutes (see RACE_TOTAL_TIME_TTL_MS) — long enough to make
+    // repeated tab switches free, short enough that a newly finished race
+    // still shows up promptly without needing a page reload.
     async function ensureRaceTotalTimesLoaded(trackId) {
       const config = LEADERBOARDS[trackId];
       if (!config || !config.isRace) return;
 
-      try {
-        raceTotalTimeData[trackId] = await fetchRaceTotalTimes(config.workerPrefix);
-      } catch (err) {
-        raceTotalTimeData[trackId] = {};
-      }
-      refreshLeaderboardFlags();
+      const loadedAt = raceTotalTimeLoadedAt[trackId];
+      if (loadedAt && Date.now() - loadedAt < RACE_TOTAL_TIME_TTL_MS) return;
+
+      // A fetch for this exact track is already in flight — wait on it
+      // rather than starting a duplicate one (e.g. rapidly clicking
+      // between tabs before the first fetch has resolved).
+      if (pendingRaceTotalTimeFetch[trackId]) return pendingRaceTotalTimeFetch[trackId];
+
+      const fetchPromise = (async () => {
+        try {
+          raceTotalTimeData[trackId] = await fetchRaceTotalTimes(config.workerPrefix);
+          raceTotalTimeLoadedAt[trackId] = Date.now();
+        } catch (err) {
+          raceTotalTimeData[trackId] = raceTotalTimeData[trackId] || {};
+        } finally {
+          delete pendingRaceTotalTimeFetch[trackId];
+        }
+        refreshLeaderboardFlags();
+      })();
+
+      pendingRaceTotalTimeFetch[trackId] = fetchPromise;
+      return fetchPromise;
     }
 
     const LEADERBOARDS = {
