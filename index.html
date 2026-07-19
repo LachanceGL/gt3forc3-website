@@ -671,6 +671,9 @@
       font-size: 12px;
       margin-top: 2px;
     }
+    .crash-stat-driver {
+      text-decoration: underline;
+    }
     .crash-report-empty {
       color: #999;
       font-size: 13px;
@@ -1736,12 +1739,12 @@
           <div class="crash-stat-card">
             <div class="crash-stat-label">Most Incidents</div>
             <div class="crash-stat-value">${data.topDriver ? data.topDriver.count : "-"}</div>
-            <div class="crash-stat-detail">${data.topDriver ? data.topDriver.name : "-"}</div>
+            <div class="crash-stat-detail crash-stat-driver">${data.topDriver ? data.topDriver.name : "-"}</div>
           </div>
           <div class="crash-stat-card">
             <div class="crash-stat-label">Highest Impact</div>
             <div class="crash-stat-value">${data.highest ? Math.round(data.highest.relative_impact_kmh) + " km/h" : "-"}</div>
-            <div class="crash-stat-detail">${data.highest ? data.highest.driverName : "-"}</div>
+            <div class="crash-stat-detail crash-stat-driver">${data.highest ? data.highest.driverName : "-"}</div>
           </div>
         </div>
       `;
