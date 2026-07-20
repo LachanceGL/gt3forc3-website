@@ -427,6 +427,15 @@
       border-color: #e63946;
       color: #fff;
     }
+    .rank-toggle-note {
+      display: none;
+      color: #999;
+      font-size: 12px;
+      font-style: italic;
+    }
+    .rank-toggle-note.visible {
+      display: inline;
+    }
     .leaderboard-search-input:focus {
       border-color: #e63946;
     }
@@ -1015,6 +1024,7 @@
     <span class="rank-toggle-label">Ranked by</span>
     <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">Race Time</button>
     <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">Best Lap</button>
+    <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
   </div>
   <div id="leaderboard-status"></div>
   <div id="leaderboard-frame" class="leaderboard-frame"></div>
@@ -2166,6 +2176,13 @@
     // natively). Resets to the default whenever the active track changes.
     let raceRankMode = "total_time";
 
+    // The "Race Time only shows Completed Races" note only applies while
+    // ranking by Race Time — Best Lap mode has no such restriction.
+    function updateRankToggleNote() {
+      const noteEl = document.getElementById("rank-toggle-note");
+      if (noteEl) noteEl.classList.toggle("visible", raceRankMode === "total_time");
+    }
+
     function computeFilteredEntries(rows) {
       const cleanRows = rows.filter(row => !isFlagged(row));
       const raceConfig = LEADERBOARDS[activeTrack];
@@ -2427,10 +2444,7 @@
     function updateCheaterTooltipText(track) {
       const tooltipEl = document.getElementById("cheater-notice-tooltip-text");
       if (!tooltipEl) return;
-      const config = LEADERBOARDS[track];
-      tooltipEl.innerHTML = (config && config.isRace)
-        ? `Only completed races will show up.<div class="cheater-notice-tooltip-divider"></div>${CHEATER_TOOLTIP_BASE}`
-        : CHEATER_TOOLTIP_BASE;
+      tooltipEl.textContent = CHEATER_TOOLTIP_BASE;
     }
 
     function switchToTrack(track) {
@@ -2456,6 +2470,7 @@
       document.querySelectorAll(".rank-toggle-btn").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.rankMode === raceRankMode);
       });
+      updateRankToggleNote();
 
       loadLeaderboard(track);
       loadServerName(track);
@@ -2489,6 +2504,7 @@
       const rankToggleRowEl = document.getElementById("rank-toggle-row");
       const config = LEADERBOARDS[activeTrack];
       if (rankToggleRowEl) rankToggleRowEl.classList.toggle("visible", Boolean(config && config.isRace));
+      updateRankToggleNote();
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
@@ -2596,6 +2612,7 @@
         document.querySelectorAll(".rank-toggle-btn").forEach(b => {
           b.classList.toggle("active", b.dataset.rankMode === raceRankMode);
         });
+        updateRankToggleNote();
         // Re-derive rank/order from the raw cached rows under the new mode.
         const rawRows = leaderboardCache[activeTrack];
         if (rawRows) {
