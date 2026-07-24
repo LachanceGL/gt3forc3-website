@@ -1952,7 +1952,10 @@
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
         title: "Hot Lap",
-        updateNote: "Ranking updated every 8 hours"
+        updateNote: "Ranking updated every 8 hours",
+        // Overrides the default 200-entry cap (see LEADERBOARD_MAX_ENTRIES)
+        // for this track only.
+        maxEntries: 250
       },
       redbullring: {
         workerPrefix: "/server3",
@@ -2267,7 +2270,7 @@
 
       return orderedRows
         .map((row, i) => ({ rank: i + 1, row }))
-        .slice(0, LEADERBOARD_MAX_ENTRIES);
+        .slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
     }
 
     function renderLeaderboardRows(rows) {
