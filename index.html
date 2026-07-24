@@ -430,6 +430,12 @@
       border-color: #ff2727;
       color: #fff;
     }
+    .sub7-filter-btn {
+      display: none;
+    }
+    .sub7-filter-btn.track-visible {
+      display: inline-block;
+    }
     .rank-toggle-note {
       display: none;
       background: var(--surface-1);
@@ -1044,6 +1050,7 @@
   <div class="rank-toggle-row" id="verified-filter-row">
     <span class="rank-toggle-label">Filter by</span>
     <button type="button" class="rank-toggle-btn" id="verified-filter-btn">🛡 Verified Driver</button>
+    <button type="button" class="rank-toggle-btn sub7-filter-btn" id="sub7-filter-btn">🕖 Sub 7 Club</button>
   </div>
   <div id="leaderboard-status"></div>
   <div id="leaderboard-frame" class="leaderboard-frame"></div>
@@ -2245,6 +2252,12 @@
     // changes.
     let verifiedOnlyFilter = false;
 
+    // Nordschleife-only toggle: when true, only drivers with a Best Lap
+    // under 7 minutes show on the leaderboard ("Sub 7 Club" — a real
+    // Nürburgring enthusiast term). Resets to off on track change.
+    let sub7ClubFilter = false;
+    const SUB_7_CLUB_MS = 6 * 60 * 1000 + 59999; // 6:59.999
+
     // The "Race Time only shows Completed Races" note only applies while
     // ranking by Race Time — Best Lap mode has no such restriction.
     function updateRankToggleNote() {
@@ -2441,6 +2454,13 @@
         if (!isVerified) return true;
       }
 
+      // Nordschleife-only "Sub 7 Club" toggle — hides any row whose Best
+      // Lap isn't under 7 minutes.
+      if (sub7ClubFilter && activeTrack === "nordschleife") {
+        const lapMs = parseLapTimeToMs(row.BestLap);
+        if (lapMs == null || lapMs > SUB_7_CLUB_MS) return true;
+      }
+
       return false;
     }
 
@@ -2558,6 +2578,14 @@
       const verifiedFilterBtn = document.getElementById("verified-filter-btn");
       if (verifiedFilterBtn) verifiedFilterBtn.classList.remove("active");
 
+      // Same reset for the Nordschleife-only "Sub 7 Club" toggle.
+      sub7ClubFilter = false;
+      const sub7FilterBtn = document.getElementById("sub7-filter-btn");
+      if (sub7FilterBtn) {
+        sub7FilterBtn.classList.remove("active");
+        sub7FilterBtn.classList.toggle("track-visible", track === "nordschleife");
+      }
+
       loadLeaderboard(track);
       loadServerName(track);
       ensureTrackDataLoaded(track);
@@ -2596,6 +2624,8 @@
       const config = LEADERBOARDS[activeTrack];
       const verifiedFilterRowEl = document.getElementById("verified-filter-row");
       if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
+      const sub7FilterBtn = document.getElementById("sub7-filter-btn");
+      if (sub7FilterBtn) sub7FilterBtn.classList.toggle("track-visible", activeTrack === "nordschleife");
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
@@ -2719,6 +2749,21 @@
       verifiedFilterBtnEl.addEventListener("click", () => {
         verifiedOnlyFilter = !verifiedOnlyFilter;
         verifiedFilterBtnEl.classList.toggle("active", verifiedOnlyFilter);
+        const rawRows = leaderboardCache[activeTrack];
+        if (rawRows) {
+          currentLeaderboardEntries = computeFilteredEntries(rawRows);
+          updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
+          applyLeaderboardSearch();
+        }
+      });
+    }
+
+    // ---- Filter by Sub 7 Club toggle (Nordschleife only) ----
+    const sub7FilterBtnEl = document.getElementById("sub7-filter-btn");
+    if (sub7FilterBtnEl) {
+      sub7FilterBtnEl.addEventListener("click", () => {
+        sub7ClubFilter = !sub7ClubFilter;
+        sub7FilterBtnEl.classList.toggle("active", sub7ClubFilter);
         const rawRows = leaderboardCache[activeTrack];
         if (rawRows) {
           currentLeaderboardEntries = computeFilteredEntries(rawRows);
