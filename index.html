@@ -819,7 +819,7 @@
       position: relative;
       width: 100%;
       max-width: 720px;
-      margin: 4px auto 20px;
+      margin: 20px auto 4px;
       background: var(--surface-2);
       border: 1px solid #2e2e2e;
       border-radius: 10px;
@@ -867,20 +867,20 @@
 
     .country-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 6px;
+      grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+      gap: 5px;
     }
     .country-card {
       background: var(--surface-2);
-      border-radius: 6px;
-      padding: 8px 10px;
+      border-radius: 5px;
+      padding: 5px 7px;
       display: flex;
       align-items: center;
-      gap: 8px;
+      gap: 6px;
     }
     .country-flag {
-      width: 22px;
-      height: 15px;
+      width: 16px;
+      height: 11px;
       border-radius: 2px;
       flex-shrink: 0;
     }
@@ -893,17 +893,17 @@
     }
     .country-code {
       font-weight: 600;
-      font-size: 12.5px;
+      font-size: 11px;
     }
     .country-count {
       color: #999;
-      font-size: 11px;
+      font-size: 10px;
     }
 
     @media (max-width: 600px) {
       .country-grid {
-        grid-template-columns: repeat(2, 1fr);
-        gap: 6px;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 5px;
       }
     }
 
@@ -1147,8 +1147,8 @@
     <div class="loading-bar-track" id="loading-bar-track">
       <div class="loading-bar-fill" id="loading-bar-fill"></div>
     </div>
-    <div id="world-map-container" class="world-map-container"></div>
     <div id="content"></div>
+    <div id="world-map-container" class="world-map-container"></div>
   </div>
 
   <footer>
