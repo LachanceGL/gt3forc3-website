@@ -1387,12 +1387,6 @@
         .attr("stroke", "#262626")
         .attr("stroke-width", 1);
 
-      g.append("path")
-        .attr("d", pathGen(d3.geoGraticule10()))
-        .attr("fill", "none")
-        .attr("stroke", "#1c1c1c")
-        .attr("stroke-width", 0.5);
-
       const tooltip = document.createElement("div");
       tooltip.className = "world-map-tooltip";
       container.appendChild(tooltip);
