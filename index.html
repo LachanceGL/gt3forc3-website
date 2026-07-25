@@ -841,9 +841,11 @@
       max-width: 720px;
       margin: 4px auto 20px;
       background: var(--surface-2);
+      border: 1px solid #2e2e2e;
       border-radius: 10px;
       padding: 12px;
       box-sizing: border-box;
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.35);
     }
     .world-map-container svg {
       display: block;
@@ -854,12 +856,12 @@
       stroke: #0a0a0a;
       stroke-width: 0.5;
       cursor: pointer;
-      transition: opacity 0.15s ease;
+      transition: filter 0.15s ease, stroke 0.15s ease;
     }
     .world-map-country:hover {
-      opacity: 0.8;
-      stroke: #ff2727;
-      stroke-width: 1.2;
+      filter: brightness(1.35) drop-shadow(0 0 4px rgba(255, 39, 39, 0.6));
+      stroke: #fff;
+      stroke-width: 1;
     }
     .world-map-tooltip {
       position: absolute;
@@ -1315,13 +1317,17 @@
     // vs. most countries in single digits) — linear would make almost
     // every country look identical and only the top one or two stand out.
     function colorForCount(count, maxCount) {
-      if (!count) return "#262626";
+      if (!count) return "#1e1e1e";
       const t = maxCount > 0 ? Math.sqrt(count) / Math.sqrt(maxCount) : 0;
-      const from = { r: 0x3a, g: 0x2a, b: 0x2a };
+      // Even a country with just 1 driver should read as clearly reddish,
+      // not nearly indistinguishable from "no data" — floor the scale so
+      // the low end still has visible color.
+      const tFloored = 0.22 + t * 0.78;
+      const from = { r: 0x4a, g: 0x22, b: 0x22 };
       const to = { r: 0xff, g: 0x27, b: 0x27 };
-      const r = Math.round(from.r + (to.r - from.r) * t);
-      const g = Math.round(from.g + (to.g - from.g) * t);
-      const b = Math.round(from.b + (to.b - from.b) * t);
+      const r = Math.round(from.r + (to.r - from.r) * tFloored);
+      const g = Math.round(from.g + (to.g - from.g) * tFloored);
+      const b = Math.round(from.b + (to.b - from.b) * tFloored);
       return `rgb(${r},${g},${b})`;
     }
 
@@ -1350,11 +1356,19 @@
       }
       if (worldMapState) return; // a concurrent call already finished building it
 
-      const countries = topojson.feature(world, world.objects.countries).features;
+      // Antarctica is geometrically huge but never has any driver data —
+      // rendering it just wastes vertical space and pulls focus away from
+      // the countries that actually matter here.
+      const countries = topojson.feature(world, world.objects.countries).features
+        .filter(d => d.id !== "010");
 
       const width = 720;
-      const height = 380;
-      const projection = d3.geoNaturalEarth1().fitSize([width - 16, height - 16], { type: "Sphere" });
+      const height = 340;
+      // Fit to the actual country set (Antarctica excluded) so the
+      // populated world fills the frame instead of leaving a big gap
+      // where Antarctica used to be.
+      const projection = d3.geoNaturalEarth1()
+        .fitSize([width - 16, height - 16], { type: "FeatureCollection", features: countries });
       const pathGen = d3.geoPath(projection);
 
       const svg = d3.select(container)
@@ -1362,13 +1376,29 @@
         .attr("viewBox", `0 0 ${width} ${height}`)
         .attr("preserveAspectRatio", "xMidYMid meet");
 
+      const g = svg.append("g").attr("transform", `translate(8,8)`);
+
+      // A faint ocean/sphere backdrop and graticule, so the map reads as
+      // an actual globe projection rather than country shapes floating on
+      // the section's plain background.
+      g.append("path")
+        .attr("d", pathGen({ type: "Sphere" }))
+        .attr("fill", "#0d0d0d")
+        .attr("stroke", "#262626")
+        .attr("stroke-width", 1);
+
+      g.append("path")
+        .attr("d", pathGen(d3.geoGraticule10()))
+        .attr("fill", "none")
+        .attr("stroke", "#1c1c1c")
+        .attr("stroke-width", 0.5);
+
       const tooltip = document.createElement("div");
       tooltip.className = "world-map-tooltip";
       container.appendChild(tooltip);
 
-      const pathSel = svg.append("g")
-        .attr("transform", `translate(8,8)`)
-        .selectAll("path")
+      const pathSel = g
+        .selectAll("path.world-map-country")
         .data(countries)
         .join("path")
         .attr("class", "world-map-country")
