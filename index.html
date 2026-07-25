@@ -393,6 +393,27 @@
       font-size: 14px;
       outline: none;
     }
+    .sort-direction-btn {
+      background: var(--surface-2);
+      border: 1px solid #333;
+      color: #999;
+      width: 36px;
+      height: 36px;
+      flex-shrink: 0;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .sort-direction-btn:hover {
+      border-color: #ff2727;
+      color: #eee;
+    }
+    .sort-direction-btn.active {
+      background: #ff2727;
+      border-color: #ff2727;
+      color: #fff;
+    }
 
     .rank-toggle-row {
       display: none;
@@ -1040,6 +1061,7 @@
       id="leaderboard-search"
       class="leaderboard-search-input"
       placeholder="Search drivers, cars and sessions">
+    <button type="button" class="sort-direction-btn" id="sort-direction-btn" title="Reverse ranking order">⇅</button>
   </div>
   <div class="rank-toggle-row" id="rank-toggle-row">
     <span class="rank-toggle-label">Ranked by</span>
@@ -2258,6 +2280,11 @@
     let sub7ClubFilter = false;
     const SUB_7_CLUB_MS = 6 * 60 * 1000 + 59999; // 6:59.999
 
+    // When true, the current ranking order (whatever it is — Best Lap,
+    // Race Time, etc.) is displayed reversed. Resets to off on track
+    // change, same as the other toggles.
+    let sortReversed = false;
+
     // The "Race Time only shows Completed Races" note only applies while
     // ranking by Race Time — Best Lap mode has no such restriction.
     function updateRankToggleNote() {
@@ -2281,7 +2308,8 @@
           })
         : cleanRows; // "best_lap" mode: /rows is already ordered by Best Lap natively
 
-      const entries = orderedRows.map((row, i) => ({ rank: i + 1, row }));
+      const finalOrderedRows = sortReversed ? orderedRows.slice().reverse() : orderedRows;
+      const entries = finalOrderedRows.map((row, i) => ({ rank: i + 1, row }));
 
       // While Sub 7 Club is on, don't cap to the usual top-N display limit —
       // isFlagged() has already filtered `rows` down to just sub-7 drivers
@@ -2594,6 +2622,11 @@
         sub7FilterBtn.classList.toggle("track-visible", track === "nordschleife");
       }
 
+      // Same reset for the sort-direction toggle.
+      sortReversed = false;
+      const sortDirectionBtn = document.getElementById("sort-direction-btn");
+      if (sortDirectionBtn) sortDirectionBtn.classList.remove("active");
+
       loadLeaderboard(track);
       loadServerName(track);
       ensureTrackDataLoaded(track);
@@ -2772,6 +2805,21 @@
       sub7FilterBtnEl.addEventListener("click", () => {
         sub7ClubFilter = !sub7ClubFilter;
         sub7FilterBtnEl.classList.toggle("active", sub7ClubFilter);
+        const rawRows = leaderboardCache[activeTrack];
+        if (rawRows) {
+          currentLeaderboardEntries = computeFilteredEntries(rawRows);
+          updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
+          applyLeaderboardSearch();
+        }
+      });
+    }
+
+    // ---- Sort direction toggle (every leaderboard) ----
+    const sortDirectionBtnEl = document.getElementById("sort-direction-btn");
+    if (sortDirectionBtnEl) {
+      sortDirectionBtnEl.addEventListener("click", () => {
+        sortReversed = !sortReversed;
+        sortDirectionBtnEl.classList.toggle("active", sortReversed);
         const rawRows = leaderboardCache[activeTrack];
         if (rawRows) {
           currentLeaderboardEntries = computeFilteredEntries(rawRows);
