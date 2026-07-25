@@ -1145,7 +1145,6 @@
   <div class="rank-toggle-row" id="verified-filter-row">
     <span class="rank-toggle-label">Filter by</span>
     <button type="button" class="rank-toggle-btn sub7-filter-btn" id="sub7-filter-btn">SUB 7 CLUB</button>
-    <button type="button" class="rank-toggle-btn" id="verified-filter-btn">VERIFIED DRIVERS</button>
   </div>
   <div id="leaderboard-status"></div>
   <div id="leaderboard-frame" class="leaderboard-frame"></div>
@@ -2470,11 +2469,6 @@
     // natively). Resets to the default whenever the active track changes.
     let raceRankMode = "total_time";
 
-    // Hotlap-only toggle: when true, only drivers with the verified badge
-    // show on the leaderboard. Resets to off whenever the active track
-    // changes.
-    let verifiedOnlyFilter = false;
-
     // Nordschleife-only toggle: when true, only drivers with a Best Lap
     // under 7 minutes show on the leaderboard ("Sub 7 Club" — a real
     // Nürburgring enthusiast term). Resets to off on track change.
@@ -2688,16 +2682,6 @@
         if (sessionDataLoaded && driverLaps !== raceConfig.requiredLaps) return true;
       }
 
-      // Hotlap-only "Filter by Verified Driver" toggle — hides any row
-      // that isn't verified when the filter is on. Doesn't apply on
-      // Race-type leaderboards, which have their own separate toggle row.
-      if (verifiedOnlyFilter && !(raceConfig && raceConfig.isRace)) {
-        const isVerified = Boolean(
-          row.FullName && (VERIFIED_DRIVERS.has(row.FullName) || (nameKey && expandedVerifiedNameKeys.has(nameKey)))
-        );
-        if (!isVerified) return true;
-      }
-
       // Nordschleife-only "Sub 7 Club" toggle — hides any row whose Best
       // Lap isn't under 7 minutes.
       if (sub7ClubFilter && activeTrack === "nordschleife") {
@@ -2815,12 +2799,10 @@
       });
       updateRankToggleNote();
 
-      // Same reset for the Hotlap-only "Filter by Verified Driver" toggle.
-      verifiedOnlyFilter = false;
+      // The "Filter by" row is shown on Hotlap tracks (currently just the
+      // Sub 7 Club toggle lives there).
       const verifiedFilterRowEl = document.getElementById("verified-filter-row");
       if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
-      const verifiedFilterBtn = document.getElementById("verified-filter-btn");
-      if (verifiedFilterBtn) verifiedFilterBtn.classList.remove("active");
 
       // Same reset for the Nordschleife-only "Sub 7 Club" toggle.
       sub7ClubFilter = false;
@@ -2991,21 +2973,6 @@
         }
       });
     });
-
-    // ---- Filter by Verified Driver toggle (Hotlap leaderboards only) ----
-    const verifiedFilterBtnEl = document.getElementById("verified-filter-btn");
-    if (verifiedFilterBtnEl) {
-      verifiedFilterBtnEl.addEventListener("click", () => {
-        verifiedOnlyFilter = !verifiedOnlyFilter;
-        verifiedFilterBtnEl.classList.toggle("active", verifiedOnlyFilter);
-        const rawRows = leaderboardCache[activeTrack];
-        if (rawRows) {
-          currentLeaderboardEntries = computeFilteredEntries(rawRows);
-          updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
-          applyLeaderboardSearch();
-        }
-      });
-    }
 
     // ---- Filter by Sub 7 Club toggle (Nordschleife only) ----
     const sub7FilterBtnEl = document.getElementById("sub7-filter-btn");
