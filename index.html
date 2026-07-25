@@ -2308,18 +2308,25 @@
           })
         : cleanRows; // "best_lap" mode: /rows is already ordered by Best Lap natively
 
-      const finalOrderedRows = sortReversed ? orderedRows.slice().reverse() : orderedRows;
-      const entries = finalOrderedRows.map((row, i) => ({ rank: i + 1, row }));
+      // Cap to the normal top-N first — except in Sub 7 Club mode, which
+      // intentionally shows every qualifying entry across the whole
+      // leaderboard (isFlagged() already filtered `rows` down to just
+      // sub-7 drivers before we ever got here).
+      const isSub7Mode = sub7ClubFilter && activeTrack === "nordschleife";
+      const visibleRows = isSub7Mode
+        ? orderedRows
+        : orderedRows.slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
 
-      // While Sub 7 Club is on, don't cap to the usual top-N display limit —
-      // isFlagged() has already filtered `rows` down to just sub-7 drivers
-      // across the ENTIRE leaderboard (thousands of entries), and capping
-      // that result to the same 250 shown normally would just silently
-      // hide anyone beyond the fastest 250, making the filter look like it
-      // does nothing whenever 250+ drivers already qualify.
-      if (sub7ClubFilter && activeTrack === "nordschleife") return entries;
+      // Ranks are assigned from this visible set in its natural (fastest/
+      // best-first) order, so "#250" always means the 250th-best entry
+      // that's actually shown — never renumbered.
+      const entries = visibleRows.map((row, i) => ({ rank: i + 1, row }));
 
-      return entries.slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
+      // Reversing only flips the DISPLAY order of what's already visible —
+      // e.g. inverting a Top 250 view shows the row ranked #250 first, but
+      // it still reads "#250", not relabeled "#1". It never reaches into
+      // rows beyond what was already capped/shown.
+      return sortReversed ? entries.slice().reverse() : entries;
     }
 
     function renderLeaderboardRows(rows) {
