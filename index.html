@@ -89,14 +89,10 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.03em;
-      background: var(--surface-1);
-      padding: 8px 14px;
-      border-radius: 6px;
       text-decoration: none;
       cursor: pointer;
     }
     .discord-stats:hover {
-      background: var(--surface-2);
       color: #999;
     }
     .discord-stats:empty {
@@ -466,12 +462,6 @@
       background: #ff2727;
       border-color: #ff2727;
       color: #fff;
-    }
-    .sub7-filter-btn {
-      display: none;
-    }
-    .sub7-filter-btn.track-visible {
-      display: inline-block;
     }
     .rank-toggle-note {
       display: none;
@@ -1146,7 +1136,8 @@
   </div>
   <div class="rank-toggle-row" id="verified-filter-row">
     <span class="rank-toggle-label">Filter by</span>
-    <button type="button" class="rank-toggle-btn sub7-filter-btn" id="sub7-filter-btn">SUB 7 CLUB</button>
+    <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
+    <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
   </div>
   <div id="leaderboard-status"></div>
   <div id="leaderboard-frame" class="leaderboard-frame"></div>
@@ -2493,10 +2484,11 @@
     // natively). Resets to the default whenever the active track changes.
     let raceRankMode = "total_time";
 
-    // Nordschleife-only toggle: when true, only drivers with a Best Lap
-    // under 7 minutes show on the leaderboard ("Sub 7 Club" — a real
-    // Nürburgring enthusiast term). Resets to off on track change.
-    let sub7ClubFilter = false;
+    // Nordschleife-only filter mode: "top200" (default, the normal
+    // leaderboard) or "sub7" (only drivers with a Best Lap under 7 minutes
+    // — "Sub 7 Club", a real Nürburgring enthusiast term). Resets to
+    // "top200" on track change.
+    let nordschleifeFilterMode = "top200";
     const SUB_7_CLUB_MS = 6 * 60 * 1000 + 59999; // 6:59.999
 
     // When true, the current ranking order (whatever it is — Best Lap,
@@ -2531,7 +2523,7 @@
       // intentionally shows every qualifying entry across the whole
       // leaderboard (isFlagged() already filtered `rows` down to just
       // sub-7 drivers before we ever got here).
-      const isSub7Mode = sub7ClubFilter && activeTrack === "nordschleife";
+      const isSub7Mode = nordschleifeFilterMode === "sub7" && activeTrack === "nordschleife";
       const visibleRows = isSub7Mode
         ? orderedRows
         : orderedRows.slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
@@ -2706,9 +2698,9 @@
         if (sessionDataLoaded && driverLaps !== raceConfig.requiredLaps) return true;
       }
 
-      // Nordschleife-only "Sub 7 Club" toggle — hides any row whose Best
-      // Lap isn't under 7 minutes.
-      if (sub7ClubFilter && activeTrack === "nordschleife") {
+      // Nordschleife-only "Sub 7 Club" filter mode — hides any row whose
+      // Best Lap isn't under 7 minutes.
+      if (nordschleifeFilterMode === "sub7" && activeTrack === "nordschleife") {
         const lapMs = parseLapTimeToMs(row.BestLap);
         if (lapMs == null || lapMs > SUB_7_CLUB_MS) return true;
       }
@@ -2823,18 +2815,15 @@
       });
       updateRankToggleNote();
 
-      // The "Filter by" row is shown on Hotlap tracks (currently just the
-      // Sub 7 Club toggle lives there).
+      // The "Filter by" row (Top 200 / Sub 7 Club) is Nordschleife-only.
       const verifiedFilterRowEl = document.getElementById("verified-filter-row");
-      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
+      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", track === "nordschleife");
 
-      // Same reset for the Nordschleife-only "Sub 7 Club" toggle.
-      sub7ClubFilter = false;
-      const sub7FilterBtn = document.getElementById("sub7-filter-btn");
-      if (sub7FilterBtn) {
-        sub7FilterBtn.classList.remove("active");
-        sub7FilterBtn.classList.toggle("track-visible", track === "nordschleife");
-      }
+      // Reset to the default filter mode whenever the active track changes.
+      nordschleifeFilterMode = "top200";
+      document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
+      });
 
       // Same reset for the sort-direction toggle.
       sortReversed = false;
@@ -2876,11 +2865,8 @@
       updateRankToggleNote();
     }
     {
-      const config = LEADERBOARDS[activeTrack];
       const verifiedFilterRowEl = document.getElementById("verified-filter-row");
-      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
-      const sub7FilterBtn = document.getElementById("sub7-filter-btn");
-      if (sub7FilterBtn) sub7FilterBtn.classList.toggle("track-visible", activeTrack === "nordschleife");
+      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", activeTrack === "nordschleife");
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
@@ -2998,12 +2984,15 @@
       });
     });
 
-    // ---- Filter by Sub 7 Club toggle (Nordschleife only) ----
-    const sub7FilterBtnEl = document.getElementById("sub7-filter-btn");
-    if (sub7FilterBtnEl) {
-      sub7FilterBtnEl.addEventListener("click", () => {
-        sub7ClubFilter = !sub7ClubFilter;
-        sub7FilterBtnEl.classList.toggle("active", sub7ClubFilter);
+    // ---- Nordschleife filter mode: TOP 200 / SUB 7 CLUB (radio-style) ----
+    document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const mode = btn.dataset.filterMode;
+        if (mode === nordschleifeFilterMode) return; // already active
+        nordschleifeFilterMode = mode;
+        document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(b => {
+          b.classList.toggle("active", b.dataset.filterMode === nordschleifeFilterMode);
+        });
         const rawRows = leaderboardCache[activeTrack];
         if (rawRows) {
           currentLeaderboardEntries = computeFilteredEntries(rawRows);
@@ -3011,7 +3000,7 @@
           applyLeaderboardSearch();
         }
       });
-    }
+    });
 
     // ---- Sort direction toggle (every leaderboard) ----
     const sortDirectionBtnEl = document.getElementById("sort-direction-btn");
