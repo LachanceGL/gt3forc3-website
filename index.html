@@ -89,9 +89,15 @@
       font-weight: 600;
       text-transform: uppercase;
       letter-spacing: 0.03em;
-      background: var(--surface-2);
+      background: var(--surface-1);
       padding: 8px 14px;
       border-radius: 6px;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .discord-stats:hover {
+      background: var(--surface-2);
+      color: #999;
     }
     .discord-stats:empty {
       padding: 0;
@@ -788,7 +794,7 @@
       margin-bottom: 4px;
     }
     .crash-stat-value {
-      color: #ff2727;
+      color: #b04545;
       font-size: 20px;
       font-weight: 700;
     }
@@ -798,7 +804,7 @@
       margin-top: 2px;
     }
     .crash-stat-driver {
-      text-decoration: underline;
+      text-decoration: none;
     }
     .crash-stat-joke {
       color: #666;
@@ -827,6 +833,54 @@
     }
     .section-box .country-grid {
       margin-top: 4px;
+    }
+
+    .world-map-container {
+      position: relative;
+      width: 100%;
+      max-width: 720px;
+      margin: 4px auto 20px;
+      background: var(--surface-2);
+      border-radius: 10px;
+      padding: 12px;
+      box-sizing: border-box;
+    }
+    .world-map-container svg {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+    .world-map-country {
+      stroke: #0a0a0a;
+      stroke-width: 0.5;
+      cursor: pointer;
+      transition: opacity 0.15s ease;
+    }
+    .world-map-country:hover {
+      opacity: 0.8;
+      stroke: #ff2727;
+      stroke-width: 1.2;
+    }
+    .world-map-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: #2a1a1a;
+      border: 1px solid rgba(255, 39, 39, 0.4);
+      color: #eee;
+      font-size: 12px;
+      padding: 6px 10px;
+      border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.1s ease;
+      transform: translate(-50%, -120%);
+      z-index: 10;
+    }
+    .world-map-tooltip.visible {
+      opacity: 1;
+    }
+    .world-map-tooltip strong {
+      color: #ff2727;
     }
 
     .country-grid {
@@ -1007,6 +1061,9 @@
   </style>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "65e2f7685f054614a7a2adc1fae8132f"}'></script><!-- End Cloudflare Web Analytics -->
   <!-- Umami Analytics --><script defer src="https://cloud.umami.is/script.js" data-website-id="b86daa6e-9440-444b-8033-d814a8273437"></script><!-- End Umami Analytics -->
+  <!-- D3 + TopoJSON, used only for the interactive world map -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/topojson-client/3.1.0/topojson-client.min.js"></script>
 </head>
 <body>
   <div class="admin-panel" id="admin-panel">
@@ -1032,7 +1089,7 @@
     </div>
 
     <div class="discord-header-block">
-      <div class="discord-stats" id="discord-stats"></div>
+      <a class="discord-stats" id="discord-stats" href="https://discord.gg/edVd7RMfpH" target="_blank" rel="noopener"></a>
       <a class="discord-link" href="https://discord.gg/edVd7RMfpH" target="_blank" rel="noopener">
         <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
           <path d="M20.317 4.37a19.79 19.79 0 0 0-4.885-1.515.07.07 0 0 0-.074.035c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.036A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028 14.09 14.09 0 0 0 1.226-1.994.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.927 1.793 8.18 1.793 12.061 0a.073.073 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.548-13.66a.06.06 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.955 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
@@ -1105,6 +1162,7 @@
     <div class="loading-bar-track" id="loading-bar-track">
       <div class="loading-bar-fill" id="loading-bar-fill"></div>
     </div>
+    <div id="world-map-container" class="world-map-container"></div>
     <div id="content"></div>
   </div>
 
@@ -1213,6 +1271,132 @@
     const COUNTRY_CACHE_KEY = "gt3_country_data_v11";
     const COUNTRY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
+    // ---- Interactive world map ----
+    // Maps this topology's numeric country IDs (ISO 3166-1 numeric) to the
+    // alpha-3 codes used everywhere else on this site (nationCounts keys).
+    // Built directly from the actual countries-110m.json data, not typed
+    // from memory, so it's guaranteed to match this specific topology file.
+    const TOPO_ID_TO_ALPHA3 = {
+      "004":"AFG","008":"ALB","012":"DZA","024":"AGO","031":"AZE","032":"ARG",
+      "036":"AUS","040":"AUT","044":"BHS","050":"BGD","051":"ARM","056":"BEL",
+      "064":"BTN","068":"BOL","070":"BIH","072":"BWA","076":"BRA","084":"BLZ",
+      "090":"SLB","096":"BRN","100":"BGR","104":"MMR","108":"BDI","112":"BLR",
+      "116":"KHM","120":"CMR","124":"CAN","140":"CAF","144":"LKA","148":"TCD",
+      "152":"CHL","156":"CHN","158":"TWN","170":"COL","178":"COG","180":"COD",
+      "188":"CRI","191":"HRV","192":"CUB","196":"CYP","203":"CZE","204":"BEN",
+      "208":"DNK","214":"DOM","218":"ECU","222":"SLV","226":"GNQ","231":"ETH",
+      "232":"ERI","233":"EST","238":"FLK","242":"FJI","246":"FIN","250":"FRA",
+      "260":"ATF","262":"DJI","266":"GAB","268":"GEO","270":"GMB","275":"PSE",
+      "276":"DEU","288":"GHA","300":"GRC","304":"GRL","320":"GTM","324":"GIN",
+      "328":"GUY","332":"HTI","340":"HND","348":"HUN","352":"ISL","356":"IND",
+      "360":"IDN","364":"IRN","368":"IRQ","372":"IRL","376":"ISR","380":"ITA",
+      "384":"CIV","388":"JAM","392":"JPN","398":"KAZ","400":"JOR","404":"KEN",
+      "408":"PRK","410":"KOR","414":"KWT","417":"KGZ","418":"LAO","422":"LBN",
+      "426":"LSO","428":"LVA","430":"LBR","434":"LBY","440":"LTU","442":"LUX",
+      "450":"MDG","454":"MWI","458":"MYS","466":"MLI","478":"MRT","484":"MEX",
+      "496":"MNG","498":"MDA","499":"MNE","504":"MAR","508":"MOZ","512":"OMN",
+      "516":"NAM","524":"NPL","528":"NLD","540":"NCL","548":"VUT","554":"NZL",
+      "558":"NIC","562":"NER","566":"NGA","578":"NOR","586":"PAK","591":"PAN",
+      "598":"PNG","600":"PRY","604":"PER","608":"PHL","616":"POL","620":"PRT",
+      "624":"GNB","626":"TLS","630":"PRI","634":"QAT","642":"ROU","643":"RUS",
+      "646":"RWA","682":"SAU","686":"SEN","688":"SRB","694":"SLE","703":"SVK",
+      "704":"VNM","705":"SVN","706":"SOM","710":"ZAF","716":"ZWE","724":"ESP",
+      "728":"SSD","729":"SDN","732":"ESH","740":"SUR","748":"SWZ","752":"SWE",
+      "756":"CHE","760":"SYR","762":"TJK","764":"THA","768":"TGO","780":"TTO",
+      "784":"ARE","788":"TUN","792":"TUR","795":"TKM","800":"UGA","804":"UKR",
+      "807":"MKD","818":"EGY","826":"GBR","834":"TZA","840":"USA","854":"BFA",
+      "858":"URY","860":"UZB","862":"VEN","887":"YEM","894":"ZMB","010":"ATA"
+    };
+
+    let worldMapState = null; // { svg, pathSel, path } once built
+
+    // Fades from a neutral dark grey (no data) up to the site's red at the
+    // country with the most drivers. Uses a sqrt scale rather than linear,
+    // since the real distribution is heavily skewed (e.g. Germany's 600+
+    // vs. most countries in single digits) — linear would make almost
+    // every country look identical and only the top one or two stand out.
+    function colorForCount(count, maxCount) {
+      if (!count) return "#262626";
+      const t = maxCount > 0 ? Math.sqrt(count) / Math.sqrt(maxCount) : 0;
+      const from = { r: 0x3a, g: 0x2a, b: 0x2a };
+      const to = { r: 0xff, g: 0x27, b: 0x27 };
+      const r = Math.round(from.r + (to.r - from.r) * t);
+      const g = Math.round(from.g + (to.g - from.g) * t);
+      const b = Math.round(from.b + (to.b - from.b) * t);
+      return `rgb(${r},${g},${b})`;
+    }
+
+    async function renderWorldMap(nationCounts) {
+      const container = document.getElementById("world-map-container");
+      if (!container || typeof d3 === "undefined" || typeof topojson === "undefined") return;
+
+      const maxCount = Math.max(0, ...Object.values(nationCounts));
+
+      // Already built — just update colors/tooltips with fresh counts,
+      // no need to re-fetch or re-draw the geometry.
+      if (worldMapState) {
+        worldMapState.pathSel.attr("fill", d => {
+          const alpha3 = TOPO_ID_TO_ALPHA3[d.id];
+          return colorForCount(alpha3 ? (nationCounts[alpha3] || 0) : 0, maxCount);
+        });
+        worldMapState.countsRef = nationCounts;
+        return;
+      }
+
+      let world;
+      try {
+        world = await d3.json("https://cdn.jsdelivr.net/npm/world-atlas@2/countries-110m.json");
+      } catch (err) {
+        return; // Fail silently — the flag grid below still shows the same data as text
+      }
+      if (worldMapState) return; // a concurrent call already finished building it
+
+      const countries = topojson.feature(world, world.objects.countries).features;
+
+      const width = 720;
+      const height = 380;
+      const projection = d3.geoNaturalEarth1().fitSize([width - 16, height - 16], { type: "Sphere" });
+      const pathGen = d3.geoPath(projection);
+
+      const svg = d3.select(container)
+        .append("svg")
+        .attr("viewBox", `0 0 ${width} ${height}`)
+        .attr("preserveAspectRatio", "xMidYMid meet");
+
+      const tooltip = document.createElement("div");
+      tooltip.className = "world-map-tooltip";
+      container.appendChild(tooltip);
+
+      const pathSel = svg.append("g")
+        .attr("transform", `translate(8,8)`)
+        .selectAll("path")
+        .data(countries)
+        .join("path")
+        .attr("class", "world-map-country")
+        .attr("d", pathGen)
+        .attr("fill", d => {
+          const alpha3 = TOPO_ID_TO_ALPHA3[d.id];
+          return colorForCount(alpha3 ? (nationCounts[alpha3] || 0) : 0, maxCount);
+        })
+        .on("mousemove", (event, d) => {
+          const alpha3 = TOPO_ID_TO_ALPHA3[d.id];
+          const count = alpha3 ? (nationCounts[alpha3] || 0) : 0;
+          const name = (d.properties && d.properties.name) || "Unknown";
+          tooltip.innerHTML = count
+            ? `${name}: <strong>${count}</strong> driver${count === 1 ? "" : "s"}`
+            : `${name}: no drivers yet`;
+          const rect = container.getBoundingClientRect();
+          tooltip.style.left = (event.clientX - rect.left) + "px";
+          tooltip.style.top = (event.clientY - rect.top) + "px";
+          tooltip.classList.add("visible");
+        })
+        .on("mouseleave", () => {
+          tooltip.classList.remove("visible");
+        });
+
+      worldMapState = { svg, pathSel, tooltip, countsRef: nationCounts };
+    }
+
     function renderCountryData(nationCounts, uniqueDriverCount) {
       const nations = Object.entries(nationCounts).sort((a, b) => b[1] - a[1]);
 
@@ -1223,6 +1407,8 @@
 
       statusEl.textContent = "";
       contentEl.innerHTML = "";
+
+      renderWorldMap(nationCounts);
 
       const subtitleEl = document.getElementById("country-subtitle");
       if (subtitleEl) {
@@ -2140,7 +2326,8 @@
       "Florian Bauer",
       "Kingsley Performance",
       "Daniel K",
-      "enjoy enjoy"
+      "enjoy enjoy",
+      "Toni Keränen"
     ]);
     const VERIFIED_BADGE_URL = "https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/refs/heads/main/GT3FORC3_VerifiedBadge01.png";
 
