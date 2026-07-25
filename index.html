@@ -16,7 +16,7 @@
       --border-subtle: #333;
     }
     html {
-      background: linear-gradient(180deg, #000000 0%, #222222 600px, #222222 100%);
+      background: linear-gradient(180deg, #000000 0%, #1e1e1e 600px, #1e1e1e 100%);
       background-attachment: fixed;
       border-top: 2px solid #ff2727;
     }
@@ -83,6 +83,7 @@
     .discord-stats {
       display: flex;
       align-items: center;
+      justify-content: center;
       gap: 10px;
       font-size: 10px;
       color: #666;
@@ -405,26 +406,7 @@
       outline: none;
     }
     .sort-direction-btn {
-      background: var(--surface-2);
-      border: none;
-      color: #555;
-      width: 36px;
-      height: 36px;
-      box-sizing: border-box;
-      flex-shrink: 0;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-      font-family: inherit;
-    }
-    .sort-direction-btn:hover {
-      background: var(--surface-3);
-      color: #999;
-    }
-    .sort-direction-btn.active {
-      background: #ff2727;
-      border-color: #ff2727;
-      color: #fff;
+      color: #666;
     }
 
     .rank-toggle-row {
@@ -459,7 +441,7 @@
       color: #eee;
     }
     .rank-toggle-btn.active {
-      background: #ff2727;
+      background: linear-gradient(0deg, #ff2727 0%, var(--surface-3) 40%);
       border-color: #ff2727;
       color: #fff;
     }
@@ -495,6 +477,9 @@
     }
     #leaderboard-server-name-text {
       color: #256f40;
+    }
+    #leaderboard-server-name-text.no-drivers {
+      color: #666;
     }
 
     .live-badge {
@@ -543,13 +528,18 @@
       animation: none;
     }
 
+    .leaderboard-frame-border {
+      background: linear-gradient(180deg, #1a0a0a 0%, rgba(26, 10, 10, 0) 100%);
+      border-radius: 8px;
+      padding: 2px;
+      margin-bottom: 16px;
+    }
     .leaderboard-frame {
       width: 100%;
       max-height: 578px;
       overflow-y: auto;
-      border-radius: 8px;
+      border-radius: 6px;
       background: var(--surface-1);
-      margin-bottom: 16px;
       scrollbar-width: thin;
       scrollbar-color: #444 #111;
     }
@@ -784,7 +774,7 @@
       margin-bottom: 4px;
     }
     .crash-stat-value {
-      color: #b04545;
+      color: #999;
       font-size: 20px;
       font-weight: 700;
     }
@@ -1126,21 +1116,24 @@
       id="leaderboard-search"
       class="leaderboard-search-input"
       placeholder="Search drivers, cars and sessions">
-    <button type="button" class="sort-direction-btn" id="sort-direction-btn" title="Reverse ranking order">⇅</button>
   </div>
   <div class="rank-toggle-row" id="rank-toggle-row">
+    <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
     <span class="rank-toggle-label">Ranked by</span>
     <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">Race Time</button>
     <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">Best Lap</button>
     <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
   </div>
   <div class="rank-toggle-row" id="verified-filter-row">
+    <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
     <span class="rank-toggle-label">Filter by</span>
     <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
     <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
   </div>
   <div id="leaderboard-status"></div>
-  <div id="leaderboard-frame" class="leaderboard-frame"></div>
+  <div class="leaderboard-frame-border">
+    <div id="leaderboard-frame" class="leaderboard-frame"></div>
+  </div>
 
   <div class="section-box" id="crash-report-section">
     <div class="section-subtitle" id="crash-report-subtitle">💥 Loading crash data...</div>
@@ -1347,19 +1340,28 @@
       }
       if (worldMapState) return; // a concurrent call already finished building it
 
-      // Antarctica is geometrically huge but never has any driver data —
-      // rendering it just wastes vertical space and pulls focus away from
-      // the countries that actually matter here.
+      // Antarctica and French Southern and Antarctic Lands (a scatter of
+      // remote islands near Antarctica) are geometrically huge/remote but
+      // never have driver data — worse, letting them into the fit-bounds
+      // calculation below can drag the projection's zoom out so far that
+      // they (or other extreme-latitude slivers) render as isolated marks
+      // detached from the main landmass.
       const countries = topojson.feature(world, world.objects.countries).features
-        .filter(d => d.id !== "010");
+        .filter(d => d.id !== "010" && d.id !== "260");
 
       const width = 720;
       const height = 340;
-      // Fit to the actual country set (Antarctica excluded) so the
-      // populated world fills the frame instead of leaving a big gap
-      // where Antarctica used to be.
+      // Fit to a fixed, sensible "populated world" extent rather than the
+      // actual data's bounding box — this way no remote outlier territory
+      // (an Arctic sliver, an antimeridian-crossing island chain, etc.)
+      // can ever skew the zoom/pan and pull something off into empty space
+      // far from the main map.
+      const boundingExtent = {
+        type: "Polygon",
+        coordinates: [[[-170, -58], [170, -58], [170, 83], [-170, 83], [-170, -58]]]
+      };
       const projection = d3.geoNaturalEarth1()
-        .fitSize([width - 16, height - 16], { type: "FeatureCollection", features: countries });
+        .fitSize([width - 16, height - 16], boundingExtent);
       const pathGen = d3.geoPath(projection);
 
       const svg = d3.select(container)
@@ -2263,6 +2265,14 @@
       countEl.textContent = (isGenuinelyOnline && count != null)
         ? `(${count} Driver${count === 1 ? "" : "s"})`
         : "";
+
+      // The server name text is green by default (matching the "online"
+      // indicator), but that reads oddly next to "(0 Drivers)" — grey it
+      // out specifically when the server is online with nobody on it.
+      const nameTextEl = document.getElementById("leaderboard-server-name-text");
+      if (nameTextEl) {
+        nameTextEl.classList.toggle("no-drivers", isGenuinelyOnline && count === 0);
+      }
     }
 
     // Incremented every time loadLeaderboard() is called. Lets an in-flight
@@ -2796,7 +2806,9 @@
         t.classList.toggle("active", t.dataset.track === track);
       });
       const liveBadgeEl = document.getElementById("server-live-badge");
-      document.getElementById("leaderboard-server-name-text").textContent = serverNameCache[track] || "";
+      const nameTextEl = document.getElementById("leaderboard-server-name-text");
+      nameTextEl.textContent = serverNameCache[track] || "";
+      nameTextEl.classList.remove("no-drivers");
       document.getElementById("live-player-count").textContent = "";
       liveBadgeEl.classList.remove("visible", "offline", "deactivated");
       const cheaterNoticeEl = document.getElementById("cheater-notice");
@@ -2827,8 +2839,7 @@
 
       // Same reset for the sort-direction toggle.
       sortReversed = false;
-      const sortDirectionBtn = document.getElementById("sort-direction-btn");
-      if (sortDirectionBtn) sortDirectionBtn.classList.remove("active");
+      document.querySelectorAll(".sort-direction-btn").forEach(btn => btn.classList.remove("active"));
 
       loadLeaderboard(track);
       loadServerName(track);
@@ -3002,12 +3013,11 @@
       });
     });
 
-    // ---- Sort direction toggle (every leaderboard) ----
-    const sortDirectionBtnEl = document.getElementById("sort-direction-btn");
-    if (sortDirectionBtnEl) {
+    // ---- Sort direction toggle (every leaderboard, one button per visible row) ----
+    document.querySelectorAll(".sort-direction-btn").forEach(sortDirectionBtnEl => {
       sortDirectionBtnEl.addEventListener("click", () => {
         sortReversed = !sortReversed;
-        sortDirectionBtnEl.classList.toggle("active", sortReversed);
+        document.querySelectorAll(".sort-direction-btn").forEach(btn => btn.classList.toggle("active", sortReversed));
         const rawRows = leaderboardCache[activeTrack];
         if (rawRows) {
           currentLeaderboardEntries = computeFilteredEntries(rawRows);
@@ -3015,7 +3025,7 @@
           applyLeaderboardSearch();
         }
       });
-    }
+    });
 
     // ---- Get Verified modal ----
     const verifyModalOverlay = document.getElementById("verify-modal-overlay");
