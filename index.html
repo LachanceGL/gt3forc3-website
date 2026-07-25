@@ -2281,9 +2281,17 @@
           })
         : cleanRows; // "best_lap" mode: /rows is already ordered by Best Lap natively
 
-      return orderedRows
-        .map((row, i) => ({ rank: i + 1, row }))
-        .slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
+      const entries = orderedRows.map((row, i) => ({ rank: i + 1, row }));
+
+      // While Sub 7 Club is on, don't cap to the usual top-N display limit —
+      // isFlagged() has already filtered `rows` down to just sub-7 drivers
+      // across the ENTIRE leaderboard (thousands of entries), and capping
+      // that result to the same 250 shown normally would just silently
+      // hide anyone beyond the fastest 250, making the filter look like it
+      // does nothing whenever 250+ drivers already qualify.
+      if (sub7ClubFilter && activeTrack === "nordschleife") return entries;
+
+      return entries.slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
     }
 
     function renderLeaderboardRows(rows) {
