@@ -1042,8 +1042,8 @@
       Nordschleife
       <span class="leaderboard-tab-type">Hot Lap</span>
     </a>
-    <a class="leaderboard-tab" href="#spa" data-track="spa">
-      Spa Francorchamps
+    <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">
+      Red Bull Ring
       <span class="leaderboard-tab-type">Hot Lap</span>
     </a>
     <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
@@ -1995,7 +1995,11 @@
         title: "Hot Lap",
         updateNote: "Ranking updated every 8 hours"
       },
-      redbullring: {
+      // Superseded by the "redbullring" entry below (a different, actively
+      // used Red Bull Ring leaderboard on server2). Kept under a distinct
+      // key, same as the archived Kyalami entry, purely so it's not lost
+      // if ever needed again — no tab points here, nothing loads it.
+      redbullringlegacy: {
         workerPrefix: "/server3",
         shareKey: "3a0072bb-b916-4262-8e81-28f6486b4f75",
         displayName: "Red Bull Ring",
@@ -2030,8 +2034,9 @@
         shareKey: "a6aea2bb-9846-446d-9987-7d64cbdd90e6",
         displayName: "Kyalami",
         title: "Hot Lap",
-        // Server 2 now runs Red Bull Ring, not Kyalami — same situation as
-        // Spa below. Frozen leaderboard, no live status of its own anymore.
+        // Server 2 now runs Red Bull Ring, not Kyalami (see "redbullring"
+        // below) — this is a frozen leaderboard, no live status of its own
+        // anymore.
         legacy: true,
         driverDataSource: "redbullring",
         // Archived: kept fully configured (data, share key, everything) so
@@ -2039,10 +2044,10 @@
         // tab is hidden from the tab bar since the server's moved on.
         archived: true
       },
-      spa: {
+      redbullring: {
         workerPrefix: "/server2",
-        shareKey: "c8393a9b-16f2-4e29-9ddb-7de2ab3ad5ae",
-        displayName: "Spa Francorchamps",
+        shareKey: "439b9d09-5983-4286-9d12-1822e775a0af",
+        displayName: "Red Bull Ring",
         title: "Hot Lap",
         updateNote: "Ranking updated every 8 hours"
       }
