@@ -756,32 +756,32 @@
 
     .crash-report-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-      gap: 10px;
-      margin-top: 4px;
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+      gap: 6px;
+      margin-top: 2px;
     }
     .crash-stat-card {
       background: var(--surface-2);
-      border-radius: 8px;
-      padding: 12px 14px;
+      border-radius: 6px;
+      padding: 8px 10px;
     }
     .crash-stat-label {
       color: #999;
-      font-size: 11px;
+      font-size: 10px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.03em;
-      margin-bottom: 4px;
+      margin-bottom: 2px;
     }
     .crash-stat-value {
       color: #999;
-      font-size: 20px;
+      font-size: 17px;
       font-weight: 700;
     }
     .crash-stat-detail {
       color: #999;
-      font-size: 12px;
-      margin-top: 2px;
+      font-size: 11px;
+      margin-top: 1px;
     }
     .crash-stat-driver {
       text-decoration: none;
@@ -805,6 +805,9 @@
       border-radius: 10px;
       padding: 24px;
       margin-bottom: 8px;
+    }
+    #crash-report-section {
+      padding: 14px 16px;
     }
     .section-box .section-title {
       border-top: none;
@@ -1042,6 +1045,10 @@
     <a class="leaderboard-tab" href="#spa" data-track="spa">
       Spa Francorchamps
       <span class="leaderboard-tab-type">Hot Lap</span>
+    </a>
+    <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
+      Laguna Seca
+      <span class="leaderboard-tab-type">Race</span>
     </a>
     <!-- Red Bull Ring temporarily disabled — tab hidden, but its full
          config below is left untouched so it can come back instantly by
@@ -2005,6 +2012,18 @@
         // to run, only show rows from races that hit this exact lap
         // count, matching the server's standard 5-lap Race format.
         requiredLaps: 5
+      },
+      lagunaseca: {
+        workerPrefix: "/server4",
+        shareKey: "5b68f526-55c2-416e-8104-52940481e0c9",
+        displayName: "Laguna Seca",
+        title: "Race",
+        updateNote: "Ranking updated every race",
+        isRace: true,
+        // Same reasoning as Red Bull Ring — Total Time is only comparable
+        // across rows that ran the same race distance. This server's
+        // standard Race format is 10 laps.
+        requiredLaps: 10
       },
       kyalami: {
         workerPrefix: "/server2",
