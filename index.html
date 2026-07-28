@@ -113,13 +113,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 6px;
+      gap: 5px;
       background: rgba(255, 39, 39, 0.12);
       border: 1px solid rgba(255, 39, 39, 0.35);
       color: #ff2727;
-      padding: 8px 14px;
+      height: 28px;
+      box-sizing: border-box;
+      padding: 0 12px;
       border-radius: 6px;
-      font-size: 14px;
+      font-size: 12px;
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
@@ -128,8 +130,8 @@
       background: rgba(255, 39, 39, 0.2);
     }
     .get-verified-badge-icon {
-      width: 15px;
-      height: 15px;
+      width: 11px;
+      height: 11px;
     }
 
     .admin-panel {
@@ -485,7 +487,7 @@
       flex-wrap: wrap;
     }
     #leaderboard-server-name-text {
-      color: #256f40;
+      color: #3ba55d;
     }
     #leaderboard-server-name-text.no-drivers {
       color: #666;
@@ -2373,11 +2375,29 @@
 
     function renderLeaderboardRows(rows) {
       currentLeaderboardEntries = computeFilteredEntries(rows);
+      updateTop200ButtonLabel();
 
       const searchInput = document.getElementById("leaderboard-search");
       if (searchInput) searchInput.value = "";
 
       return buildLeaderboardTable(currentLeaderboardEntries);
+    }
+
+    // The "TOP 200" filter button's number was hardcoded and wrong
+    // whenever a track has fewer real entries than the 200 cap (e.g. Spa
+    // with under 20) — this computes the actual count that mode would
+    // show, regardless of which mode is currently active, by briefly
+    // evaluating as if "top200" were selected.
+    function updateTop200ButtonLabel() {
+      const btn = document.getElementById("filter-top200-btn");
+      if (!btn) return;
+      const rawRows = leaderboardCache[activeTrack];
+      if (!rawRows) return;
+      const savedMode = nordschleifeFilterMode;
+      nordschleifeFilterMode = "top200";
+      const count = computeFilteredEntries(rawRows).length;
+      nordschleifeFilterMode = savedMode;
+      btn.textContent = `TOP ${count}`;
     }
 
     function applyLeaderboardSearch() {
@@ -2413,6 +2433,7 @@
       if (rawRows) {
         currentLeaderboardEntries = computeFilteredEntries(rawRows);
         updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
+        updateTop200ButtonLabel();
       }
       if (currentLeaderboardEntries.length > 0) {
         applyLeaderboardSearch();
