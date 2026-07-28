@@ -436,6 +436,15 @@
       font-family: inherit;
       cursor: pointer;
     }
+    /* Sub 7 Club only makes sense on Nordschleife — hidden everywhere else
+       the "Filter by" row now appears (e.g. Spa), unlike TOP 200 and the
+       invert button, which are useful on any leaderboard. */
+    #sub7-filter-btn {
+      display: none;
+    }
+    #sub7-filter-btn.nordschleife-only-visible {
+      display: inline-block;
+    }
     .rank-toggle-btn:hover {
       border-color: #ff2727;
       color: #eee;
@@ -2639,9 +2648,13 @@
       });
       updateRankToggleNote();
 
-      // The "Filter by" row (Top 200 / Sub 7 Club) is Nordschleife-only.
+      // The "Filter by" row (Top 200 / invert button) shows on every
+      // Hotlap track. "Sub 7 Club" specifically is Nordschleife-only —
+      // that one button toggles separately below.
       const verifiedFilterRowEl = document.getElementById("verified-filter-row");
-      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", track === "nordschleife");
+      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
+      const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
+      if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", track === "nordschleife");
 
       // Reset to the default filter mode whenever the active track changes.
       nordschleifeFilterMode = "top200";
@@ -2688,8 +2701,11 @@
       updateRankToggleNote();
     }
     {
+      const config = LEADERBOARDS[activeTrack];
       const verifiedFilterRowEl = document.getElementById("verified-filter-row");
-      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", activeTrack === "nordschleife");
+      if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
+      const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
+      if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", activeTrack === "nordschleife");
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
