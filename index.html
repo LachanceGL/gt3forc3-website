@@ -510,6 +510,9 @@
       letter-spacing: 0.03em;
       color: #4ade80;
     }
+    .live-player-count.no-drivers {
+      color: #666;
+    }
     .live-badge.visible {
       display: inline-flex;
     }
@@ -2122,6 +2125,7 @@
       if (nameTextEl) {
         nameTextEl.classList.toggle("no-drivers", isGenuinelyOnline && count === 0);
       }
+      countEl.classList.toggle("no-drivers", isGenuinelyOnline && count === 0);
     }
 
     // Incremented every time loadLeaderboard() is called. Lets an in-flight
@@ -2607,7 +2611,7 @@
           liveBadgeEl.classList.add("visible", "deactivated");
           liveBadgeEl.innerHTML = '<span class="live-dot"></span>Inactive';
           const countEl = document.getElementById("live-player-count");
-          if (countEl) countEl.textContent = "";
+          if (countEl) { countEl.textContent = ""; countEl.classList.remove("no-drivers"); }
         }
         return;
       }
@@ -2654,7 +2658,7 @@
           liveBadgeEl.classList.add("visible", "offline");
           liveBadgeEl.innerHTML = '<span class="live-dot"></span>Offline';
           const countEl = document.getElementById("live-player-count");
-          if (countEl) countEl.textContent = "";
+          if (countEl) { countEl.textContent = ""; countEl.classList.remove("no-drivers"); }
         }
       }
     }
@@ -2679,7 +2683,9 @@
       const nameTextEl = document.getElementById("leaderboard-server-name-text");
       nameTextEl.textContent = serverNameCache[track] || "";
       nameTextEl.classList.remove("no-drivers");
-      document.getElementById("live-player-count").textContent = "";
+      const countElReset = document.getElementById("live-player-count");
+      countElReset.textContent = "";
+      countElReset.classList.remove("no-drivers");
       liveBadgeEl.classList.remove("visible", "offline", "deactivated");
       const cheaterNoticeEl = document.getElementById("cheater-notice");
       if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[track]));
