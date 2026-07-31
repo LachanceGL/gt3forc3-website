@@ -495,6 +495,66 @@
     .leaderboard-search-input::placeholder {
       color: #555;
     }
+    /* Wraps the input so the "what can I search" dropdown can be
+       positioned relative to it. margin-left:auto moved here from the
+       input itself so the input can go back to width:100% inside it. */
+    .leaderboard-search-wrap {
+      position: relative;
+      width: 100%;
+      max-width: 220px;
+      margin-left: auto;
+    }
+    .leaderboard-search-wrap .leaderboard-search-input {
+      max-width: none;
+      margin-left: 0;
+    }
+    /* Shown only while the box is focused AND still empty (using
+       :placeholder-shown, which is only true when there's no value) —
+       so it appears the moment you click in, and gets out of the way
+       the moment you start typing, without needing any JS. */
+    .leaderboard-search-hint {
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      z-index: 5;
+      width: 210px;
+      max-width: 80vw;
+      background: var(--surface-1);
+      border: 1px solid var(--border-subtle);
+      border-radius: 8px;
+      padding: 10px 12px;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-4px);
+      transition: opacity 0.15s ease, transform 0.15s ease;
+      pointer-events: none;
+    }
+    .leaderboard-search-input:focus:placeholder-shown ~ .leaderboard-search-hint {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+    }
+    .leaderboard-search-hint-title {
+      color: #666;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 8px;
+    }
+    .leaderboard-search-hint-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .leaderboard-search-hint-tag {
+      background: var(--surface-2);
+      border: 1px solid var(--border-subtle);
+      border-radius: 4px;
+      padding: 3px 8px;
+      color: #ccc;
+      font-size: 11px;
+    }
 
     .leaderboard-server-name {
       color: #666;
@@ -1128,11 +1188,23 @@
       ⚠ Anomalies will be flagged
       <span class="cheater-notice-tooltip" id="cheater-notice-tooltip-text">There are cheaters and exploiters, but glitches can happen too. If you don't see your name and believe it was flagged by mistake, come to our Discord so we can look into it.</span>
     </span>
-    <input
-      type="text"
-      id="leaderboard-search"
-      class="leaderboard-search-input"
-      placeholder="Search drivers, cars, countries and sessions">
+    <div class="leaderboard-search-wrap">
+      <input
+        type="text"
+        id="leaderboard-search"
+        class="leaderboard-search-input"
+        placeholder="Search"
+        autocomplete="off">
+      <div class="leaderboard-search-hint">
+        <div class="leaderboard-search-hint-title">Search by</div>
+        <div class="leaderboard-search-hint-tags">
+          <span class="leaderboard-search-hint-tag">Driver</span>
+          <span class="leaderboard-search-hint-tag">Car</span>
+          <span class="leaderboard-search-hint-tag">Country</span>
+          <span class="leaderboard-search-hint-tag">Session</span>
+        </div>
+      </div>
+    </div>
   </div>
   <div class="rank-toggle-row" id="rank-toggle-row">
     <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
