@@ -1132,7 +1132,7 @@
       type="text"
       id="leaderboard-search"
       class="leaderboard-search-input"
-      placeholder="Search drivers, cars and sessions">
+      placeholder="Search drivers, cars, countries and sessions">
   </div>
   <div class="rank-toggle-row" id="rank-toggle-row">
     <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
@@ -2463,7 +2463,8 @@
       }
 
       const filtered = currentLeaderboardEntries.filter(({ row }) => {
-        const haystack = `${row.FullName || ""} ${row.CarName || ""} ${row.SessionDate || ""} ${row.SessionType || ""}`.toLowerCase();
+        const nationCode = row.FullName ? (driverNationMap[row.FullName.trim().toLowerCase()] || "") : "";
+        const haystack = `${row.FullName || ""} ${row.CarName || ""} ${row.SessionDate || ""} ${row.SessionType || ""} ${nationCode}`.toLowerCase();
         return haystack.includes(query);
       });
 
