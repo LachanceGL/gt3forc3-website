@@ -692,6 +692,7 @@
       margin-bottom: 10px;
     }
     .leaderboard-tab {
+      position: relative;
       background: var(--surface-2);
       color: #ff2727;
       border: 2px solid #333;
@@ -738,6 +739,33 @@
       background: linear-gradient(0deg, #ff2727 0%, var(--surface-3) 40%);
       color: #fff;
       border-color: #ff2727;
+    }
+    /* Distinct blue/turquoise theme for the Nürburgring Tour leaderboard,
+       so it reads as visually separate from the site's usual red tabs. */
+    .leaderboard-tab-tour {
+      color: #2dd4d4;
+    }
+    .leaderboard-tab-tour:hover,
+    .leaderboard-tab-tour.active {
+      background: linear-gradient(0deg, #17b3b3 0%, var(--surface-3) 40%);
+      color: #fff;
+      border-color: #17b3b3;
+    }
+    .leaderboard-tab-corner-note {
+      position: absolute;
+      top: -8px;
+      right: -6px;
+      background: #0d3b3b;
+      border: 1px solid #17b3b3;
+      color: #6ee7e7;
+      font-size: 8px;
+      font-weight: 700;
+      font-style: normal;
+      text-transform: uppercase;
+      letter-spacing: 0.02em;
+      padding: 2px 5px;
+      border-radius: 4px;
+      white-space: nowrap;
     }
     .leaderboard-tab.leaderboard-tab-legacy.active {
       background: #1a4677;
@@ -1057,9 +1085,10 @@
       Spa Francorchamps
       <span class="leaderboard-tab-type">Hot Lap</span>
     </a>
-    <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
-      Laguna Seca
-      <span class="leaderboard-tab-type">Race</span>
+    <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgringtour" data-track="nurburgringtour">
+      <span class="leaderboard-tab-corner-note">H Shifter Road Cars</span>
+      Nürburgring Tour
+      <span class="leaderboard-tab-type">Hot Lap</span>
     </a>
     <!-- Red Bull Ring temporarily disabled — tab hidden, but its full
          config below is left untouched so it can come back instantly by
@@ -2027,17 +2056,15 @@
         // count, matching the server's standard 5-lap Race format.
         requiredLaps: 5
       },
-      lagunaseca: {
+      nurburgringtour: {
         workerPrefix: "/server4",
-        shareKey: "5b68f526-55c2-416e-8104-52940481e0c9",
-        displayName: "Laguna Seca",
-        title: "Race",
-        updateNote: "Ranks updated every race",
-        isRace: true,
-        // Same reasoning as Red Bull Ring — Total Time is only comparable
-        // across rows that ran the same race distance. This server's
-        // standard Race format is 10 laps.
-        requiredLaps: 10
+        shareKey: "fb389295-5360-4e88-ab4c-ae700874dcc1",
+        displayName: "Nürburgring Tour",
+        title: "Hot Lap",
+        updateNote: "Ranks updated every session",
+        // Distinct blue/turquoise theme for this one leaderboard, applied
+        // via the .leaderboard-tab-tour class on its tab element.
+        themeClass: "leaderboard-tab-tour"
       },
       kyalami: {
         workerPrefix: "/server2",
