@@ -1190,14 +1190,22 @@
         Spa Francorchamps
         <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
+      <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
+        Laguna Seca
+        <span class="leaderboard-tab-type">Race</span>
+      </a>
+      <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">
+        Red Bull Ring
+        <span class="leaderboard-tab-type">Race</span>
+      </a>
+      <!-- Nürburgring Touring leaderboard, on server5 (fr.assettohosting.com:60785
+           / ASSETTO_API_KEY_5 in the Worker). The old server4 slot this
+           used to occupy is now Laguna Seca, above. -->
       <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgringtour" data-track="nurburgringtour">
         <span class="leaderboard-tab-corner-note">H Shifter Road Cars</span>
         Nürburgring
         <span class="leaderboard-tab-type">Touring</span>
       </a>
-      <!-- Red Bull Ring temporarily disabled — tab hidden, but its full
-           config below is left untouched so it can come back instantly by
-           just re-adding this tab element. -->
     </div>
     <div class="leaderboard-server-name" id="leaderboard-server-name">
       <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
@@ -1303,6 +1311,7 @@
           <option value="Nordschleife">Nordschleife</option>
           <option value="Spa Francorchamps">Spa Francorchamps</option>
           <option value="Red Bull Ring">Red Bull Ring</option>
+          <option value="Laguna Seca">Laguna Seca</option>
         </select>
       </div>
       <div class="verify-field">
@@ -2153,9 +2162,6 @@
         title: "Hot Lap",
         updateNote: "Ranks updated every session"
       },
-      // Disabled for now — tab hidden, but its full config below is left
-      // untouched so it can come back instantly by just adding the tab
-      // back.
       redbullring: {
         workerPrefix: "/server3",
         shareKey: "3a0072bb-b916-4262-8e81-28f6486b4f75",
@@ -2174,14 +2180,31 @@
         // count, matching the server's standard 5-lap Race format.
         requiredLaps: 5
       },
-      nurburgringtour: {
+      // Was Nürburgring Touring — now repointed to server4's new Laguna
+      // Seca leaderboard, using the Race template (Total Time column,
+      // Ranked-by toggle) same as Red Bull Ring below.
+      lagunaseca: {
         workerPrefix: "/server4",
-        shareKey: "fb389295-5360-4e88-ab4c-ae700874dcc1",
+        shareKey: "5b68f526-55c2-416e-8104-52940481e0c9",
+        displayName: "Laguna Seca",
+        title: "Race",
+        updateNote: "Ranks updated every race",
+        isRace: true,
+        // Assumed 5 laps to match the other Race-template track
+        // (Red Bull Ring) — confirm/adjust if Laguna Seca's race format
+        // runs a different lap count, otherwise rows that don't hit this
+        // exact count get filtered out of Total Time ranking.
+        requiredLaps: 5
+      },
+      // Nürburgring Touring, now on server5 (fr.assettohosting.com:60785
+      // / ASSETTO_API_KEY_5 in the Worker) — the old server4 slot this used
+      // to occupy is now Laguna Seca, above.
+      nurburgringtour: {
+        workerPrefix: "/server5",
+        shareKey: "3027ac22-5a4a-4948-a375-40beed0a2bf6",
         displayName: "Nürburgring",
         title: "Touring",
         updateNote: "Ranks updated every session",
-        // Distinct blue/turquoise theme for this one leaderboard, applied
-        // via the .leaderboard-tab-tour class on its tab element.
         themeClass: "leaderboard-tab-tour"
       },
       kyalami: {
