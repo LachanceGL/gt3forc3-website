@@ -2173,12 +2173,12 @@
         // from the public /rows leaderboard which only has best lap.
         isRace: true,
         // Total Time is only comparable across rows when every race ran
-        // the same distance — a 4-lap race's total will always look
-        // "faster" than a 5-lap race's, regardless of who's actually
+        // the same distance — a shorter race's total will always look
+        // "faster" than a longer one's, regardless of who's actually
         // quicker. Rather than rank whatever distance each row happened
         // to run, only show rows from races that hit this exact lap
-        // count, matching the server's standard 5-lap Race format.
-        requiredLaps: 5
+        // count, matching the server's standard 10-lap Race format.
+        requiredLaps: 10
       },
       // Was Nürburgring Touring — now repointed to server4's new Laguna
       // Seca leaderboard, using the Race template (Total Time column,
@@ -2190,11 +2190,8 @@
         title: "Race",
         updateNote: "Ranks updated every race",
         isRace: true,
-        // Assumed 5 laps to match the other Race-template track
-        // (Red Bull Ring) — confirm/adjust if Laguna Seca's race format
-        // runs a different lap count, otherwise rows that don't hit this
-        // exact count get filtered out of Total Time ranking.
-        requiredLaps: 5
+        // Confirmed 10 laps, matching Red Bull Ring's format.
+        requiredLaps: 10
       },
       // Nürburgring Touring, now on server5 (fr.assettohosting.com:60785
       // / ASSETTO_API_KEY_5 in the Worker) — the old server4 slot this used
