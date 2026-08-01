@@ -103,7 +103,7 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
+      gap: 5px;
       font-size: 10px;
       color: #bbb;
       font-weight: 600;
@@ -432,7 +432,7 @@
          corner of the box (negative x shifts the shadow's "core" rect
          left, positive y shifts it down, leaving the top-right corner
          exposed to the shadow). */
-      box-shadow: inset -4px 4px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: inset -4px 4px 6px rgba(0, 0, 0, 0.2);
     }
     .sort-direction-btn {
       color: #666;
@@ -2944,7 +2944,7 @@
           parts.push(`${data.member_count} Members`);
         }
 
-        statsEl.innerHTML = parts.join(" &nbsp;·&nbsp; ");
+        statsEl.innerHTML = parts.join(" &nbsp;· ");
 
         discordPlayerCounts = data.server_players || {};
         updatePlayerCountDisplay(activeTrack);
