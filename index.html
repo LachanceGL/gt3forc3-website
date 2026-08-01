@@ -97,6 +97,7 @@
       flex-direction: column;
       align-items: stretch;
       gap: 6px;
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
     .discord-stats {
       display: flex;
@@ -1116,6 +1117,16 @@
       margin-bottom: 16px;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
+    /* Wraps the game logo + track tabs + toolbar + filter rows so the
+       whole panel gets one unified drop-shadow (same shadow values as
+       .game-logo) instead of leaving those buttons/labels flat against
+       the background image behind them. */
+    .leaderboard-header-group {
+      filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
+    }
+    .leaderboard-header-group .game-logo {
+      filter: none; /* avoid stacking two shadows on the same logo image */
+    }
   </style>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "65e2f7685f054614a7a2adc1fae8132f"}'></script><!-- End Cloudflare Web Analytics -->
   <!-- Umami Analytics --><script defer src="https://cloud.umami.is/script.js" data-website-id="b86daa6e-9440-444b-8033-d814a8273437"></script><!-- End Umami Analytics -->
@@ -1159,66 +1170,68 @@
     </div>
   </div>
 
-  <img class="game-logo" src="https://cdn2.steamgriddb.com/logo_thumb/fc01a2102f0e61c902da69e52aac5d0d.png" alt="Assetto Corsa EVO">
-  <div class="leaderboard-tabs">
-    <a class="leaderboard-tab active" href="#nordschleife" data-track="nordschleife">
-      Nordschleife
-      <span class="leaderboard-tab-type">Hot Lap</span>
-    </a>
-    <a class="leaderboard-tab" href="#spa" data-track="spa">
-      Spa Francorchamps
-      <span class="leaderboard-tab-type">Hot Lap</span>
-    </a>
-    <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgringtour" data-track="nurburgringtour">
-      <span class="leaderboard-tab-corner-note">H Shifter Road Cars</span>
-      Nürburgring
-      <span class="leaderboard-tab-type">Touring</span>
-    </a>
-    <!-- Red Bull Ring temporarily disabled — tab hidden, but its full
-         config below is left untouched so it can come back instantly by
-         just re-adding this tab element. -->
-  </div>
-  <div class="leaderboard-server-name" id="leaderboard-server-name">
-    <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
-    <span class="live-player-count" id="live-player-count"></span>
-    <span id="leaderboard-server-name-text"></span>
-  </div>
-  <div class="leaderboard-toolbar">
-    <h3 class="leaderboard-title" id="leaderboard-title"></h3>
-    <span class="cheater-notice" id="cheater-notice">
-      ⚠ Anomalies will be flagged
-      <span class="cheater-notice-tooltip" id="cheater-notice-tooltip-text">There are cheaters and exploiters, but glitches can happen too. If you don't see your name and believe it was flagged by mistake, come to our Discord so we can look into it.</span>
-    </span>
-    <div class="leaderboard-search-wrap">
-      <input
-        type="text"
-        id="leaderboard-search"
-        class="leaderboard-search-input"
-        placeholder="Search"
-        autocomplete="off">
-      <div class="leaderboard-search-hint">
-        <div class="leaderboard-search-hint-title">Search by</div>
-        <div class="leaderboard-search-hint-tags">
-          <span class="leaderboard-search-hint-tag">Driver</span>
-          <span class="leaderboard-search-hint-tag">Car</span>
-          <span class="leaderboard-search-hint-tag">Country</span>
-          <span class="leaderboard-search-hint-tag">Session</span>
+  <div class="leaderboard-header-group">
+    <img class="game-logo" src="https://cdn2.steamgriddb.com/logo_thumb/fc01a2102f0e61c902da69e52aac5d0d.png" alt="Assetto Corsa EVO">
+    <div class="leaderboard-tabs">
+      <a class="leaderboard-tab active" href="#nordschleife" data-track="nordschleife">
+        Nordschleife
+        <span class="leaderboard-tab-type">Hot Lap</span>
+      </a>
+      <a class="leaderboard-tab" href="#spa" data-track="spa">
+        Spa Francorchamps
+        <span class="leaderboard-tab-type">Hot Lap</span>
+      </a>
+      <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgringtour" data-track="nurburgringtour">
+        <span class="leaderboard-tab-corner-note">H Shifter Road Cars</span>
+        Nürburgring
+        <span class="leaderboard-tab-type">Touring</span>
+      </a>
+      <!-- Red Bull Ring temporarily disabled — tab hidden, but its full
+           config below is left untouched so it can come back instantly by
+           just re-adding this tab element. -->
+    </div>
+    <div class="leaderboard-server-name" id="leaderboard-server-name">
+      <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
+      <span class="live-player-count" id="live-player-count"></span>
+      <span id="leaderboard-server-name-text"></span>
+    </div>
+    <div class="leaderboard-toolbar">
+      <h3 class="leaderboard-title" id="leaderboard-title"></h3>
+      <span class="cheater-notice" id="cheater-notice">
+        ⚠ Anomalies will be flagged
+        <span class="cheater-notice-tooltip" id="cheater-notice-tooltip-text">There are cheaters and exploiters, but glitches can happen too. If you don't see your name and believe it was flagged by mistake, come to our Discord so we can look into it.</span>
+      </span>
+      <div class="leaderboard-search-wrap">
+        <input
+          type="text"
+          id="leaderboard-search"
+          class="leaderboard-search-input"
+          placeholder="Search"
+          autocomplete="off">
+        <div class="leaderboard-search-hint">
+          <div class="leaderboard-search-hint-title">Search by</div>
+          <div class="leaderboard-search-hint-tags">
+            <span class="leaderboard-search-hint-tag">Driver</span>
+            <span class="leaderboard-search-hint-tag">Car</span>
+            <span class="leaderboard-search-hint-tag">Country</span>
+            <span class="leaderboard-search-hint-tag">Session</span>
+          </div>
         </div>
       </div>
     </div>
-  </div>
-  <div class="rank-toggle-row" id="rank-toggle-row">
-    <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
-    <span class="rank-toggle-label">Ranked by</span>
-    <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">Race Time</button>
-    <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">Best Lap</button>
-    <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
-  </div>
-  <div class="rank-toggle-row" id="verified-filter-row">
-    <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
-    <span class="rank-toggle-label">Filter by</span>
-    <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
-    <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
+    <div class="rank-toggle-row" id="rank-toggle-row">
+      <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
+      <span class="rank-toggle-label">Ranked by</span>
+      <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">Race Time</button>
+      <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">Best Lap</button>
+      <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
+    </div>
+    <div class="rank-toggle-row" id="verified-filter-row">
+      <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
+      <span class="rank-toggle-label">Filter by</span>
+      <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
+      <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
+    </div>
   </div>
   <div id="leaderboard-status"></div>
   <div class="leaderboard-frame-border">
