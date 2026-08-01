@@ -427,6 +427,12 @@
       border-radius: 6px;
       font-size: 13px;
       outline: none;
+      /* Inset shadow instead of the drop-shadow used elsewhere in this
+         panel — offset -x/+y pushes the shaded area toward the top-right
+         corner of the box (negative x shifts the shadow's "core" rect
+         left, positive y shifts it down, leaving the top-right corner
+         exposed to the shadow). */
+      box-shadow: inset -4px 4px 6px rgba(0, 0, 0, 0.55);
     }
     .sort-direction-btn {
       color: #666;
@@ -1117,15 +1123,18 @@
       margin-bottom: 16px;
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
-    /* Wraps the game logo + track tabs + toolbar + filter rows so the
-       whole panel gets one unified drop-shadow (same shadow values as
-       .game-logo) instead of leaving those buttons/labels flat against
-       the background image behind them. */
-    .leaderboard-header-group {
+    /* Applied per-element rather than on the .leaderboard-header-group
+       wrapper as a whole: a CSS filter on a parent renders its entire
+       subtree as one flattened layer before the shadow is applied, so a
+       child can't opt itself out of it. Targeting each piece individually
+       (everything except the search bar) is what lets the search bar get
+       its own different (inset) treatment below instead. */
+    .leaderboard-tabs,
+    .leaderboard-server-name,
+    .leaderboard-title,
+    .cheater-notice,
+    .rank-toggle-row {
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
-    }
-    .leaderboard-header-group .game-logo {
-      filter: none; /* avoid stacking two shadows on the same logo image */
     }
   </style>
   <!-- Cloudflare Web Analytics --><script type='module' src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "65e2f7685f054614a7a2adc1fae8132f"}'></script><!-- End Cloudflare Web Analytics -->
