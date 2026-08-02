@@ -948,6 +948,71 @@
       margin-top: 4px;
     }
 
+    /* Touring-only "allowed cars" list — hidden by default, shown only
+       when the active track's config has a carClassList (currently just
+       nurburgringtour). Same show/hide pattern as .rank-toggle-row above. */
+    #car-class-section {
+      display: none;
+    }
+    #car-class-section.visible {
+      display: block;
+    }
+    .car-class-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .car-class-card {
+      background: var(--surface-2);
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .car-class-image-wrap {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: var(--surface-3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .car-class-image-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    /* Shown instead of a photo whenever a car has no confirmed image URL
+       yet — a plain silhouette rather than a broken-image icon. */
+    .car-class-image-placeholder {
+      width: 42px;
+      height: 42px;
+      opacity: 0.25;
+    }
+    .car-class-info {
+      padding: 8px 10px;
+    }
+    .car-class-name {
+      color: #eee;
+      font-size: 12px;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+    .car-class-ratio {
+      display: inline-block;
+      margin-top: 5px;
+      background: var(--surface-3);
+      color: #999;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+
     .country-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
@@ -1253,6 +1318,12 @@
   <div id="leaderboard-status"></div>
   <div class="leaderboard-frame-border">
     <div id="leaderboard-frame" class="leaderboard-frame"></div>
+  </div>
+
+  <div class="section-box" id="car-class-section">
+    <h2 class="section-title">🏎️ Touring Class — Allowed Cars</h2>
+    <div class="section-subtitle">Cars eligible for this leaderboard</div>
+    <div class="car-class-grid" id="car-class-grid"></div>
   </div>
 
   <div class="section-box" id="crash-report-section">
@@ -2205,7 +2276,48 @@
         themeClass: "leaderboard-tab-tour",
         // No cheater-flagging system in place for this leaderboard yet,
         // so don't show the "Anomalies will be flagged" notice here.
-        hideAnomaliesNotice: true
+        hideAnomaliesNotice: true,
+        // Allowed cars for this Touring class. `ratio` is the raw
+        // power-to-weight figure as given (unit unconfirmed — shown as-is
+        // rather than guessing a label like "kg/hp"). `image` is left ""
+        // for every car except one: only a single example asset URL was
+        // provided (for what's assumed to be the Supra MKIV Standard,
+        // based on the filename) — the rest need real URLs from the
+        // fr.assettohosting.com:60785/assets/versions/ directory before
+        // they'll show real photos instead of the placeholder icon.
+        carClassList: [
+          { name: "BMW M3 E30 Sport Evo (Evolution III) - Standard", ratio: 9.36, image: "" },
+          { name: "Chevrolet Camaro ZL1 - 1LE", ratio: 12.50, image: "" },
+          { name: "Chevrolet Camaro ZL1 - Standard", ratio: 12.33, image: "" },
+          { name: "Dallara Stradale - Coupe", ratio: 18.99, image: "" },
+          { name: "Dallara Stradale - Spider", ratio: 18.99, image: "" },
+          { name: "Dallara Stradale - Track", ratio: 21.34, image: "" },
+          { name: "Ferrari F40 LM - Standard", ratio: 20.19, image: "" },
+          { name: "Ford Escort RS Cosworth - Standard", ratio: 8.35, image: "" },
+          { name: "Honda NSX-R 92R - Standard", ratio: 10.79, image: "" },
+          { name: "Honda S2000 AP1 - Standard", ratio: 9.89, image: "" },
+          { name: "Hyundai i30 N Hatchback - Performance", ratio: 9.37, image: "" },
+          { name: "Hyundai i30 N Hatchback - Performance N Limited", ratio: 9.57, image: "" },
+          { name: "Lancia Delta HF integrale Evoluzione II - Evo 3 \"Violet\"", ratio: 9.13, image: "" },
+          { name: "Lancia Delta HF integrale Evoluzione II - Standard", ratio: 9.05, image: "" },
+          { name: "Lotus Emira - Sports", ratio: 13.28, image: "" },
+          { name: "Lotus Emira - Touring", ratio: 13.15, image: "" },
+          { name: "Mazda MX-5 NA - RS Limited", ratio: 9.31, image: "" },
+          { name: "Mazda MX-5 NA - Standard", ratio: 9.06, image: "" },
+          { name: "Mazda MX-5 ND Cup - Global Cup ND1", ratio: 10.86, image: "" },
+          { name: "Mazda MX-5 ND Cup - Global Cup ND2", ratio: 11.15, image: "" },
+          { name: "Mercedes-Benz 190E 2.5-16 Evo II - Standard", ratio: 9.79, image: "" },
+          { name: "Porsche 911 Turbo 3.6 (964) - Standard", ratio: 12.27, image: "" },
+          { name: "Porsche 911 Turbo 3.6 (964) - X88", ratio: 12.41, image: "" },
+          { name: "Renault 5 GT Turbo - Standard", ratio: 8.49, image: "" },
+          { name: "Toyota GR86 - Hakone Edition", ratio: 8.89, image: "" },
+          { name: "Toyota GR86 - Standard", ratio: 8.85, image: "" },
+          { name: "Toyota GR86 - Trueno Edition", ratio: 8.89, image: "" },
+          { name: "Toyota Supra MKIV - Drift", ratio: 13.03, image: "" },
+          // Guessed match for the one example URL given — unconfirmed,
+          // verify this is really the Standard trim's image.
+          { name: "Toyota Supra MKIV - Standard", ratio: 10.08, image: "https://fr.assettohosting.com:60785/assets/versions/preset_supramkiv_mech_2.png" }
+        ]
       },
       kyalami: {
         workerPrefix: "/server2",
@@ -2827,6 +2939,42 @@
       tooltipEl.textContent = CHEATER_TOOLTIP_BASE;
     }
 
+    // Renders (or hides) the "Allowed Cars" grid for tracks that define a
+    // carClassList in their LEADERBOARDS config — currently just the
+    // Nürburgring Touring leaderboard. Cars without a confirmed `image`
+    // URL get a plain silhouette placeholder instead of a broken-image icon.
+    const CAR_SILHOUETTE_SVG = `<svg class="car-class-image-placeholder" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13h18v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>`;
+
+    function renderCarClassSection(track) {
+      const sectionEl = document.getElementById("car-class-section");
+      const gridEl = document.getElementById("car-class-grid");
+      if (!sectionEl || !gridEl) return;
+
+      const config = LEADERBOARDS[track];
+      const cars = config && config.carClassList;
+
+      if (!cars || !cars.length) {
+        sectionEl.classList.remove("visible");
+        gridEl.innerHTML = "";
+        return;
+      }
+
+      sectionEl.classList.add("visible");
+      gridEl.innerHTML = cars.map(car => `
+        <div class="car-class-card">
+          <div class="car-class-image-wrap">
+            ${car.image
+              ? `<img src="${car.image}" alt="${car.name}" loading="lazy" onerror="this.closest('.car-class-image-wrap').innerHTML = ${JSON.stringify(CAR_SILHOUETTE_SVG)};">`
+              : CAR_SILHOUETTE_SVG}
+          </div>
+          <div class="car-class-info">
+            <div class="car-class-name">${car.name}</div>
+            <span class="car-class-ratio">${car.ratio.toFixed(2)}</span>
+          </div>
+        </div>
+      `).join("");
+    }
+
     function switchToTrack(track) {
       if (!LEADERBOARDS[track]) return;
       document.querySelectorAll(".leaderboard-tab").forEach(t => {
@@ -2843,6 +2991,7 @@
       const cheaterNoticeEl = document.getElementById("cheater-notice");
       if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[track] && !LEADERBOARDS[track].hideAnomaliesNotice));
       updateCheaterTooltipText(track);
+      renderCarClassSection(track);
 
       // Reset to the default rank mode whenever the active track changes —
       // "which metric ranks this board" shouldn't carry over from a
@@ -2901,6 +3050,7 @@
       const cheaterNoticeEl = document.getElementById("cheater-notice");
       if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[activeTrack] && !LEADERBOARDS[activeTrack].hideAnomaliesNotice));
       updateCheaterTooltipText(activeTrack);
+      renderCarClassSection(activeTrack);
     }
     {
       const rankToggleRowEl = document.getElementById("rank-toggle-row");
