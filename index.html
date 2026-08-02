@@ -1061,14 +1061,12 @@
       border-color: #17b3b3;
       color: #eee;
     }
-    /* List instead of a grid — each row: image, then name, then ratio.
-       Scrollbar styled the same as .leaderboard-frame's, but with the
-       turquoise hover accent to match this panel's own theme. */
+    /* Real <table> now, same proven pattern as .leaderboard-frame's table
+       (see the global "th, td { padding, border-bottom, ... }" rule) —
+       simpler and battle-tested, instead of custom flex cards. Scrollbar
+       styled the same as .leaderboard-frame's, but with the turquoise
+       hover accent to match this panel's own theme. */
     .car-class-grid {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      padding: 12px 16px;
       overflow-y: auto;
       flex: 1 1 auto;
       min-height: 0;
@@ -1089,26 +1087,28 @@
     .car-class-grid::-webkit-scrollbar-thumb:hover {
       background-color: #17b3b3;
     }
-    .car-class-card {
-      background: var(--surface-2);
-      border: 1px solid transparent;
-      border-radius: 8px;
-      overflow: hidden;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 6px;
-      transition: border-color 0.15s ease;
-      user-select: none;
+    .car-class-table {
+      width: 100%;
+      border-collapse: collapse;
     }
-    .car-class-card:hover {
-      border-color: #17b3b3;
+    .car-class-table td {
+      padding: 8px 16px;
+      border-bottom: 1px solid #333;
+      vertical-align: middle;
+    }
+    .car-class-table tr:last-child td {
+      border-bottom: none;
+    }
+    .car-class-table tr:hover td {
+      background: var(--surface-2);
+    }
+    .car-class-image-cell {
+      width: 140px;
     }
     .car-class-image-wrap {
       position: relative;
       width: 140px;
       aspect-ratio: 16 / 9;
-      flex-shrink: 0;
       background: var(--surface-3);
       border-radius: 5px;
       display: flex;
@@ -1129,30 +1129,18 @@
       height: 32px;
       opacity: 0.25;
     }
-    .car-class-info {
-      flex: 1 1 auto;
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-    }
     .car-class-name {
-      color: #fff;
-      font-size: 14px;
+      color: #eee;
+      font-size: 13px;
       font-weight: 700;
-      line-height: 1.3;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
     }
-    .car-class-ratio {
-      align-self: flex-start;
-      background: var(--surface-3);
+    .car-class-ratio-cell {
+      width: 70px;
+      text-align: right;
       color: #999;
-      font-size: 10px;
+      font-size: 13px;
       font-weight: 700;
-      letter-spacing: 0.02em;
-      padding: 3px 8px;
-      border-radius: 4px;
+      white-space: nowrap;
     }
 
     .country-grid {
@@ -3141,19 +3129,20 @@
 
       dropdownEl.classList.add("visible");
       if (subtitleEl) subtitleEl.textContent = `Manual H Shifter · ${cars.length} cars`;
-      gridEl.innerHTML = cars.map(car => `
-        <div class="car-class-card">
-          <div class="car-class-image-wrap">
-            ${car.image
-              ? `<img src="${car.image}" alt="${car.name}" loading="lazy" onerror="handleCarImageError(this)">`
-              : CAR_SILHOUETTE_SVG}
-          </div>
-          <div class="car-class-info">
-            <div class="car-class-name">${car.name}</div>
-            <span class="car-class-ratio">${car.ratio.toFixed(2)}</span>
-          </div>
-        </div>
+      const rowsHtml = cars.map(car => `
+        <tr>
+          <td class="car-class-image-cell">
+            <div class="car-class-image-wrap">
+              ${car.image
+                ? `<img src="${car.image}" alt="${car.name}" loading="lazy" onerror="handleCarImageError(this)">`
+                : CAR_SILHOUETTE_SVG}
+            </div>
+          </td>
+          <td class="car-class-name">${car.name}</td>
+          <td class="car-class-ratio-cell">${car.ratio.toFixed(2)}</td>
+        </tr>
       `).join("");
+      gridEl.innerHTML = `<table class="car-class-table"><tbody>${rowsHtml}</tbody></table>`;
     }
 
     // Click-toggle for the dropdown itself, same pattern as the
