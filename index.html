@@ -1009,13 +1009,16 @@
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
       opacity: 0;
       visibility: hidden;
-      transform: translateY(-4px);
-      transition: opacity 0.15s ease, transform 0.15s ease;
+      /* No transform here on purpose (unlike other tooltips/dropdowns in
+         this file) — transform + opacity together promotes this panel to
+         its own GPU-composited layer, which on some GPU/driver combos
+         degrades text rendering (loses subpixel AA) for everything inside
+         it, especially small bold white text. Opacity-only avoids that. */
+      transition: opacity 0.15s ease;
     }
     .car-class-dropdown.open .car-class-dropdown-panel {
       opacity: 1;
       visibility: visible;
-      transform: translateY(0);
     }
     .car-class-panel-header {
       display: flex;
@@ -1138,6 +1141,8 @@
       font-size: 14px;
       font-weight: 700;
       line-height: 1.3;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
     }
     .car-class-ratio {
       align-self: flex-start;
