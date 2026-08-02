@@ -528,7 +528,7 @@
       width: 210px;
       max-width: 80vw;
       background: var(--surface-1);
-      border: 1px solid var(--border-subtle);
+      border: 1px solid #ff2727;
       border-radius: 8px;
       padding: 10px 12px;
       opacity: 0;
@@ -3195,11 +3195,10 @@
       const gridEl = document.getElementById("car-class-grid");
       if (!gridEl) return;
 
-      // Lower power-to-weight ratio = more power relative to weight =
-      // the "better" car, so ascending ratio is the default order (best
-      // car at the top); the invert button flips this to worst-first.
+      // Default: highest ratio first (descending); the invert button
+      // flips to lowest-first (ascending).
       const sorted = cars.slice().sort((a, b) =>
-        carClassSortReversed ? b.ratio - a.ratio : a.ratio - b.ratio
+        carClassSortReversed ? a.ratio - b.ratio : b.ratio - a.ratio
       );
 
       const rowsHtml = sorted.map(car => `
