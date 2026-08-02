@@ -572,6 +572,7 @@
       align-items: center;
       gap: 8px;
       flex-wrap: wrap;
+      position: relative;
     }
     #leaderboard-server-name-text {
       color: #3ba55d;
@@ -953,10 +954,12 @@
        track's config has a carClassList (currently just nurburgringtour).
        Whole dropdown hidden/shown the same way as .rank-toggle-row above;
        the panel itself opens/closes via .open, same click-toggle pattern
-       as .cheater-notice-tooltip. */
+       as .cheater-notice-tooltip. The panel is positioned relative to
+       .leaderboard-server-name (not .car-class-dropdown itself, which sits
+       far to the right) so it can anchor to the row's LEFT edge instead
+       of opening under the button and overlapping the search box. */
     .car-class-dropdown {
       display: none;
-      position: relative;
       margin-left: auto;
     }
     .car-class-dropdown.visible {
@@ -991,16 +994,17 @@
     }
     .car-class-dropdown-panel {
       position: absolute;
-      top: calc(100% + 8px);
-      right: 0;
+      top: calc(100% + 10px);
+      left: 0;
       z-index: 10;
-      width: min(520px, 80vw);
-      max-height: 360px;
-      overflow-y: auto;
+      width: min(760px, 92vw);
+      max-height: 420px;
+      display: flex;
+      flex-direction: column;
       background: var(--surface-1);
       border: 1px solid var(--border-subtle);
-      border-radius: 10px;
-      padding: 12px;
+      border-radius: 12px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
       opacity: 0;
       visibility: hidden;
       transform: translateY(-4px);
@@ -1011,17 +1015,64 @@
       visibility: visible;
       transform: translateY(0);
     }
+    .car-class-panel-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 16px 12px;
+      border-bottom: 1px solid var(--border-subtle);
+      flex-shrink: 0;
+    }
+    .car-class-panel-title {
+      color: #eee;
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .car-class-panel-subtitle {
+      color: #999;
+      font-size: 11px;
+      margin-top: 3px;
+    }
+    .car-class-panel-close {
+      background: var(--surface-2);
+      border: 1px solid #333;
+      color: #999;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .car-class-panel-close:hover {
+      border-color: #ff2727;
+      color: #eee;
+    }
     .car-class-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
-      gap: 8px;
+      grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+      gap: 10px;
+      padding: 14px 16px;
+      overflow-y: auto;
+      flex: 1 1 auto;
+      min-height: 0;
     }
     .car-class-card {
       background: var(--surface-2);
-      border-radius: 6px;
+      border: 1px solid transparent;
+      border-radius: 8px;
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      transition: border-color 0.15s ease, transform 0.15s ease;
+    }
+    .car-class-card:hover {
+      border-color: #ff2727;
+      transform: translateY(-2px);
     }
     .car-class-image-wrap {
       position: relative;
@@ -1041,28 +1092,28 @@
     /* Shown instead of a photo whenever a car has no confirmed image URL
        yet — a plain silhouette rather than a broken-image icon. */
     .car-class-image-placeholder {
-      width: 28px;
-      height: 28px;
+      width: 30px;
+      height: 30px;
       opacity: 0.25;
     }
     .car-class-info {
-      padding: 6px 7px;
+      padding: 8px 9px;
     }
     .car-class-name {
       color: #eee;
-      font-size: 10px;
+      font-size: 11px;
       font-weight: 600;
-      line-height: 1.25;
+      line-height: 1.3;
     }
     .car-class-ratio {
       display: inline-block;
-      margin-top: 4px;
+      margin-top: 5px;
       background: var(--surface-3);
       color: #999;
       font-size: 9px;
       font-weight: 700;
       letter-spacing: 0.02em;
-      padding: 1px 6px;
+      padding: 2px 6px;
       border-radius: 4px;
     }
 
@@ -1335,6 +1386,13 @@
           <span class="car-class-dropdown-arrow">▾</span>
         </button>
         <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
+          <div class="car-class-panel-header">
+            <div>
+              <div class="car-class-panel-title">Touring Class — Allowed Cars</div>
+              <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Cars eligible for this leaderboard</div>
+            </div>
+            <button type="button" class="car-class-panel-close" id="car-class-panel-close" aria-label="Close">✕</button>
+          </div>
           <div class="car-class-grid" id="car-class-grid"></div>
         </div>
       </div>
@@ -3026,6 +3084,7 @@
     function renderCarClassSection(track) {
       const dropdownEl = document.getElementById("car-class-dropdown");
       const gridEl = document.getElementById("car-class-grid");
+      const subtitleEl = document.getElementById("car-class-panel-subtitle");
       if (!dropdownEl || !gridEl) return;
 
       // Always start closed when (re)rendering — most relevantly when
@@ -3043,6 +3102,7 @@
       }
 
       dropdownEl.classList.add("visible");
+      if (subtitleEl) subtitleEl.textContent = `${cars.length} cars eligible for this leaderboard`;
       gridEl.innerHTML = cars.map(car => `
         <div class="car-class-card">
           <div class="car-class-image-wrap">
@@ -3063,6 +3123,7 @@
     // anywhere outside to close.
     const carClassDropdownEl = document.getElementById("car-class-dropdown");
     const carClassDropdownBtnEl = document.getElementById("car-class-dropdown-btn");
+    const carClassPanelCloseEl = document.getElementById("car-class-panel-close");
     if (carClassDropdownEl && carClassDropdownBtnEl) {
       carClassDropdownBtnEl.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -3071,6 +3132,16 @@
       document.addEventListener("click", () => {
         carClassDropdownEl.classList.remove("open");
       });
+    }
+    if (carClassPanelCloseEl && carClassDropdownEl) {
+      carClassPanelCloseEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        carClassDropdownEl.classList.remove("open");
+      });
+    }
+    const carClassDropdownPanelEl = document.getElementById("car-class-dropdown-panel");
+    if (carClassDropdownPanelEl) {
+      carClassDropdownPanelEl.addEventListener("click", (e) => e.stopPropagation());
     }
 
     function switchToTrack(track) {
