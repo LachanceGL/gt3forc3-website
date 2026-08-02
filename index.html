@@ -949,18 +949,17 @@
       margin-top: 4px;
     }
 
-    /* Touring-only "allowed cars" dropdown — the trigger button lives
-       inline in .leaderboard-server-name, only shown when the active
-       track's config has a carClassList (currently just nurburgringtour).
-       Whole dropdown hidden/shown the same way as .rank-toggle-row above;
-       the panel itself opens/closes via .open, same click-toggle pattern
-       as .cheater-notice-tooltip. The panel is positioned relative to
-       .leaderboard-server-name (not .car-class-dropdown itself, which sits
-       far to the right) so it can anchor to the row's LEFT edge instead
-       of opening under the button and overlapping the search box. */
+    /* Touring-only "allowed cars" dropdown — now its own standalone,
+       left-aligned row directly under .leaderboard-server-name (not
+       nested inside it anymore, and not pinned to the right) — only
+       shown when the active track's config has a carClassList (currently
+       just nurburgringtour). Whole dropdown hidden/shown the same way as
+       .rank-toggle-row above; the panel itself opens/closes via .open,
+       same click-toggle pattern as .cheater-notice-tooltip. */
     .car-class-dropdown {
       display: none;
-      margin-left: auto;
+      position: relative;
+      margin-bottom: 12px;
     }
     .car-class-dropdown.visible {
       display: block;
@@ -994,7 +993,7 @@
     }
     .car-class-dropdown-panel {
       position: absolute;
-      top: calc(100% + 10px);
+      top: calc(100% + 8px);
       left: 0;
       z-index: 10;
       width: min(420px, 90vw);
@@ -1380,21 +1379,21 @@
       <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
       <span class="live-player-count" id="live-player-count"></span>
       <span id="leaderboard-server-name-text"></span>
-      <div class="car-class-dropdown" id="car-class-dropdown">
-        <button type="button" class="car-class-dropdown-btn" id="car-class-dropdown-btn">
-          Allowed Cars
-          <span class="car-class-dropdown-arrow">▾</span>
-        </button>
-        <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
-          <div class="car-class-panel-header">
-            <div>
-              <div class="car-class-panel-title">Touring Class — Allowed Cars</div>
-              <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Cars eligible for this leaderboard</div>
-            </div>
-            <button type="button" class="car-class-panel-close" id="car-class-panel-close" aria-label="Close">✕</button>
+    </div>
+    <div class="car-class-dropdown" id="car-class-dropdown">
+      <button type="button" class="car-class-dropdown-btn" id="car-class-dropdown-btn">
+        Allowed Cars
+        <span class="car-class-dropdown-arrow">▾</span>
+      </button>
+      <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
+        <div class="car-class-panel-header">
+          <div>
+            <div class="car-class-panel-title">Touring Class — Allowed Cars</div>
+            <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Cars eligible for this leaderboard</div>
           </div>
-          <div class="car-class-grid" id="car-class-grid"></div>
+          <button type="button" class="car-class-panel-close" id="car-class-panel-close" aria-label="Close">✕</button>
         </div>
+        <div class="car-class-grid" id="car-class-grid"></div>
       </div>
     </div>
     <div class="leaderboard-toolbar">
