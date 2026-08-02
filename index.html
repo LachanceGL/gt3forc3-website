@@ -2469,7 +2469,7 @@
       // a Hot Lap board. Reflect that in the title so it's clear which
       // metric is being shown, instead of always saying "Race".
       const label = (config.isRace && raceRankMode === "best_lap")
-        ? `${config.title || "Race"} - Hot Lap`
+        ? `${config.title || "Race"} - Best Lap`
         : (config.title || "Hot Lap");
       titleEl.innerHTML = `${label} Top ${entryCount}<span class="leaderboard-track-badge">${badgeText}</span>`;
     }
