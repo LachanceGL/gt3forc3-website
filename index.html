@@ -421,7 +421,7 @@
       box-sizing: border-box;
       margin-left: auto;
       background: var(--surface-2);
-      border: none;
+      border: 1px solid #111;
       color: #eee;
       padding: 8px 12px;
       border-radius: 6px;
@@ -804,11 +804,11 @@
     .leaderboard-tab-type {
       display: block;
       font-size: 10px;
-      font-weight: 600;
+      font-weight: 700;
       font-style: normal;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      opacity: 0.6;
+      opacity: 0.85;
       margin-top: 2px;
     }
     .leaderboard-tab:hover {
@@ -956,9 +956,22 @@
        just nurburgringtour). Whole dropdown hidden/shown the same way as
        .rank-toggle-row above; the panel itself opens/closes via .open,
        same click-toggle pattern as .cheater-notice-tooltip. */
+    /* Full-screen dark backdrop shown behind the Road Cars List panel,
+       same idea as .verify-modal-overlay (Get Verified's popup). */
+    .car-class-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.85);
+      z-index: 9;
+    }
+    .car-class-backdrop.visible {
+      display: block;
+    }
     .car-class-dropdown {
       display: none;
       position: relative;
+      z-index: 11;
       margin-bottom: 12px;
     }
     .car-class-dropdown.visible {
@@ -1040,6 +1053,33 @@
       color: #999;
       font-size: 11px;
       margin-top: 3px;
+    }
+    .car-class-panel-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+    .car-class-sort-btn {
+      background: var(--surface-2);
+      border: 1px solid #333;
+      color: #999;
+      width: 22px;
+      height: 22px;
+      border-radius: 6px;
+      font-size: 13px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      font-family: inherit;
+    }
+    .car-class-sort-btn:hover,
+    .car-class-sort-btn.active {
+      border-color: #17b3b3;
+      color: #eee;
     }
     .car-class-panel-close {
       background: var(--surface-2);
@@ -1382,7 +1422,7 @@
         <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
       <a class="leaderboard-tab" href="#spa" data-track="spa">
-        Spa Francorchamps
+        Spa
         <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
       <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
@@ -1407,6 +1447,7 @@
       <span class="live-player-count" id="live-player-count"></span>
       <span id="leaderboard-server-name-text"></span>
     </div>
+    <div class="car-class-backdrop" id="car-class-backdrop"></div>
     <div class="car-class-dropdown" id="car-class-dropdown">
       <button type="button" class="car-class-dropdown-btn" id="car-class-dropdown-btn">
         Road Cars List
@@ -1418,7 +1459,10 @@
             <div class="car-class-panel-title">Road Cars List</div>
             <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Manual H Shifter</div>
           </div>
-          <button type="button" class="car-class-panel-close" id="car-class-panel-close" aria-label="Close">✕</button>
+          <div class="car-class-panel-header-actions">
+            <button type="button" class="car-class-sort-btn" id="car-class-sort-btn" title="Reverse ranking order">⇅</button>
+            <button type="button" class="car-class-panel-close" id="car-class-panel-close" aria-label="Close">✕</button>
+          </div>
         </div>
         <div class="car-class-grid" id="car-class-grid"></div>
       </div>
@@ -2773,6 +2817,10 @@
     // Race Time, etc.) is displayed reversed. Resets to off on track
     // change, same as the other toggles.
     let sortReversed = false;
+    // Independent from sortReversed above (which is the leaderboard rows'
+    // own sort state) — kept separate so toggling one never affects the
+    // other, even though they share a similar ⇅ button pattern.
+    let carClassSortReversed = false;
 
     // The "Race Time only shows Completed Races" note only applies while
     // ranking by Race Time — Best Lap mode has no such restriction.
@@ -3117,6 +3165,14 @@
       // switching tracks, so the panel doesn't stay open showing another
       // track's cars (or an empty grid on a track with none).
       dropdownEl.classList.remove("open");
+      const backdropEl = document.getElementById("car-class-backdrop");
+      if (backdropEl) backdropEl.classList.remove("visible");
+
+      // Reset to the default order (best car first) whenever the active
+      // track changes, same as the leaderboard's own sort-direction reset.
+      carClassSortReversed = false;
+      const sortBtnEl = document.getElementById("car-class-sort-btn");
+      if (sortBtnEl) sortBtnEl.classList.remove("active");
 
       const config = LEADERBOARDS[track];
       const cars = config && config.carClassList;
@@ -3129,7 +3185,24 @@
 
       dropdownEl.classList.add("visible");
       if (subtitleEl) subtitleEl.textContent = `Manual H Shifter · ${cars.length} cars`;
-      const rowsHtml = cars.map(car => `
+      renderCarClassRows(cars);
+    }
+
+    // Split out from renderCarClassSection so the sort-invert button can
+    // re-render just the rows without resetting/re-checking the whole
+    // dropdown's visibility state.
+    function renderCarClassRows(cars) {
+      const gridEl = document.getElementById("car-class-grid");
+      if (!gridEl) return;
+
+      // Lower power-to-weight ratio = more power relative to weight =
+      // the "better" car, so ascending ratio is the default order (best
+      // car at the top); the invert button flips this to worst-first.
+      const sorted = cars.slice().sort((a, b) =>
+        carClassSortReversed ? b.ratio - a.ratio : a.ratio - b.ratio
+      );
+
+      const rowsHtml = sorted.map(car => `
         <tr>
           <td class="car-class-image-cell">
             <div class="car-class-image-wrap">
@@ -3147,28 +3220,50 @@
 
     // Click-toggle for the dropdown itself, same pattern as the
     // cheater-notice tooltip: click the button to open/close, click
-    // anywhere outside to close.
+    // anywhere outside to close. The backdrop's own visibility is kept in
+    // sync with .open on every toggle path (button, close button, outside
+    // click, backdrop click itself).
     const carClassDropdownEl = document.getElementById("car-class-dropdown");
     const carClassDropdownBtnEl = document.getElementById("car-class-dropdown-btn");
     const carClassPanelCloseEl = document.getElementById("car-class-panel-close");
+    const carClassBackdropEl = document.getElementById("car-class-backdrop");
     if (carClassDropdownEl && carClassDropdownBtnEl) {
       carClassDropdownBtnEl.addEventListener("click", (e) => {
         e.stopPropagation();
         carClassDropdownEl.classList.toggle("open");
+        if (carClassBackdropEl) carClassBackdropEl.classList.toggle("visible", carClassDropdownEl.classList.contains("open"));
       });
       document.addEventListener("click", () => {
         carClassDropdownEl.classList.remove("open");
+        if (carClassBackdropEl) carClassBackdropEl.classList.remove("visible");
       });
     }
     if (carClassPanelCloseEl && carClassDropdownEl) {
       carClassPanelCloseEl.addEventListener("click", (e) => {
         e.stopPropagation();
         carClassDropdownEl.classList.remove("open");
+        if (carClassBackdropEl) carClassBackdropEl.classList.remove("visible");
+      });
+    }
+    if (carClassBackdropEl && carClassDropdownEl) {
+      carClassBackdropEl.addEventListener("click", () => {
+        carClassDropdownEl.classList.remove("open");
+        carClassBackdropEl.classList.remove("visible");
       });
     }
     const carClassDropdownPanelEl = document.getElementById("car-class-dropdown-panel");
     if (carClassDropdownPanelEl) {
       carClassDropdownPanelEl.addEventListener("click", (e) => e.stopPropagation());
+    }
+    const carClassSortBtnEl = document.getElementById("car-class-sort-btn");
+    if (carClassSortBtnEl) {
+      carClassSortBtnEl.addEventListener("click", (e) => {
+        e.stopPropagation();
+        carClassSortReversed = !carClassSortReversed;
+        carClassSortBtnEl.classList.toggle("active", carClassSortReversed);
+        const config = LEADERBOARDS[activeTrack];
+        if (config && config.carClassList) renderCarClassRows(config.carClassList);
+      });
     }
 
     function switchToTrack(track) {
