@@ -2418,12 +2418,12 @@
 
     // Shared across every GT3 leaderboard below (Nordschleife, Spa, Laguna
     // Seca, Red Bull Ring) — one class of cars, same list on all four.
-    // `ratio` is the raw power-to-weight figure as given. The Porsche 911
-    // GT3 Cup (992) trio all share the exact same ratio (17.28), so their
-    // relative order (which image is which) couldn't be derived the way
-    // the others were — same for which of the two GT3 RS (992) files is
-    // Clubsport vs Weissach. Weissach's ratio itself is also missing
-    // (never given) — shows as "—" until provided; flagged for the user.
+    // `ratio` is the raw power-to-weight figure as given. Two pairs/trios
+    // below share an identical ratio with no way to derive which image
+    // file is which trim (unlike every other pair, where ascending ratio
+    // order matched the file numbering): the Porsche 911 GT3 Cup (992)
+    // trio (all 17.28), and the GT3 RS (992) pair (Clubsport/Weissach,
+    // both 16.64) — both flagged inline below with an unconfirmed guess.
     const GT3_CAR_CLASS_LIST = [
       { name: "Audi R8 LMS GT3 Evo II - GT3", ratio: 20.55, image: "https://ca.assettohosting.com:10647/assets/versions/preset_r8gt3_mech_1.png" },
       { name: "BMW M4 GT3 Evo - GT3", ratio: 21.13, image: "https://ca.assettohosting.com:10647/assets/versions/preset_m4gt3_mech_1.png" },
@@ -2437,9 +2437,11 @@
       { name: "Porsche 911 GT3 Cup (992) - No ABS No TC", ratio: 17.28, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992c_mech_3.png" },
       { name: "Porsche 911 GT3 R Rennsport (992) - GT3", ratio: 19.76, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992ren_mech_1.png" },
       { name: "Porsche 911 GT3 R Rennsport (992) - Unrestricted", ratio: 20.29, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992ren_mech_2.png" },
+      // Order between these two is also an unconfirmed guess — both
+      // confirmed at ratio 16.64 (same value), so again no numeric way
+      // to tell which file is which trim.
       { name: "Porsche 911 GT3 RS (992) - Clubsport", ratio: 16.64, image: "https://ca.assettohosting.com:10647/assets/versions/preset_gt3rs_mech_1.png" },
-      // Ratio was never given for this one — displays as "—" until known.
-      { name: "Porsche 911 GT3 RS (992) - Weissach", ratio: null, image: "https://ca.assettohosting.com:10647/assets/versions/preset_gt3rs_mech_2.png" }
+      { name: "Porsche 911 GT3 RS (992) - Weissach", ratio: 16.64, image: "https://ca.assettohosting.com:10647/assets/versions/preset_gt3rs_mech_2.png" }
     ];
 
     const LEADERBOARDS = {
