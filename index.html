@@ -2955,6 +2955,18 @@
     // URL get a plain silhouette placeholder instead of a broken-image icon.
     const CAR_SILHOUETTE_SVG = `<svg class="car-class-image-placeholder" viewBox="0 0 24 24" fill="none" stroke="#999" stroke-width="1.5" xmlns="http://www.w3.org/2000/svg"><path d="M3 13l1.5-4.5A2 2 0 0 1 6.4 7h11.2a2 2 0 0 1 1.9 1.5L21 13" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 13h18v4a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1H6v1a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1v-4z" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="17.5" r="1.5"/><circle cx="16.5" cy="17.5" r="1.5"/></svg>`;
 
+    // Called from the <img>'s onerror. Kept as a named global function
+    // (rather than inlining CAR_SILHOUETTE_SVG via JSON.stringify directly
+    // in the onerror="..." attribute) because that inline approach broke
+    // the attribute's own double-quoting — CAR_SILHOUETTE_SVG contains
+    // double quotes itself, so JSON.stringify's output terminated the
+    // onerror="..." attribute early and leaked stray characters (like a
+    // stray ";") as visible text next to the image.
+    function handleCarImageError(imgEl) {
+      const wrap = imgEl.closest(".car-class-image-wrap");
+      if (wrap) wrap.innerHTML = CAR_SILHOUETTE_SVG;
+    }
+
     function renderCarClassSection(track) {
       const sectionEl = document.getElementById("car-class-section");
       const gridEl = document.getElementById("car-class-grid");
@@ -2974,7 +2986,7 @@
         <div class="car-class-card">
           <div class="car-class-image-wrap">
             ${car.image
-              ? `<img src="${car.image}" alt="${car.name}" loading="lazy" onerror="this.closest('.car-class-image-wrap').innerHTML = ${JSON.stringify(CAR_SILHOUETTE_SVG)};">`
+              ? `<img src="${car.image}" alt="${car.name}" loading="lazy" onerror="handleCarImageError(this)">`
               : CAR_SILHOUETTE_SVG}
           </div>
           <div class="car-class-info">
