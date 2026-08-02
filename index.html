@@ -1239,8 +1239,8 @@
     <div class="rank-toggle-row" id="rank-toggle-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Ranked by</span>
-      <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">Race Time</button>
-      <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">Best Lap</button>
+      <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
+      <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">BEST LAP</button>
       <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
     </div>
     <div class="rank-toggle-row" id="verified-filter-row">
@@ -2461,7 +2461,13 @@
       }
 
       const badgeText = config.updateNote || config.displayName || track;
-      const label = config.title || "Hot Lap";
+      // On Race-type leaderboards, Best Lap mode isn't really ranking by
+      // race result anymore — it's ranking by single fastest lap, same as
+      // a Hot Lap board. Reflect that in the title so it's clear which
+      // metric is being shown, instead of always saying "Race".
+      const label = (config.isRace && raceRankMode === "best_lap")
+        ? `${config.title || "Race"} - Hot Lap`
+        : (config.title || "Hot Lap");
       titleEl.innerHTML = `${label} Top ${entryCount}<span class="leaderboard-track-badge">${badgeText}</span>`;
     }
 
@@ -3017,6 +3023,7 @@
         const rawRows = leaderboardCache[activeTrack];
         if (rawRows) {
           currentLeaderboardEntries = computeFilteredEntries(rawRows);
+          updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
           applyLeaderboardSearch();
         }
       });
