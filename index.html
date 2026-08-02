@@ -973,6 +973,13 @@
       position: relative;
       z-index: 11;
       margin-bottom: 12px;
+      /* Theme colors — overridden per-track via inline style from JS
+         (renderCarClassSection) so the same dropdown can be turquoise for
+         Nürburgring Touring or red for the GT3 tracks, without duplicating
+         all this CSS per theme. */
+      --car-class-accent: #17b3b3;
+      --car-class-accent-hover: #129090;
+      --car-class-accent-text: #111;
     }
     .car-class-dropdown.visible {
       display: block;
@@ -981,9 +988,9 @@
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      background: #17b3b3;
-      border: 1px solid #17b3b3;
-      color: #111;
+      background: var(--car-class-accent);
+      border: 1px solid var(--car-class-accent);
+      color: var(--car-class-accent-text);
       padding: 5px 10px;
       border-radius: 6px;
       font-size: 11px;
@@ -994,8 +1001,8 @@
       cursor: pointer;
     }
     .car-class-dropdown-btn:hover {
-      background: #129090;
-      border-color: #129090;
+      background: var(--car-class-accent-hover);
+      border-color: var(--car-class-accent-hover);
     }
     .car-class-dropdown-arrow {
       font-size: 9px;
@@ -1017,7 +1024,7 @@
       display: flex;
       flex-direction: column;
       background: var(--surface-1);
-      border: 2px solid #17b3b3;
+      border: 2px solid var(--car-class-accent);
       border-radius: 12px;
       box-shadow: 0 12px 32px rgba(0, 0, 0, 0.5);
       opacity: 0;
@@ -1078,7 +1085,7 @@
     }
     .car-class-sort-btn:hover,
     .car-class-sort-btn.active {
-      border-color: #17b3b3;
+      border-color: var(--car-class-accent);
       color: #eee;
     }
     .car-class-panel-close {
@@ -1098,14 +1105,14 @@
       padding: 0;
     }
     .car-class-panel-close:hover {
-      border-color: #17b3b3;
+      border-color: var(--car-class-accent);
       color: #eee;
     }
     /* Real <table> now, same proven pattern as .leaderboard-frame's table
        (see the global "th, td { padding, border-bottom, ... }" rule) —
        simpler and battle-tested, instead of custom flex cards. Scrollbar
-       styled the same as .leaderboard-frame's, but with the turquoise
-       hover accent to match this panel's own theme. */
+       styled the same as .leaderboard-frame's, but with this panel's own
+       accent color on hover. */
     .car-class-grid {
       overflow-y: auto;
       flex: 1 1 auto;
@@ -1125,7 +1132,7 @@
       border-radius: 8px;
     }
     .car-class-grid::-webkit-scrollbar-thumb:hover {
-      background-color: #17b3b3;
+      background-color: var(--car-class-accent);
     }
     .car-class-table {
       width: 100%;
@@ -1450,13 +1457,13 @@
     <div class="car-class-backdrop" id="car-class-backdrop"></div>
     <div class="car-class-dropdown" id="car-class-dropdown">
       <button type="button" class="car-class-dropdown-btn" id="car-class-dropdown-btn">
-        Road Cars List
+        <span id="car-class-dropdown-btn-label">Road Cars List</span>
         <span class="car-class-dropdown-arrow">▾</span>
       </button>
       <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
         <div class="car-class-panel-header">
           <div>
-            <div class="car-class-panel-title">Road Cars List</div>
+            <div class="car-class-panel-title" id="car-class-panel-title">Road Cars List</div>
             <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Manual H Shifter</div>
           </div>
           <div class="car-class-panel-header-actions">
@@ -2409,13 +2416,43 @@
       return fetchPromise;
     }
 
+    // Shared across every GT3 leaderboard below (Nordschleife, Spa, Laguna
+    // Seca, Red Bull Ring) — one class of cars, same list on all four.
+    // `ratio` is the raw power-to-weight figure as given. The Porsche 911
+    // GT3 Cup (992) trio all share the exact same ratio (17.28), so their
+    // relative order (which image is which) couldn't be derived the way
+    // the others were — same for which of the two GT3 RS (992) files is
+    // Clubsport vs Weissach. Weissach's ratio itself is also missing
+    // (never given) — shows as "—" until provided; flagged for the user.
+    const GT3_CAR_CLASS_LIST = [
+      { name: "Audi R8 LMS GT3 Evo II - GT3", ratio: 20.55, image: "https://ca.assettohosting.com:10647/assets/versions/preset_r8gt3_mech_1.png" },
+      { name: "BMW M4 GT3 Evo - GT3", ratio: 21.13, image: "https://ca.assettohosting.com:10647/assets/versions/preset_m4gt3_mech_1.png" },
+      { name: "Ferrari 296 GT3 - GT3", ratio: 22.28, image: "https://ca.assettohosting.com:10647/assets/versions/preset_296gt3_mech_1.png" },
+      { name: "Ford Mustang GT3 - GT3", ratio: 19.39, image: "https://ca.assettohosting.com:10647/assets/versions/preset_msggt3_mech_1.png" },
+      // Order among these three (which file is ABS / ABS TC / No ABS No
+      // TC) is an unconfirmed guess — all three share ratio 17.28, so
+      // there's no numeric way to derive it like the other tracks' pairs.
+      { name: "Porsche 911 GT3 Cup (992) - ABS", ratio: 17.28, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992c_mech_1.png" },
+      { name: "Porsche 911 GT3 Cup (992) - ABS TC", ratio: 17.28, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992c_mech_2.png" },
+      { name: "Porsche 911 GT3 Cup (992) - No ABS No TC", ratio: 17.28, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992c_mech_3.png" },
+      { name: "Porsche 911 GT3 R Rennsport (992) - GT3", ratio: 19.76, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992ren_mech_1.png" },
+      { name: "Porsche 911 GT3 R Rennsport (992) - Unrestricted", ratio: 20.29, image: "https://ca.assettohosting.com:10647/assets/versions/preset_992ren_mech_2.png" },
+      { name: "Porsche 911 GT3 RS (992) - Clubsport", ratio: 16.64, image: "https://ca.assettohosting.com:10647/assets/versions/preset_gt3rs_mech_1.png" },
+      // Ratio was never given for this one — displays as "—" until known.
+      { name: "Porsche 911 GT3 RS (992) - Weissach", ratio: null, image: "https://ca.assettohosting.com:10647/assets/versions/preset_gt3rs_mech_2.png" }
+    ];
+
     const LEADERBOARDS = {
       nordschleife: {
         workerPrefix: "/server1",
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
         title: "Hot Lap",
-        updateNote: "Ranks updated every session"
+        updateNote: "Ranks updated every session",
+        carClassList: GT3_CAR_CLASS_LIST,
+        carClassButtonLabel: "GT3 Cars List",
+        carClassSubtitle: "GT3 Class",
+        carClassTheme: "red"
       },
       redbullring: {
         workerPrefix: "/server3",
@@ -2433,7 +2470,11 @@
         // quicker. Rather than rank whatever distance each row happened
         // to run, only show rows from races that hit this exact lap
         // count, matching the server's standard 10-lap Race format.
-        requiredLaps: 10
+        requiredLaps: 10,
+        carClassList: GT3_CAR_CLASS_LIST,
+        carClassButtonLabel: "GT3 Cars List",
+        carClassSubtitle: "GT3 Class",
+        carClassTheme: "red"
       },
       // Was Nürburgring Touring — now repointed to server4's new Laguna
       // Seca leaderboard, using the Race template (Total Time column,
@@ -2446,7 +2487,11 @@
         updateNote: "Ranks updated every race",
         isRace: true,
         // Confirmed 10 laps, matching Red Bull Ring's format.
-        requiredLaps: 10
+        requiredLaps: 10,
+        carClassList: GT3_CAR_CLASS_LIST,
+        carClassButtonLabel: "GT3 Cars List",
+        carClassSubtitle: "GT3 Class",
+        carClassTheme: "red"
       },
       // Nürburgring Touring, now on server5 (fr.assettohosting.com:60785
       // / ASSETTO_API_KEY_5 in the Worker) — the old server4 slot this used
@@ -2461,6 +2506,9 @@
         // No cheater-flagging system in place for this leaderboard yet,
         // so don't show the "Anomalies will be flagged" notice here.
         hideAnomaliesNotice: true,
+        carClassButtonLabel: "Road Cars List",
+        carClassSubtitle: "Manual H Shifter",
+        carClassTheme: "turquoise",
         // Allowed cars for this Touring class. `ratio` is the raw
         // power-to-weight figure as given (unit unconfirmed — shown as-is
         // rather than guessing a label like "kg/hp"). `image` is only set
@@ -2533,7 +2581,11 @@
         shareKey: "c8393a9b-16f2-4e29-9ddb-7de2ab3ad5ae",
         displayName: "Spa Francorchamps",
         title: "Hot Lap",
-        updateNote: "Ranks updated every session"
+        updateNote: "Ranks updated every session",
+        carClassList: GT3_CAR_CLASS_LIST,
+        carClassButtonLabel: "GT3 Cars List",
+        carClassSubtitle: "GT3 Class",
+        carClassTheme: "red"
       }
     };
 
@@ -3159,6 +3211,8 @@
       const dropdownEl = document.getElementById("car-class-dropdown");
       const gridEl = document.getElementById("car-class-grid");
       const subtitleEl = document.getElementById("car-class-panel-subtitle");
+      const btnLabelEl = document.getElementById("car-class-dropdown-btn-label");
+      const panelTitleEl = document.getElementById("car-class-panel-title");
       if (!dropdownEl || !gridEl) return;
 
       // Always start closed when (re)rendering — most relevantly when
@@ -3183,8 +3237,26 @@
         return;
       }
 
+      // Theme (red for the GT3 tracks, turquoise for Nürburgring Touring)
+      // is applied via CSS custom properties set right on the dropdown,
+      // rather than separate CSS classes per theme — see the
+      // --car-class-accent* defaults declared on .car-class-dropdown.
+      if (config.carClassTheme === "red") {
+        dropdownEl.style.setProperty("--car-class-accent", "#ff2727");
+        dropdownEl.style.setProperty("--car-class-accent-hover", "#cc1f1f");
+        dropdownEl.style.setProperty("--car-class-accent-text", "#fff");
+      } else {
+        dropdownEl.style.setProperty("--car-class-accent", "#17b3b3");
+        dropdownEl.style.setProperty("--car-class-accent-hover", "#129090");
+        dropdownEl.style.setProperty("--car-class-accent-text", "#111");
+      }
+
+      const label = config.carClassButtonLabel || "Road Cars List";
+      if (btnLabelEl) btnLabelEl.textContent = label;
+      if (panelTitleEl) panelTitleEl.textContent = label;
+
       dropdownEl.classList.add("visible");
-      if (subtitleEl) subtitleEl.textContent = `Manual H Shifter · ${cars.length} cars`;
+      if (subtitleEl) subtitleEl.textContent = `${config.carClassSubtitle || ""} · ${cars.length} cars`;
       renderCarClassRows(cars);
     }
 
@@ -3196,10 +3268,15 @@
       if (!gridEl) return;
 
       // Default: highest ratio first (descending); the invert button
-      // flips to lowest-first (ascending).
-      const sorted = cars.slice().sort((a, b) =>
-        carClassSortReversed ? a.ratio - b.ratio : b.ratio - a.ratio
-      );
+      // flips to lowest-first (ascending). Cars with no ratio yet (e.g.
+      // Weissach, still missing) always sort to the bottom regardless of
+      // direction, rather than colliding with 0 at either extreme.
+      const sorted = cars.slice().sort((a, b) => {
+        if (a.ratio == null && b.ratio == null) return 0;
+        if (a.ratio == null) return 1;
+        if (b.ratio == null) return -1;
+        return carClassSortReversed ? a.ratio - b.ratio : b.ratio - a.ratio;
+      });
 
       const rowsHtml = sorted.map(car => `
         <tr>
@@ -3211,7 +3288,7 @@
             </div>
           </td>
           <td class="car-class-name">${car.name}</td>
-          <td class="car-class-ratio-cell">π ${car.ratio.toFixed(2)}</td>
+          <td class="car-class-ratio-cell">${car.ratio != null ? `π ${car.ratio.toFixed(2)}` : "π —"}</td>
         </tr>
       `).join("");
       gridEl.innerHTML = `<table class="car-class-table"><tbody>${rowsHtml}</tbody></table>`;
