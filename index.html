@@ -2202,7 +2202,10 @@
         displayName: "Nürburgring",
         title: "Touring",
         updateNote: "Ranks updated every session",
-        themeClass: "leaderboard-tab-tour"
+        themeClass: "leaderboard-tab-tour",
+        // No cheater-flagging system in place for this leaderboard yet,
+        // so don't show the "Anomalies will be flagged" notice here.
+        hideAnomaliesNotice: true
       },
       kyalami: {
         workerPrefix: "/server2",
@@ -2838,7 +2841,7 @@
       countElReset.classList.remove("no-drivers");
       liveBadgeEl.classList.remove("visible", "offline", "deactivated");
       const cheaterNoticeEl = document.getElementById("cheater-notice");
-      if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[track]));
+      if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[track] && !LEADERBOARDS[track].hideAnomaliesNotice));
       updateCheaterTooltipText(track);
 
       // Reset to the default rank mode whenever the active track changes —
@@ -2896,7 +2899,7 @@
     }
     {
       const cheaterNoticeEl = document.getElementById("cheater-notice");
-      if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[activeTrack]));
+      if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[activeTrack] && !LEADERBOARDS[activeTrack].hideAnomaliesNotice));
       updateCheaterTooltipText(activeTrack);
     }
     {
