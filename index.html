@@ -996,7 +996,10 @@
       top: calc(100% + 8px);
       left: 0;
       z-index: 10;
-      width: min(420px, 90vw);
+      /* Matches the site's own content width (body { max-width: 900px }
+         near the top of this stylesheet), so the popup lines up with the
+         rest of the page instead of an arbitrary size. */
+      width: min(900px, calc(100vw - 40px));
       max-height: 420px;
       display: flex;
       flex-direction: column;
@@ -1051,11 +1054,12 @@
       border-color: #ff2727;
       color: #eee;
     }
+    /* List instead of a grid — each row: image, then name, then ratio. */
     .car-class-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
-      gap: 8px;
-      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      padding: 12px 16px;
       overflow-y: auto;
       flex: 1 1 auto;
       min-height: 0;
@@ -1066,21 +1070,25 @@
       border-radius: 8px;
       overflow: hidden;
       display: flex;
-      flex-direction: column;
-      transition: border-color 0.15s ease, transform 0.15s ease;
+      align-items: center;
+      gap: 12px;
+      padding: 6px;
+      transition: border-color 0.15s ease;
     }
     .car-class-card:hover {
       border-color: #ff2727;
-      transform: translateY(-2px);
     }
     .car-class-image-wrap {
       position: relative;
-      width: 100%;
+      width: 96px;
       aspect-ratio: 16 / 9;
+      flex-shrink: 0;
       background: var(--surface-3);
+      border-radius: 5px;
       display: flex;
       align-items: center;
       justify-content: center;
+      overflow: hidden;
     }
     .car-class-image-wrap img {
       width: 100%;
@@ -1091,28 +1099,32 @@
     /* Shown instead of a photo whenever a car has no confirmed image URL
        yet — a plain silhouette rather than a broken-image icon. */
     .car-class-image-placeholder {
-      width: 30px;
-      height: 30px;
+      width: 26px;
+      height: 26px;
       opacity: 0.25;
     }
     .car-class-info {
-      padding: 8px 9px;
+      flex: 1 1 auto;
+      min-width: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
     }
     .car-class-name {
       color: #eee;
-      font-size: 11px;
+      font-size: 12px;
       font-weight: 600;
       line-height: 1.3;
     }
     .car-class-ratio {
-      display: inline-block;
-      margin-top: 5px;
+      flex-shrink: 0;
       background: var(--surface-3);
       color: #999;
-      font-size: 9px;
+      font-size: 10px;
       font-weight: 700;
       letter-spacing: 0.02em;
-      padding: 2px 6px;
+      padding: 3px 8px;
       border-radius: 4px;
     }
 
@@ -1388,8 +1400,8 @@
       <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
         <div class="car-class-panel-header">
           <div>
-            <div class="car-class-panel-title">Touring Class — Allowed Cars</div>
-            <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Cars eligible for this leaderboard</div>
+            <div class="car-class-panel-title">Road Cars List</div>
+            <div class="car-class-panel-subtitle" id="car-class-panel-subtitle">Manual H Shifter</div>
           </div>
           <button type="button" class="car-class-panel-close" id="car-class-panel-close" aria-label="Close">✕</button>
         </div>
@@ -3101,7 +3113,7 @@
       }
 
       dropdownEl.classList.add("visible");
-      if (subtitleEl) subtitleEl.textContent = `${cars.length} cars eligible for this leaderboard`;
+      if (subtitleEl) subtitleEl.textContent = `Manual H Shifter · ${cars.length} cars`;
       gridEl.innerHTML = cars.map(car => `
         <div class="car-class-card">
           <div class="car-class-image-wrap">
