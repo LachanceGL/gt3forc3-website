@@ -53,7 +53,7 @@
       display: flex;
       align-items: center;
       justify-content: flex-end;
-      gap: 8px;
+      gap: 10px;
       position: relative;
       left: 50%;
       width: 100vw;
@@ -63,25 +63,37 @@
       box-sizing: border-box;
       background: #1a1a1a;
       border-bottom: 1px solid var(--border-subtle);
-      color: #888;
+      color: #999;
       text-decoration: none;
       text-transform: none;
+      letter-spacing: 0.01em;
       font-size: 13px;
       font-weight: 700;
-      padding: 8px 20px;
+      padding: 10px 20px;
+      transition: background 0.15s ease;
     }
     .patreon-topbar:hover {
       background: #232323;
+      color: #ccc;
     }
     /* External SVG loaded via <img> can't have its fill changed directly
-       with CSS — grayscale + brightness/contrast is the standard trick to
-       recolor an external image like this to a flat gray tone. */
+       with CSS. brightness(0) first flattens every opaque pixel to solid
+       black regardless of the source file's own color(s), then invert()
+       brings that black up to a specific light-gray level — reliable
+       recoloring to one flat tone no matter what the original SVG looked
+       like. (The earlier grayscale+brightness-down version made it nearly
+       black-on-black against this bar's dark background, i.e. invisible —
+       this fixes that by going lighter, not darker.) */
     .patreon-topbar-icon {
       display: inline-block;
-      height: 28px;
+      height: 30px;
       width: auto;
       flex-shrink: 0;
-      filter: grayscale(1) brightness(0.7) contrast(0.8);
+      filter: brightness(0) invert(80%);
+      transition: filter 0.15s ease;
+    }
+    .patreon-topbar:hover .patreon-topbar-icon {
+      filter: brightness(0) invert(95%);
     }
     .title-link {
       display: inline-block;
