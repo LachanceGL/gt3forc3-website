@@ -45,6 +45,49 @@
       max-width: 900px;
       margin: 0 auto;
     }
+    /* Full-bleed bar at the very top of the page — breaks out of body's
+       centered/padded 900px column using the standard "100vw + negative
+       margin" trick, and cancels body's own top padding so it sits flush
+       against the top edge of the viewport instead of leaving a gap. */
+    .patreon-topbar {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 8px;
+      position: relative;
+      left: 50%;
+      width: 100vw;
+      margin-left: -50vw;
+      margin-top: -32px;
+      margin-bottom: 24px;
+      box-sizing: border-box;
+      background: #1a1a1a;
+      border-bottom: 1px solid var(--border-subtle);
+      color: #eee;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 700;
+      padding: 8px 20px;
+    }
+    .patreon-topbar:hover {
+      background: #232323;
+    }
+    /* Simple generic "P" mark rather than Patreon's actual trademarked
+       logo asset (not reproduced here) — swap in their official badge SVG
+       if you have it. */
+    .patreon-topbar-icon {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 16px;
+      height: 16px;
+      border-radius: 50%;
+      background: #ff424d;
+      color: #fff;
+      font-size: 10px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
     .title-link {
       display: inline-block;
     }
@@ -1383,6 +1426,11 @@
   <!-- Umami Analytics --><script defer src="https://cloud.umami.is/script.js" data-website-id="b86daa6e-9440-444b-8033-d814a8273437"></script><!-- End Umami Analytics -->
 </head>
 <body>
+  <a class="patreon-topbar" href="https://www.patreon.com/cw/forc3mod" target="_blank" rel="noopener">
+    <span class="patreon-topbar-icon">P</span>
+    Support GT3FORC3 on Patreon
+  </a>
+
   <div class="admin-panel" id="admin-panel">
     <h3 class="admin-panel-title">🔧 Admin · Notify Verified Driver</h3>
     <p class="admin-panel-subtitle">Sends the "you're verified" DM via the Discord bot. Not linked anywhere — only visible with #admin in the URL.</p>
