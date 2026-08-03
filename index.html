@@ -1407,7 +1407,7 @@
        color (the Discord icon's fill: #ff2727 above) — brightens to the
        lighter hover red on :hover, same as the Discord SVG does. */
     .footer-patreon-icon {
-      height: 16px;
+      height: 11.2px;
       width: auto;
       filter: brightness(0) saturate(100%) invert(21%) sepia(95%) saturate(6000%) hue-rotate(357deg) brightness(101%) contrast(105%);
       transition: filter 0.15s ease;
@@ -1606,8 +1606,8 @@
       <span class="site-version">// V 0.6</span>
     </span>
     <a href="https://www.patreon.com/cw/forc3mod/membership" target="_blank" rel="noopener">
+      Support us on
       <img class="footer-patreon-icon" src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/b26d038a3d517e935f740cb17d0cf85c7a8bb9fb/images/Patreon_logo.svg" alt="">
-      Support us on Patreon
     </a>
     <a href="https://discord.gg/dfcK4x64vb" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
@@ -1711,7 +1711,13 @@
     const COUNTRY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
 
     function renderCountryData(nationCounts, uniqueDriverCount) {
-      const nations = Object.entries(nationCounts).sort((a, b) => b[1] - a[1]);
+      // BVT (Bouvet Island) and ALA (Åland Islands) excluded from display
+      // — almost certainly GeoIP misreads rather than real driver
+      // nationalities, given Bouvet Island in particular is uninhabited.
+      const EXCLUDED_NATION_CODES = new Set(["BVT", "ALA"]);
+      const nations = Object.entries(nationCounts)
+        .filter(([code]) => !EXCLUDED_NATION_CODES.has(code))
+        .sort((a, b) => b[1] - a[1]);
 
       if (nations.length === 0) {
         statusEl.textContent = "Couldn't load driver data — check your connection and try reloading.";
