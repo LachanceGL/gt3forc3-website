@@ -72,20 +72,11 @@
     .patreon-topbar:hover {
       background: #232323;
     }
-    /* Simple generic "P" mark rather than Patreon's actual trademarked
-       logo asset (not reproduced here) — swap in their official badge SVG
-       if you have it. */
     .patreon-topbar-icon {
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
+      display: inline-block;
       width: 16px;
       height: 16px;
-      border-radius: 50%;
-      background: #ff424d;
-      color: #fff;
-      font-size: 10px;
-      font-weight: 800;
+      object-fit: contain;
       flex-shrink: 0;
     }
     .title-link {
@@ -1427,7 +1418,7 @@
 </head>
 <body>
   <a class="patreon-topbar" href="https://www.patreon.com/cw/forc3mod" target="_blank" rel="noopener">
-    <span class="patreon-topbar-icon">P</span>
+    <img class="patreon-topbar-icon" src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/b26d038a3d517e935f740cb17d0cf85c7a8bb9fb/images/Patreon_logo.svg" alt="Patreon">
     Support GT3FORC3 on Patreon
   </a>
 
