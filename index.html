@@ -63,8 +63,9 @@
       box-sizing: border-box;
       background: #1a1a1a;
       border-bottom: 1px solid var(--border-subtle);
-      color: #eee;
+      color: #888;
       text-decoration: none;
+      text-transform: none;
       font-size: 13px;
       font-weight: 700;
       padding: 8px 20px;
@@ -72,12 +73,15 @@
     .patreon-topbar:hover {
       background: #232323;
     }
+    /* External SVG loaded via <img> can't have its fill changed directly
+       with CSS — grayscale + brightness/contrast is the standard trick to
+       recolor an external image like this to a flat gray tone. */
     .patreon-topbar-icon {
       display: inline-block;
-      width: 16px;
-      height: 16px;
-      object-fit: contain;
+      height: 28px;
+      width: auto;
       flex-shrink: 0;
+      filter: grayscale(1) brightness(0.7) contrast(0.8);
     }
     .title-link {
       display: inline-block;
@@ -1418,8 +1422,8 @@
 </head>
 <body>
   <a class="patreon-topbar" href="https://www.patreon.com/cw/forc3mod" target="_blank" rel="noopener">
-    <img class="patreon-topbar-icon" src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/b26d038a3d517e935f740cb17d0cf85c7a8bb9fb/images/Patreon_logo.svg" alt="Patreon">
-    Support GT3FORC3 on Patreon
+    Support GT3FORC3 on
+    <img class="patreon-topbar-icon" src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/b26d038a3d517e935f740cb17d0cf85c7a8bb9fb/images/Patreon_logo.svg" alt="">
   </a>
 
   <div class="admin-panel" id="admin-panel">
