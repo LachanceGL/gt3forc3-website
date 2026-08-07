@@ -410,59 +410,6 @@
       padding: 2px 6px;
       border-radius: 3px;
     }
-    .cheater-notice {
-      display: none;
-      position: relative;
-      align-items: center;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: #ff9900;
-      background: rgba(255, 153, 0, 0.12);
-      padding: 6px 10px;
-      border-radius: 6px;
-      white-space: nowrap;
-      cursor: help;
-    }
-    .cheater-notice.visible {
-      display: inline-flex;
-    }
-    .cheater-notice-tooltip {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      z-index: 5;
-      width: 260px;
-      max-width: 80vw;
-      background: #2a1a05;
-      border: 1px solid rgba(255, 153, 0, 0.35);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: #ff9900;
-      font-size: 12px;
-      font-weight: 400;
-      text-transform: none;
-      letter-spacing: normal;
-      white-space: normal;
-      line-height: 1.4;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.15s ease;
-      pointer-events: none;
-    }
-    /* Desktop: reveal on hover. Mobile has no hover state, so tapping the
-       badge instead toggles the .tooltip-open class via JS below. */
-    .cheater-notice:hover .cheater-notice-tooltip,
-    .cheater-notice.tooltip-open .cheater-notice-tooltip {
-      opacity: 1;
-      visibility: visible;
-    }
-    .cheater-notice-tooltip-divider {
-      height: 1px;
-      background: rgba(255, 153, 0, 0.25);
-      margin: 8px 0;
-    }
     .leaderboard-search-input {
       display: block;
       width: 100%;
@@ -1005,7 +952,7 @@
        shown when the active track's config has a carClassList (currently
        just nurburgringtour). Whole dropdown hidden/shown the same way as
        .rank-toggle-row above; the panel itself opens/closes via .open,
-       same click-toggle pattern as .cheater-notice-tooltip. */
+       toggled by JS below on click. */
     /* Full-screen dark backdrop shown behind the Road Cars List panel,
        same idea as .verify-modal-overlay (Get Verified's popup). */
     .car-class-backdrop {
@@ -1437,7 +1384,6 @@
     .leaderboard-tabs,
     .leaderboard-server-name,
     .leaderboard-title,
-    .cheater-notice,
     .rank-toggle-row {
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
@@ -1544,10 +1490,6 @@
     </div>
     <div class="leaderboard-toolbar">
       <h3 class="leaderboard-title" id="leaderboard-title"></h3>
-      <span class="cheater-notice" id="cheater-notice">
-        ⚠ Anomalies will be flagged
-        <span class="cheater-notice-tooltip" id="cheater-notice-tooltip-text">There are cheaters and exploiters, but glitches can happen too. If you don't see your name and believe it was flagged by mistake, come to our Discord so we can look into it.</span>
-      </span>
       <div class="leaderboard-search-wrap">
         <input
           type="text"
@@ -1569,8 +1511,8 @@
     <div class="rank-toggle-row" id="rank-toggle-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Ranked by</span>
-      <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
       <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">BEST LAP</button>
+      <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
       <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
     </div>
     <div class="rank-toggle-row" id="verified-filter-row">
@@ -2583,9 +2525,6 @@
         title: "Touring",
         updateNote: "Ranks updated every new session",
         themeClass: "leaderboard-tab-tour",
-        // No cheater-flagging system in place for this leaderboard yet,
-        // so don't show the "Anomalies will be flagged" notice here.
-        hideAnomaliesNotice: true,
         carClassButtonLabel: "Road Cars List",
         carClassSubtitle: "Manual H Shifter",
         carClassTheme: "turquoise",
@@ -3258,17 +3197,6 @@
       }
     }
 
-    // The base anomalies tooltip explains the cheater-flagging system; on
-    // Race-type leaderboards, append a note about the lap-completion
-    // filter too, since that's a second, distinct reason a driver might
-    // not appear that only applies there.
-    const CHEATER_TOOLTIP_BASE = "There are cheaters and exploiters, but glitches can happen too. If you don't see your name and believe it was flagged by mistake, come to our Discord so we can look into it.";
-    function updateCheaterTooltipText(track) {
-      const tooltipEl = document.getElementById("cheater-notice-tooltip-text");
-      if (!tooltipEl) return;
-      tooltipEl.textContent = CHEATER_TOOLTIP_BASE;
-    }
-
     // Renders (or hides) the "Allowed Cars" grid for tracks that define a
     // carClassList in their LEADERBOARDS config — currently just the
     // Nürburgring Touring leaderboard. Cars without a confirmed `image`
@@ -3374,11 +3302,10 @@
       gridEl.innerHTML = `<table class="car-class-table"><tbody>${rowsHtml}</tbody></table>`;
     }
 
-    // Click-toggle for the dropdown itself, same pattern as the
-    // cheater-notice tooltip: click the button to open/close, click
-    // anywhere outside to close. The backdrop's own visibility is kept in
-    // sync with .open on every toggle path (button, close button, outside
-    // click, backdrop click itself).
+    // Click-toggle for the dropdown itself: click the button to open/close,
+    // click anywhere outside to close. The backdrop's own visibility is
+    // kept in sync with .open on every toggle path (button, close button,
+    // outside click, backdrop click itself).
     const carClassDropdownEl = document.getElementById("car-class-dropdown");
     const carClassDropdownBtnEl = document.getElementById("car-class-dropdown-btn");
     const carClassPanelCloseEl = document.getElementById("car-class-panel-close");
@@ -3435,9 +3362,6 @@
       countElReset.textContent = "";
       countElReset.classList.remove("no-drivers");
       liveBadgeEl.classList.remove("visible", "offline", "deactivated");
-      const cheaterNoticeEl = document.getElementById("cheater-notice");
-      if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[track] && !LEADERBOARDS[track].hideAnomaliesNotice));
-      updateCheaterTooltipText(track);
       renderCarClassSection(track);
 
       // Reset to the default rank mode whenever the active track changes —
@@ -3494,9 +3418,6 @@
       });
     }
     {
-      const cheaterNoticeEl = document.getElementById("cheater-notice");
-      if (cheaterNoticeEl) cheaterNoticeEl.classList.toggle("visible", Boolean(LEADERBOARDS[activeTrack] && !LEADERBOARDS[activeTrack].hideAnomaliesNotice));
-      updateCheaterTooltipText(activeTrack);
       renderCarClassSection(activeTrack);
     }
     {
@@ -3594,20 +3515,8 @@
     // each time via randomJokeEmoji().
     setInterval(renderCrashReport, 60 * 1000);
 
-    // The anomalies-notice tooltip works via CSS :hover on desktop, but
-    // mobile has no hover state — a tap fires a click instead, so toggle a
-    // class to show/hide it there, and close it again on a tap anywhere
-    // else on the page.
-    const cheaterNoticeToggleEl = document.getElementById("cheater-notice");
-    if (cheaterNoticeToggleEl) {
-      cheaterNoticeToggleEl.addEventListener("click", (e) => {
-        e.stopPropagation();
-        cheaterNoticeToggleEl.classList.toggle("tooltip-open");
-      });
-      document.addEventListener("click", () => {
-        cheaterNoticeToggleEl.classList.remove("tooltip-open");
-      });
-    }
+    // The anomalies-notice tooltip previously here has been removed
+    // entirely, along with its mobile tap-toggle handler.
 
     // ---- Race Time / Best Lap rank toggle (Race-type leaderboards only) ----
     document.querySelectorAll(".rank-toggle-btn[data-rank-mode]").forEach(btn => {
