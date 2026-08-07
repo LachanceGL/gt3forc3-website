@@ -1511,8 +1511,8 @@
     <div class="rank-toggle-row" id="rank-toggle-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Ranked by</span>
-      <button type="button" class="rank-toggle-btn" id="rank-toggle-best-lap" data-rank-mode="best_lap">BEST LAP</button>
-      <button type="button" class="rank-toggle-btn active" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
+      <button type="button" class="rank-toggle-btn active" id="rank-toggle-best-lap" data-rank-mode="best_lap">BEST LAP</button>
+      <button type="button" class="rank-toggle-btn" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
       <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
     </div>
     <div class="rank-toggle-row" id="verified-filter-row">
@@ -2875,7 +2875,7 @@
     // "total_time" (official race result) or "best_lap" (fastest single
     // lap, same ordering the API's /rows endpoint already returns
     // natively). Resets to the default whenever the active track changes.
-    let raceRankMode = "total_time";
+    let raceRankMode = "best_lap";
 
     // Nordschleife-only filter mode: "top200" (default, the normal
     // leaderboard) or "sub7" (only drivers with a Best Lap under 7 minutes
@@ -3367,7 +3367,7 @@
       // Reset to the default rank mode whenever the active track changes —
       // "which metric ranks this board" shouldn't carry over from a
       // different track.
-      raceRankMode = "total_time";
+      raceRankMode = "best_lap";
       const rankToggleRowEl = document.getElementById("rank-toggle-row");
       const config = LEADERBOARDS[track];
       if (rankToggleRowEl) rankToggleRowEl.classList.toggle("visible", Boolean(config && config.isRace));
