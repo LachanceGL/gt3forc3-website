@@ -1471,17 +1471,23 @@
         Nordschleife
         <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
-      <a class="leaderboard-tab" href="#spa" data-track="spa">
-        Spa
-        <span class="leaderboard-tab-type">Hot Lap</span>
+      <!-- Was Red Bull Ring — now repointed to a new server3 leaderboard,
+           rebranded as "Nürburgring GP". Stays red/GT3, same as before. -->
+      <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">
+        Nürburgring GP
+        <span class="leaderboard-tab-type">Race</span>
       </a>
       <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
         Laguna Seca
         <span class="leaderboard-tab-type">Race</span>
       </a>
-      <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">
-        Red Bull Ring
-        <span class="leaderboard-tab-type">Race</span>
+      <!-- Was Spa Francorchamps — now repointed to a new server2
+           leaderboard, rebranded as a second Nürburgring board (Touring
+           template, same blue theme as the server5 one below). -->
+      <a class="leaderboard-tab leaderboard-tab-tour" href="#spa" data-track="spa">
+        <span class="leaderboard-tab-corner-note">Road &amp; Track Cars</span>
+        Nürburgring
+        <span class="leaderboard-tab-type">Touring</span>
       </a>
       <!-- Nürburgring Touring leaderboard, on server5 (fr.assettohosting.com:60785
            / ASSETTO_API_KEY_5 in the Worker). The old server4 slot this
@@ -2501,10 +2507,13 @@
         carClassSubtitle: "GT3 Class",
         carClassTheme: "red"
       },
+      // Was Red Bull Ring — now repointed to a new server3 leaderboard,
+      // rebranded as "Nürburgring GP". Same server/lap format/car class,
+      // just a new share key, so the Race template carries over unchanged.
       redbullring: {
         workerPrefix: "/server3",
-        shareKey: "3a0072bb-b916-4262-8e81-28f6486b4f75",
-        displayName: "Red Bull Ring",
+        shareKey: "1bf0f45b-2bef-469a-a89e-e78a96aaa0bc",
+        displayName: "Nürburgring GP",
         title: "Race",
         updateNote: "Ranks updated every race",
         // Race-type leaderboards get an extra Total Time column, sourced
@@ -2610,8 +2619,9 @@
         shareKey: "a6aea2bb-9846-446d-9987-7d64cbdd90e6",
         displayName: "Kyalami",
         title: "Hot Lap",
-        // Server 2 now runs Spa Francorchamps, not Kyalami — same
-        // situation as elsewhere on this site. Frozen leaderboard, no
+        // Server 2 ran Spa Francorchamps for a while and now runs the
+        // "spa"-keyed Nürburgring board (see spa below) — Kyalami hasn't
+        // been on this server for a long time. Frozen leaderboard, no
         // live status of its own anymore.
         legacy: true,
         driverDataSource: "spa",
@@ -2620,16 +2630,21 @@
         // tab is hidden from the tab bar since the server's moved on.
         archived: true
       },
+      // Was Spa Francorchamps — now repointed to a new server2 leaderboard,
+      // rebranded as a second Nürburgring board (Touring template, blue
+      // theme, matching nurburgringtour above). The track id stays "spa"
+      // so kyalami's driverDataSource link above keeps working — only the
+      // display fields change. No confirmed allowed-cars list for this
+      // specific board yet, so carClassList is left unset (the "Allowed
+      // Cars" dropdown just stays hidden) rather than reusing
+      // nurburgringtour's list, which is for a different server/session.
       spa: {
         workerPrefix: "/server2",
-        shareKey: "c8393a9b-16f2-4e29-9ddb-7de2ab3ad5ae",
-        displayName: "Spa Francorchamps",
-        title: "Hot Lap",
+        shareKey: "31cf25ce-9cbc-4b0c-a074-380d38ce0500",
+        displayName: "Nürburgring",
+        title: "Touring",
         updateNote: "Ranks updated every new session",
-        carClassList: GT3_CAR_CLASS_LIST,
-        carClassButtonLabel: "GT3 Cars List",
-        carClassSubtitle: "GT3 Class",
-        carClassTheme: "red"
+        themeClass: "leaderboard-tab-tour"
       }
     };
 
