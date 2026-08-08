@@ -895,6 +895,12 @@
       padding: 2px calc(5px - 0.02em) 2px 5px;
       border-radius: 4px;
       white-space: nowrap;
+      /* Padding alone isn't reliable for vertical centering here — the
+         default line-height leaves uneven space above/below this uppercase
+         text at such a small font-size. Flex centering is exact regardless
+         of font metrics. */
+      display: inline-flex;
+      align-items: center;
     }
     .leaderboard-tab.leaderboard-tab-legacy.active {
       background: #1a4677;
