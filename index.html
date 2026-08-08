@@ -892,13 +892,20 @@
       font-style: normal;
       text-transform: uppercase;
       letter-spacing: 0.02em;
-      padding: 2px calc(5px - 0.02em) 2px 5px;
+      padding: 1px calc(5px - 0.02em) 0 5px;
       border-radius: 4px;
       white-space: nowrap;
-      /* Padding alone isn't reliable for vertical centering here — the
-         default line-height leaves uneven space above/below this uppercase
-         text at such a small font-size. Flex centering is exact regardless
-         of font metrics. */
+      /* Vertical centering here needs line-height, not padding/flex: this
+         box hugs its content (no free space for align-items:center to
+         distribute), and default line-height reserves uneven space above
+         vs below cap-height for most system fonts anyway. Fixing height
+         and line-height to the same value handles the "extra" space beyond
+         the font's natural line, split evenly per spec — but a small
+         residual gap intrinsic to this font's cap-height-vs-ascent metrics
+         still remains, measured and corrected with the 1px asymmetric
+         top/bottom padding below. */
+      height: 14px;
+      line-height: 14px;
       display: inline-flex;
       align-items: center;
     }
