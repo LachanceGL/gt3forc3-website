@@ -1527,8 +1527,8 @@
         <span class="leaderboard-tab-type">Race</span>
       </a>
       <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
-        Laguna Seca
-        <span class="leaderboard-tab-type">Race</span>
+        Spa
+        <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
       <!-- Was Spa Francorchamps — now repointed to a new server2
            leaderboard, rebranded as a second Nürburgring board (Touring
@@ -1540,7 +1540,8 @@
       </a>
       <!-- Nürburgring Touring leaderboard, on server5 (fr.assettohosting.com:60785
            / ASSETTO_API_KEY_5 in the Worker). The old server4 slot this
-           used to occupy is now Laguna Seca, above. -->
+           used to occupy went to Laguna Seca next, and is now Spa
+           Francorchamps (the "lagunaseca" track id, above). -->
       <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgringtour" data-track="nurburgringtour">
         <span class="leaderboard-tab-corner-note">H Shifter Road Cars</span>
         Nürburgring
@@ -1666,8 +1667,9 @@
         <select id="verify-track">
           <option value="Nordschleife">Nordschleife</option>
           <option value="Spa Francorchamps">Spa Francorchamps</option>
-          <option value="Red Bull Ring">Red Bull Ring</option>
-          <option value="Laguna Seca">Laguna Seca</option>
+          <option value="Nürburgring GP">Nürburgring GP</option>
+          <option value="Nürburgring — Road & Track Cars">Nürburgring — Road &amp; Track Cars</option>
+          <option value="Nürburgring — H Shifter">Nürburgring — H Shifter</option>
         </select>
       </div>
       <div class="verify-field">
@@ -2582,18 +2584,16 @@
         carClassSubtitle: "GT3 Class",
         carClassTheme: "red"
       },
-      // Was Nürburgring Touring — now repointed to server4's new Laguna
-      // Seca leaderboard, using the Race template (Total Time column,
-      // Ranked-by toggle) same as Nürburgring GP below.
+      // Was Laguna Seca (before that, Nürburgring Touring) — server4 has
+      // now been repointed again, to a new Spa Francorchamps leaderboard
+      // using the Hot Lap template instead of Race, so isRace/requiredLaps
+      // no longer apply here.
       lagunaseca: {
         workerPrefix: "/server4",
-        shareKey: "5b68f526-55c2-416e-8104-52940481e0c9",
-        displayName: "Laguna Seca",
-        title: "Race",
-        updateNote: "Ranks updated every race",
-        isRace: true,
-        // 5 laps, matching Nürburgring GP's format.
-        requiredLaps: 5,
+        shareKey: "ffd7b659-fefd-4c32-bbca-9de24c6e1a13",
+        displayName: "Spa Francorchamps",
+        title: "Hot Lap",
+        updateNote: "Ranks updated every new session",
         carClassList: GT3_CAR_CLASS_LIST,
         carClassButtonLabel: "GT3 Cars List",
         carClassSubtitle: "GT3 Class",
@@ -2601,7 +2601,8 @@
       },
       // Nürburgring Touring, now on server5 (fr.assettohosting.com:60785
       // / ASSETTO_API_KEY_5 in the Worker) — the old server4 slot this used
-      // to occupy is now Laguna Seca, above.
+      // to occupy went to Laguna Seca next, and is now Spa Francorchamps
+      // (the "lagunaseca" track id, above).
       nurburgringtour: {
         workerPrefix: "/server5",
         shareKey: "3027ac22-5a4a-4948-a375-40beed0a2bf6",
