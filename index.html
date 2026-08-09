@@ -3114,6 +3114,12 @@
       // Serve from cache instantly if we've already fetched this track
       if (leaderboardCache[track]) {
         lbStatusEl.textContent = "";
+        // A previous track's empty-message styling (red border/background
+        // box) doesn't get cleared just by emptying the text — it's a
+        // CSS class, and this cache-hit path is the one spot that forgot
+        // to reset it, leaving a hollow styled box floating above a
+        // leaderboard that actually has rows.
+        lbStatusEl.className = "";
         lbFrameEl.innerHTML = "";
         lbFrameEl.appendChild(renderLeaderboardRows(leaderboardCache[track]));
         updateLeaderboardTitle(track, currentLeaderboardEntries.length);
