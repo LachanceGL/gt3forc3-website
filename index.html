@@ -837,6 +837,11 @@
       align-items: center;
       justify-content: center;
       text-align: center;
+      /* Gumroad-style hard-shadow lift (Uiverse.io by ramz04), kept to the
+         site's own red/turquoise accents instead of the original's flat
+         black shadow. */
+      transition: transform 0.15s ease, box-shadow 0.15s ease,
+        background 0.2s, color 0.2s, border-color 0.2s;
     }
     .leaderboard-tab-type {
       display: block;
@@ -848,10 +853,21 @@
       opacity: 0.85;
       margin-top: 2px;
     }
-    .leaderboard-tab:hover {
+    .leaderboard-tab:hover,
+    .leaderboard-tab.active {
       background: linear-gradient(0deg, #ff2727 0%, var(--surface-3) 40%);
       color: #fff;
       border-color: #ff2727;
+      transform: translate(0.25rem, -0.25rem);
+      box-shadow: -0.25rem 0.25rem 0 #ff2727;
+    }
+    /* :active (the actual click/press moment) has to come after :hover and
+       .active above so it wins the tie — all three share the same
+       specificity, and the "pressed flat" look should always win over
+       "hovering" or "currently selected" while the mouse is actually down. */
+    .leaderboard-tab:active {
+      transform: translate(0);
+      box-shadow: none;
     }
     .leaderboard-tab.leaderboard-tab-legacy {
       background: var(--surface-1);
@@ -863,11 +879,6 @@
       color: #fff;
       border-color: #1a4677;
     }
-    .leaderboard-tab.active {
-      background: linear-gradient(0deg, #ff2727 0%, var(--surface-3) 40%);
-      color: #fff;
-      border-color: #ff2727;
-    }
     /* Distinct blue/turquoise theme for the Nürburgring Tour leaderboard,
        so it reads as visually separate from the site's usual red tabs. */
     .leaderboard-tab-tour {
@@ -878,6 +889,12 @@
       background: linear-gradient(0deg, #17b3b3 0%, var(--surface-3) 40%);
       color: #fff;
       border-color: #17b3b3;
+      transform: translate(0.25rem, -0.25rem);
+      box-shadow: -0.25rem 0.25rem 0 #17b3b3;
+    }
+    .leaderboard-tab-tour:active {
+      transform: translate(0);
+      box-shadow: none;
     }
     .leaderboard-tab-corner-note {
       position: absolute;
