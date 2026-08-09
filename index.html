@@ -109,7 +109,7 @@
        accessible the way alt text did on the old <img>. */
     .site-logo {
       display: block;
-      width: 240px;
+      width: 252px;
       max-width: 100%;
       aspect-ratio: 320 / 48;
       background: linear-gradient(135deg, #ff6b6b 0%, #ff2727 45%, #991b1b 100%);
@@ -1347,11 +1347,18 @@
       color: #ff8080;
     }
     .empty-message {
+      display: block;
       color: #ff2727;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.02em;
-      font-size: 12px;
+      letter-spacing: 0.03em;
+      font-size: 16px;
+      text-align: center;
+      background: var(--surface-1);
+      border: 1px solid #ff2727;
+      border-radius: 8px;
+      padding: 20px 16px;
+      margin: 4px 0 16px;
     }
     #status.loading {
       color: #ff2727;
@@ -1445,7 +1452,7 @@
 
     .game-logo {
       display: block;
-      height: 56px;
+      height: 50px;
       width: auto;
       margin-top: 24px;
       margin-bottom: 16px;
@@ -1593,6 +1600,7 @@
         </div>
       </div>
     </div>
+    <div id="leaderboard-status"></div>
     <div class="rank-toggle-row" id="rank-toggle-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Ranked by</span>
@@ -1607,7 +1615,6 @@
       <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
     </div>
   </div>
-  <div id="leaderboard-status"></div>
   <div class="leaderboard-frame-border">
     <div id="leaderboard-frame" class="leaderboard-frame"></div>
   </div>
