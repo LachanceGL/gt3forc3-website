@@ -2521,8 +2521,8 @@
         carClassTheme: "red"
       },
       // Was Red Bull Ring — now repointed to a new server3 leaderboard,
-      // rebranded as "Nürburgring GP". Same server/lap format/car class,
-      // just a new share key, so the Race template carries over unchanged.
+      // rebranded as "Nürburgring GP". Same server/car class, new share
+      // key, and a shorter 5-lap race format (was 10, like the others).
       redbullring: {
         workerPrefix: "/server3",
         shareKey: "1bf0f45b-2bef-469a-a89e-e78a96aaa0bc",
@@ -2538,8 +2538,9 @@
         // "faster" than a longer one's, regardless of who's actually
         // quicker. Rather than rank whatever distance each row happened
         // to run, only show rows from races that hit this exact lap
-        // count, matching the server's standard 10-lap Race format.
-        requiredLaps: 10,
+        // count — this board's own format, 5 laps (not 10, unlike the
+        // other Race boards).
+        requiredLaps: 5,
         carClassList: GT3_CAR_CLASS_LIST,
         carClassButtonLabel: "GT3 Cars List",
         carClassSubtitle: "GT3 Class",
@@ -2555,7 +2556,9 @@
         title: "Race",
         updateNote: "Ranks updated every race",
         isRace: true,
-        // Confirmed 10 laps, matching Red Bull Ring's format.
+        // Confirmed 10 laps for this board specifically — Race boards on
+        // this site don't all share one lap count (Nürburgring GP below
+        // is 5, for example), so don't assume this carries over elsewhere.
         requiredLaps: 10,
         carClassList: GT3_CAR_CLASS_LIST,
         carClassButtonLabel: "GT3 Cars List",
