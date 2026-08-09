@@ -2548,7 +2548,7 @@
       },
       // Was Nürburgring Touring — now repointed to server4's new Laguna
       // Seca leaderboard, using the Race template (Total Time column,
-      // Ranked-by toggle) same as Red Bull Ring below.
+      // Ranked-by toggle) same as Nürburgring GP below.
       lagunaseca: {
         workerPrefix: "/server4",
         shareKey: "5b68f526-55c2-416e-8104-52940481e0c9",
@@ -2556,10 +2556,8 @@
         title: "Race",
         updateNote: "Ranks updated every race",
         isRace: true,
-        // Confirmed 10 laps for this board specifically — Race boards on
-        // this site don't all share one lap count (Nürburgring GP below
-        // is 5, for example), so don't assume this carries over elsewhere.
-        requiredLaps: 10,
+        // 5 laps, matching Nürburgring GP's format.
+        requiredLaps: 5,
         carClassList: GT3_CAR_CLASS_LIST,
         carClassButtonLabel: "GT3 Cars List",
         carClassSubtitle: "GT3 Class",
