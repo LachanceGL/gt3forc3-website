@@ -79,21 +79,20 @@
     /* External SVG loaded via <img> can't have its fill changed directly
        with CSS. brightness(0) first flattens every opaque pixel to solid
        black regardless of the source file's own color(s), then invert()
-       brings that black up to a specific light-gray level — reliable
-       recoloring to one flat tone no matter what the original SVG looked
-       like. (The earlier grayscale+brightness-down version made it nearly
-       black-on-black against this bar's dark background, i.e. invisible —
-       this fixes that by going lighter, not darker.) */
+       brings that black up to a specific gray level — reliable recoloring
+       to one flat tone no matter what the original SVG looked like. Kept
+       at a mid-gray (not pushed as low as pure black) so it stays visible
+       against this bar's #1a1a1a background rather than disappearing. */
     .patreon-topbar-icon {
       display: inline-block;
       height: 9px;
       width: auto;
       flex-shrink: 0;
-      filter: brightness(0) invert(80%);
+      filter: brightness(0) invert(50%);
       transition: filter 0.15s ease;
     }
     .patreon-topbar:hover .patreon-topbar-icon {
-      filter: brightness(0) invert(95%);
+      filter: brightness(0) invert(65%);
     }
     .title-link {
       display: inline-block;
