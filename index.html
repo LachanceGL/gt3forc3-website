@@ -837,7 +837,7 @@
       justify-content: center;
       text-align: center;
       /* Gumroad-style hard-shadow lift (Uiverse.io by ramz04), kept to the
-         site's own red/turquoise accents instead of the original's flat
+         site's own red/purple accents instead of the original's flat
          black shadow. */
       transition: transform 0.15s ease, box-shadow 0.15s ease,
         background 0.2s, color 0.2s, border-color 0.2s;
@@ -878,18 +878,18 @@
       color: #fff;
       border-color: #1a4677;
     }
-    /* Distinct blue/turquoise theme for the Nürburgring Tour leaderboard,
+    /* Distinct dark purple theme for the Nürburgring Tour leaderboard,
        so it reads as visually separate from the site's usual red tabs. */
     .leaderboard-tab-tour {
-      color: #2dd4d4;
+      color: #a78bfa;
     }
     .leaderboard-tab-tour:hover,
     .leaderboard-tab-tour.active {
-      background: linear-gradient(0deg, #115e59 0%, var(--surface-3) 40%);
+      background: linear-gradient(0deg, #4c1d95 0%, var(--surface-3) 40%);
       color: #fff;
-      border-color: #17b3b3;
+      border-color: #6d28d9;
       transform: translate(0.25rem, -0.25rem);
-      box-shadow: -0.25rem 0.25rem 0 #17b3b3;
+      box-shadow: -0.25rem 0.25rem 0 #6d28d9;
     }
     .leaderboard-tab-tour:active {
       transform: translate(0);
@@ -900,9 +900,9 @@
       bottom: -12px;
       left: 50%;
       transform: translateX(-50%);
-      background: #0d3b3b;
-      border: 1px solid #17b3b3;
-      color: #6ee7e7;
+      background: #2e1065;
+      border: 1px solid #6d28d9;
+      color: #d8b4fe;
       font-size: 8px;
       font-weight: 700;
       font-style: normal;
@@ -1040,12 +1040,12 @@
       z-index: 11;
       margin-bottom: 12px;
       /* Theme colors — overridden per-track via inline style from JS
-         (renderCarClassSection) so the same dropdown can be turquoise for
+         (renderCarClassSection) so the same dropdown can be dark purple for
          Nürburgring Touring or red for the GT3 tracks, without duplicating
          all this CSS per theme. */
-      --car-class-accent: #17b3b3;
-      --car-class-accent-hover: #129090;
-      --car-class-accent-text: #111;
+      --car-class-accent: #6d28d9;
+      --car-class-accent-hover: #5720ae;
+      --car-class-accent-text: #fff;
     }
     .car-class-dropdown.visible {
       display: block;
@@ -2591,7 +2591,7 @@
         themeClass: "leaderboard-tab-tour",
         carClassButtonLabel: "Road Cars List",
         carClassSubtitle: "Manual H Shifter",
-        carClassTheme: "turquoise",
+        carClassTheme: "purple",
         // Allowed cars for this Touring class. `ratio` is the raw
         // power-to-weight figure as given (unit unconfirmed — shown as-is
         // rather than guessing a label like "kg/hp"). `image` is only set
@@ -3315,7 +3315,7 @@
         return;
       }
 
-      // Theme (red for the GT3 tracks, turquoise for Nürburgring Touring)
+      // Theme (red for the GT3 tracks, dark purple for Nürburgring Touring)
       // is applied via CSS custom properties set right on the dropdown,
       // rather than separate CSS classes per theme — see the
       // --car-class-accent* defaults declared on .car-class-dropdown.
@@ -3324,9 +3324,9 @@
         dropdownEl.style.setProperty("--car-class-accent-hover", "#cc1f1f");
         dropdownEl.style.setProperty("--car-class-accent-text", "#fff");
       } else {
-        dropdownEl.style.setProperty("--car-class-accent", "#17b3b3");
-        dropdownEl.style.setProperty("--car-class-accent-hover", "#129090");
-        dropdownEl.style.setProperty("--car-class-accent-text", "#111");
+        dropdownEl.style.setProperty("--car-class-accent", "#6d28d9");
+        dropdownEl.style.setProperty("--car-class-accent-hover", "#5720ae");
+        dropdownEl.style.setProperty("--car-class-accent-text", "#fff");
       }
 
       const label = config.carClassButtonLabel || "Road Cars List";
