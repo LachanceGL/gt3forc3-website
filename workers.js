@@ -205,18 +205,20 @@ export default {
       const guild = await discordRes.json();
 
       const PLAYER_COUNT_CHANNEL_ID = "1522784231611437261";
-      // Maps a track id (matching LEADERBOARDS in index.html) to a keyword
-      // that identifies its embed by title.
+      // Maps a track id (matching LEADERBOARDS in index.html) to the exact
+      // `trackName` string the bot uses for that server in GAME_SERVERS
+      // (index.js) — kept in sync with the 2026-08-09 server reshuffle
+      // (see that repo's docs/ROADMAP.md). Track id keys themselves stay
+      // stable across reshuffles (redbullring/lagunaseca/spa keep their
+      // original names even though the server behind them changed) so
+      // share keys and URLs in index.html don't break — only the value
+      // here, and LEADERBOARDS' displayName/title in index.html, change.
       const TRACK_KEYWORDS = {
-        nordschleife: "Nordschleife",
-        spa: "Spa Francorchamps",
-        redbullring: "Red Bull Ring",
-        lagunaseca: "Laguna Seca",
-        nurburgringtour: "Nürburgring Tour"
-        // Both new tracks' keywords match this bot's `trackName` values in
-        // GAME_SERVERS (bot.js) once those two entries are enabled — until
-        // then their embeds won't exist yet, so these entries just won't
-        // match anything (harmless, same as any other offline server).
+        nordschleife: "EVO Nordschleife – HOT LAP",
+        redbullring: "EVO Nürburgring GP – RACE", // server3 (fr...:60795), was Red Bull Ring
+        lagunaseca: "EVO Spa Francorchamps – HOT LAP", // server4 (ca...:10648), was (guessed) Laguna Seca
+        spa: "EVO Nürburgring – TOURING", // server2 (de8...:60350), was Spa Francorchamps
+        nurburgringtour: "EVO Nürburgring – TOURING #2" // server5 (fr...:60785)
       };
 
       const serverPlayers = {};
@@ -229,7 +231,11 @@ export default {
           const messages = await messagesRes.json();
           for (const [trackId, keyword] of Object.entries(TRACK_KEYWORDS)) {
             for (const msg of messages) {
-              const embed = (msg.embeds || []).find(e => (e.title || "").includes(keyword));
+              // endsWith, not includes: "EVO Nürburgring – TOURING" is a
+              // prefix of "EVO Nürburgring – TOURING #2"'s title, so a
+              // loose substring match would let the shorter keyword
+              // accidentally match the wrong (², nurburgringtour) server.
+              const embed = (msg.embeds || []).find(e => (e.title || "").endsWith(keyword));
               if (!embed) continue;
               const text = JSON.stringify(embed);
               const match = text.match(/(\d+)\s*Players?\s*Online/i);
