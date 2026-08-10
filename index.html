@@ -459,6 +459,7 @@
     .leaderboard-title {
       margin: 0;
       color: #999;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 13px;
       font-weight: 700;
       text-transform: uppercase;
@@ -472,6 +473,7 @@
     .leaderboard-track-badge {
       background: var(--surface-1);
       color: #3a3a3a;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 9px;
       font-weight: 700;
       text-transform: uppercase;
@@ -526,9 +528,10 @@
       color: #999;
       padding: 5px 12px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 11px;
       font-weight: 600;
-      font-family: inherit;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      letter-spacing: 0.04em;
       cursor: pointer;
     }
     /* Sub 7 Club only makes sense on Nordschleife — hidden everywhere else
@@ -651,6 +654,7 @@
       display: none;
       align-items: center;
       gap: 5px;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
@@ -735,14 +739,18 @@
     .leaderboard-frame thead th {
       position: sticky;
       top: 0;
-      background: var(--surface-2);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface-2);
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
     }
     .leaderboard-frame thead th.lb-pos {
-      background: var(--surface-dim);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface-dim);
       color: #888;
     }
     .leaderboard-frame thead th.lb-session {
-      background: var(--surface-dim);
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface-dim);
     }
     .leaderboard-frame thead th:nth-child(2),
     .leaderboard-frame thead th:nth-child(3) {
@@ -751,12 +759,28 @@
     .lb-pos {
       width: 50px;
       text-align: center;
-      color: rgba(238, 238, 238, 0.6);
-      font-weight: 700;
       white-space: nowrap;
     }
-    .lb-medal {
-      margin-right: 4px;
+    /* Position chip, replacing the old medal-emoji + plain number —
+       matches the ID-chip treatment from the telemetry redesign concept:
+       red badge for regular rows, light badge for the podium (top 3). */
+    .lb-pos-chip {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 22px;
+      height: 20px;
+      padding: 0 4px;
+      border-radius: 4px;
+      background: #991b1b;
+      color: #eee;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 11px;
+      font-weight: 700;
+    }
+    .lb-podium-row .lb-pos-chip {
+      background: #eee;
+      color: #14090a;
     }
     .lb-driver-name {
       font-weight: 700;
@@ -792,13 +816,13 @@
       top: -1px;
     }
     .lb-best {
-      font-family: "SF Mono", Consolas, monospace;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-weight: 700;
       color: #ff2727;
       text-align: right;
     }
     .lb-total-time {
-      font-family: "SF Mono", Consolas, monospace;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-weight: 700;
       color: #eee;
       text-align: right;
@@ -821,6 +845,7 @@
     .lb-session {
       text-align: right;
       color: rgba(238, 238, 238, 0.4);
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 12px;
     }
     .lb-car {
@@ -874,6 +899,7 @@
     }
     .leaderboard-tab-type {
       display: block;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 10px;
       font-weight: 700;
       font-style: normal;
@@ -960,6 +986,7 @@
       border-color: #1a4677;
     }
     h2.section-title {
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 15px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
@@ -971,6 +998,7 @@
     }
     .section-subtitle {
       color: #999;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 13px;
       margin-bottom: 16px;
       text-transform: uppercase;
@@ -1093,7 +1121,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.03em;
-      font-family: inherit;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       cursor: pointer;
     }
     .car-class-dropdown-btn:hover {
@@ -1635,7 +1663,7 @@
   </div>
 
   <div class="section-box">
-    <h2 class="section-title">GT3FORC3 DRIVERS AROUND THE WORLD</h2>
+    <h2 class="section-title">GT3 FORC3 DRIVERS AROUND THE WORLD</h2>
     <div class="section-subtitle" id="country-subtitle">🌍 Countries represented</div>
     <div id="status"></div>
     <div class="loading-bar-track" id="loading-bar-track">
@@ -2869,12 +2897,11 @@
       `;
       const tbody = table.querySelector("tbody");
 
-      const MEDALS = { 1: "🥇", 2: "🥈", 3: "🥉" };
-
       entries.forEach(({ rank, row }) => {
         const tr = document.createElement("tr");
         if (rank <= 3) tr.classList.add("lb-podium-row");
-        const medal = `<span class="lb-medal">${MEDALS[rank] || "🏁"}</span>`;
+        const posLabel = rank < 10 ? `0${rank}` : `${rank}`;
+        const posChip = `<span class="lb-pos-chip">${posLabel}</span>`;
         const nation = row.FullName ? driverNationMap[row.FullName.trim().toLowerCase()] : null;
         const flagUrl = nation ? flagImgFor(nation) : null;
         const flagHtml = flagUrl
@@ -2919,7 +2946,7 @@
           ? `<td class="${totalTimeCellClasses}">${isInvalidTotalTime ? "Invalid" : (formatRaceTime(totalTimeMs) || "-")}</td>`
           : "";
         tr.innerHTML = `
-          <td class="lb-pos">${medal}${rank}</td>
+          <td class="lb-pos">${posChip}</td>
           <td><div class="lb-driver-name">${flagHtml}${(row.FullName && DISPLAY_NAME_OVERRIDES[row.FullName]) || row.FullName || "—"}${verifiedHtml}</div></td>
           <td class="lb-car">${row.CarName || "—"}</td>
           <td class="lb-best">${row.BestLap || "-"}</td>
