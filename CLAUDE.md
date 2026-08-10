@@ -54,23 +54,29 @@ Read `docs/ARCHITECTURE.md` for the full request-flow diagram and the
 
 ## The 5 Assetto Corsa servers
 
-| id | Host:Port | Track | Format | Worker prefix | API key env var |
+| id | Host:Port | Currently displays as | Format | Worker prefix | API key env var |
 |---|---|---|---|---|---|
 | 1 | ca.assettohosting.com:10647 | Nordschleife | Hot Lap | `/server1` | `ASSETTO_API_KEY` |
-| 2 | de8.assettohosting.com:60350 | Spa Francorchamps | Hot Lap | `/server2` | `ASSETTO_API_KEY_2` |
-| 3 | fr.assettohosting.com:60795 | Red Bull Ring | Race (10 laps) | `/server3` | `ASSETTO_API_KEY_3` |
-| 4 | ca.assettohosting.com:10648 | Laguna Seca | Race (10 laps) | `/server4` | `ASSETTO_API_KEY_4` |
-| 5 | fr.assettohosting.com:60785 | Nürburgring Touring | Touring | `/server5` | `ASSETTO_API_KEY_5` |
+| 2 | de8.assettohosting.com:60350 | "Nürburgring" (Road & Track Cars) | Touring | `/server2` | `ASSETTO_API_KEY_2` |
+| 3 | fr.assettohosting.com:60795 | "Nürburgring GP" | Race (5 laps) | `/server3` | `ASSETTO_API_KEY_3` |
+| 4 | ca.assettohosting.com:10648 | "Spa Francorchamps" | Hot Lap | `/server4` | `ASSETTO_API_KEY_4` |
+| 5 | fr.assettohosting.com:60785 | "Nürburgring" (H Shifter Road Cars) | Touring | `/server5` | `ASSETTO_API_KEY_5` |
 
-Server 4 **used to be** Nürburgring Touring; it was repointed to Laguna
-Seca mid-project, and Nürburgring Touring got its own new server5 slot.
-If you see old references to "Nürburgring" pointing at server4 anywhere
-(comments, screenshots, chat history), that's the pre-swap state — server4
-is Laguna Seca now.
+**This table has been rewritten more than once as tracks got rebranded —
+trust it over your memory of an earlier version of this file.** As of the
+latest rewrite: server2 used to display Spa Francorchamps, server3 used to
+display Red Bull Ring, server4 used to display Laguna Seca (and before
+that, Nürburgring Touring). The `LEADERBOARDS` keys in `index.html` are
+`spa`, `redbullring`, and `lagunaseca` respectively — **those ids no
+longer match what they display**, on purpose (see below and
+`docs/DATA-REFERENCE.md`). If you see old references anywhere (comments,
+screenshots, chat history) using the *previous* pairing of host↔track,
+that's stale.
 
 Server 2 **used to be** Kyalami; the `kyalami` entry still exists in
-`LEADERBOARDS` in `index.html` as a legacy/deactivated entry pointing at
-the same shareKey history, kept for continuity rather than deleted.
+`LEADERBOARDS` in `index.html` as a legacy/deactivated entry, its
+`driverDataSource` still pointing at the `spa` id purely as a historical
+cache-key link — unrelated to what `spa` currently displays.
 
 ## `index.html` — key structures to know before editing
 
@@ -79,25 +85,41 @@ the same shareKey history, kept for continuity rather than deleted.
   key it uses, its display name, whether it's a Race-template board
   (`isRace: true` + `requiredLaps`), its allowed-cars list, etc. Almost
   every "make X different for track Y" request should be a change to this
-  object, not scattered special-casing elsewhere.
-- **`GT3_CAR_CLASS_LIST`** — one shared 11-car list reused by all 4 GT3
-  tracks (Nordschleife, Spa, Laguna Seca, Red Bull Ring). Red-themed,
-  button label "GT3 Cars List".
-- **Nürburgring Touring's own `carClassList`** (inline in its config
-  entry) — 29-car list, turquoise-themed, button label "Road Cars List".
-  Not shared with anything else.
+  object, not scattered special-casing elsewhere. **The object keys
+  (`spa`, `redbullring`, `lagunaseca`, `nurburgringtour`, `nordschleife`,
+  `kyalami`) do not all match their current `displayName`** — three of
+  them got rebranded to different tracks mid-project while keeping their
+  original id, on purpose (see `docs/DATA-REFERENCE.md`'s warning section
+  before assuming `id="spa"` means Spa).
+- **`GT3_CAR_CLASS_LIST`** — one shared 11-car list, currently reused by
+  **three** tracks (Nordschleife, `redbullring`/"Nürburgring GP",
+  `lagunaseca`/"Spa Francorchamps") — not four; `spa` (currently
+  "Nürburgring") has no car class list at all. Red-themed, button label
+  "GT3 Cars List".
+- **`nurburgringtour`'s own `carClassList`** (inline in its config entry)
+  — 29-car list, purple-themed (was turquoise — see
+  `docs/DATA-REFERENCE.md` for the palette swap), button label "Road Cars
+  List". Not shared with anything else, including the *other*
+  Touring-templated board (`spa`), which has no car list of its own.
 - **The "Allowed Cars" dropdown** (`.car-class-dropdown` /
   `renderCarClassSection()` / `renderCarClassRows()`) is a single reused
   DOM widget, not duplicated per track — its button label, panel title,
-  subtitle, and accent color (red vs turquoise) are all set dynamically
-  from the active track's `LEADERBOARDS` entry via CSS custom properties
+  subtitle, and accent color (red vs purple) are all set dynamically from
+  the active track's `LEADERBOARDS` entry via CSS custom properties
   (`--car-class-accent` etc.) set inline by JS. **Important lesson learned
-  the hard way this session:** its rows are rendered as a real `<table>`,
-  not flex `<div>`s — a flex-card version caused a real (still not fully
-  understood) text-rendering bug on at least one person's browser/GPU that
-  only went away after rebuilding it as a plain table using the same
-  pattern as the main leaderboard table. Don't "simplify" it back to divs
-  without a good reason.
+  the hard way earlier in this project:** its rows are rendered as a real
+  `<table>`, not flex `<div>`s — a flex-card version caused a real (still
+  not fully understood) text-rendering bug on at least one person's
+  browser/GPU that only went away after rebuilding it as a plain table
+  using the same pattern as the main leaderboard table. Don't "simplify"
+  it back to divs without a good reason.
+- **Two tabs both display "Nürburgring"** (`spa` and `nurburgringtour`,
+  both Touring-templated) — confirmed, intentional. They're told apart by
+  `.leaderboard-tab-corner-note`, a small hardcoded badge on each tab
+  ("Road & Track Cars" vs "H Shifter Road Cars"), not by config. If you
+  add a new track selector anywhere (the "Get Verified" dropdown already
+  had to be updated for this), reuse this same disambiguating text rather
+  than inventing new wording.
 - **`switchToTrack(track)`** is the one function that runs on every tab
   change — it resets basically all per-track UI state (rank mode, sort
   direction, car-class dropdown, cheater/anomalies notice [now removed],
@@ -121,13 +143,37 @@ See `docs/TODO.md` for the full list with context. Short version:
   number) rather than confirmed 1:1, because several cars within a class
   share an identical ratio with no way to tell which image file is which
   trim. These are flagged with inline comments in `GT3_CAR_CLASS_LIST` and
-  the Nürburgring Touring `carClassList` — grep for "unconfirmed guess".
-- `bot.js` has two server entries (Laguna Seca, Nürburgring Touring)
-  present but `enabled: false`, waiting on real `.env` credentials and
-  real status-image URLs (currently placeholder filenames that likely
-  don't exist yet in the image repo).
+  the `nurburgringtour` `carClassList` — grep for "unconfirmed guess".
+- `spa` (currently "Nürburgring", the "Road & Track Cars" board) has no
+  `carClassList` at all — no confirmed allowed-cars data exists for that
+  specific server/session pool. The "Allowed Cars" dropdown just stays
+  hidden for it. Don't reuse `nurburgringtour`'s list for it; they're
+  different servers.
+- `bot.js` has two server entries (referenced there as Laguna Seca,
+  Nürburgring Touring — bot-side naming, may now be stale relative to the
+  site's rebrand) present but `enabled: false`, waiting on real `.env`
+  credentials and real status-image URLs (currently placeholder filenames
+  that likely don't exist yet in the image repo). This is tracked in
+  `forc3-discordbot`'s own repo, not fixable from here.
 - The Cloudflare Worker needs `ASSETTO_API_KEY_5` set in its environment
-  before server5 (Nürburgring Touring) will actually authenticate.
+  before server5 authenticates for `/api/v1/*` calls (the public
+  leaderboard-rows endpoint doesn't need it and already works).
+- The Worker's `/discord/stats` `TRACK_KEYWORDS` map is keyed by the same
+  `LEADERBOARDS` ids (`spa`, `redbullring`, etc.) and matches against
+  `bot.js`'s embed *titles* by substring — since those ids' displayed
+  tracks changed but the ids/keywords weren't touched, this should still
+  work mechanically (it matches physical-server identity via the bot's
+  current embed text, not the site's display name) as long as `bot.js`'s
+  own embed titles haven't changed independently. If live per-track player
+  counts on the site ever look wrong for one of the three rebranded
+  tracks, check this coupling first — see `docs/BOT-HANDOFF.md`.
+- The header's live server-name status line reflects whatever
+  AssettoHosting itself reports as that server's name/session — this is
+  **not** driven by anything in this repo and won't match the site's
+  branding until someone updates it on AssettoHosting's own control panel.
+  Confirmed stale for server4 as of this writing (still says "Laguna
+  Seca... Race... 10 Laps" despite the site showing "Spa Francorchamps /
+  Hot Lap"). Not a bug to fix here.
 
 ## Conventions this codebase already follows — keep following them
 
@@ -143,9 +189,30 @@ See `docs/TODO.md` for the full list with context. Short version:
   `--car-class-accent`/`--car-class-accent-hover`/`--car-class-accent-text`
   on `.car-class-dropdown` for the pattern: one set of CSS rules, themed
   per-instance via inline `style.setProperty(...)` from JS.
-  - Note the tab bar itself doesn't use this pattern for its red/turquoise
+  - Note the tab bar itself doesn't use this pattern for its red/purple
     theming — it's fine to introduce the CSS-variable version for *new*
     themed things, no need to retrofit everything.
+- **`box-shadow`, not `filter: drop-shadow`, on anything already using a
+  CSS `mask-image` or otherwise being composited/rasterized (the site
+  logo is the current example).** `filter` forces the element through an
+  offscreen rasterization pass to compute the shadow, which can resample
+  a masked/vector graphic's edges at visibly lower quality than normal
+  rendering. `box-shadow` reads the element's box geometry directly
+  instead, avoiding that — the tradeoff is the shadow becomes a soft
+  rectangle around the element's bounding box rather than hugging its
+  actual visible silhouette, which matters more the more transparent/
+  negative space the element has. Filters on a *parent* wrapping multiple
+  unrelated elements have a related but separate problem — see
+  `docs/DECISIONS.md`'s "Why `filter: drop-shadow(...)` is applied
+  per-element" entry.
+- **Hard-shadow hover/active "lift" interaction** (`.leaderboard-tab`,
+  originally adapted from a pasted Uiverse.io button reference): on
+  hover/when selected, `transform: translate(...)` shifts the element and
+  a same-direction `box-shadow` (no blur, solid color) simulates it
+  lifting off a flat-colored duplicate of itself. Reuse this pattern
+  (rather than reinventing it) for any other "physical button press" style
+  request — see git history around when `.leaderboard-tab` got this for
+  the exact values.
 - **Show/hide via a toggled `.visible` class, not inline `display`.**
   Every conditionally-shown block in this file (`.rank-toggle-row`,
   `.car-class-dropdown`, `.leaderboard-search-hint`, etc.) follows
@@ -165,12 +232,40 @@ See `docs/TODO.md` for the full list with context. Short version:
   from (see `docs/TODO.md` for what "strong pattern" looked like in
   practice here).
 
+## Workflow conventions for whoever (or whatever) works on this repo
+
+- **Commit and push every change immediately, without asking for
+  confirmation first.** This is a standing preference for this repo
+  specifically, not a one-time approval — don't revert to "want me to
+  push this?" after a quiet stretch.
+- **`forc3-discordbot` (the Discord bot) is out of scope for this
+  repo/conversation.** It's owned by a separate Claude Code conversation.
+  If something you find here is actually a bot-side issue or requires a
+  bot-side change, write it into `docs/BOT-HANDOFF.md` (create/update, per
+  the pattern already in that file) instead of editing that repo directly
+  — the person copies the handoff content over themselves. `bot-reference/`
+  in this repo is a read-only, point-in-time snapshot for cross-checking,
+  not something to keep in sync or edit.
+- **Verify visual/interactive changes against real computed state, not
+  just "looks right in the source."** Screenshots and hover-triggered
+  CSS transitions have been unreliable in at least one automated preview
+  environment used on this project — when that happens, fall back to
+  reading actual computed styles / forced pseudo-classes via JS, or to an
+  isolated reproduction the person can check in their own browser, rather
+  than asserting something works without evidence.
+
 ## Where to go next
 
+- `MEMORY.md` — session-by-session log of what's been done on this repo.
+  Read this for the story of how things got to their current state.
 - `docs/ARCHITECTURE.md` — full system diagram, every endpoint the Worker
   exposes, what each one is for.
 - `docs/DATA-REFERENCE.md` — every track's shareKey/workerPrefix/API key,
-  both car-class lists in full, and the reasoning behind ambiguous entries.
+  both car-class lists in full, and the reasoning behind ambiguous entries
+  — **including which `LEADERBOARDS` ids currently display a different
+  track than their name suggests.**
 - `docs/TODO.md` — concrete open items, in priority order.
-- `docs/DECISIONS.md` — notable design decisions and a couple of debugging
-  war stories worth knowing before you repeat them.
+- `docs/DECISIONS.md` — notable design decisions and debugging war stories
+  worth knowing before you repeat them.
+- `docs/BOT-HANDOFF.md` — pending findings for the separate
+  `forc3-discordbot` conversation to pick up.
