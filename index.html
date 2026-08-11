@@ -759,6 +759,9 @@
       text-align: center;
       white-space: nowrap;
     }
+    .leaderboard-frame thead th.lb-pos-head {
+      font-size: 16px;
+    }
     /* Position chip, replacing the old medal-emoji + plain number —
        matches the ID-chip treatment from the telemetry redesign concept:
        red badge for regular rows, light badge for the podium (top 3). */
@@ -2883,7 +2886,7 @@
       table.innerHTML = `
         <thead>
           <tr>
-            <th class="lb-pos">🏆 #</th>
+            <th class="lb-pos lb-pos-head">🏆</th>
             <th>Driver</th>
             <th>Car</th>
             <th class="lb-best">Best Lap</th>
