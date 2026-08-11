@@ -1812,7 +1812,7 @@
       const subtitleEl = document.getElementById("country-subtitle");
       if (subtitleEl) {
         const driverCountHtml = uniqueDriverCount
-          ? `<span class="country-count-number">${uniqueDriverCount}</span> Unique Drivers &nbsp;·&nbsp; `
+          ? `<span class="country-count-number">${uniqueDriverCount}</span> Unique Drivers &nbsp;/&nbsp; `
           : "";
         subtitleEl.innerHTML = `${driverCountHtml}<span class="country-count-number">${nations.length}</span> Countries Represented`;
       }
