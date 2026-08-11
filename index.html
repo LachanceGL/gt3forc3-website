@@ -3639,10 +3639,10 @@
           parts.push(`<span class="discord-stat-dot"></span>${data.online_count} Online`);
         }
         if (data.member_count != null) {
-          parts.push(`[${data.member_count} Members]`);
+          parts.push(`${data.member_count} Members`);
         }
 
-        statsEl.innerHTML = parts.join(" &nbsp;");
+        statsEl.innerHTML = parts.join(" &nbsp;/ ");
 
         discordPlayerCounts = data.server_players || {};
         updatePlayerCountDisplay(activeTrack);
