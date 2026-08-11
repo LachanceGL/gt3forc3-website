@@ -661,12 +661,16 @@
       color: #4ade80;
     }
     .live-player-count {
-      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-size: 11px;
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: 0.03em;
       color: #4ade80;
+    }
+    /* The parens stay in the default font — only the "N Driver(s)" text
+       itself is monospace. */
+    .live-player-count-text {
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
     }
     .live-player-count.no-drivers {
       color: #666;
@@ -2780,8 +2784,8 @@
         !liveBadgeEl.classList.contains("deactivated");
 
       const count = discordPlayerCounts[track];
-      countEl.textContent = (isGenuinelyOnline && count != null)
-        ? `(${count} Driver${count === 1 ? "" : "s"})`
+      countEl.innerHTML = (isGenuinelyOnline && count != null)
+        ? `(<span class="live-player-count-text">${count} Driver${count === 1 ? "" : "s"}</span>)`
         : "";
 
       // The server name text is green by default (matching the "online"
