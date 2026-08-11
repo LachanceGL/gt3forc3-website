@@ -1464,20 +1464,14 @@
       color: #999;
       font-size: 13px;
     }
-    footer::before,
-    footer::after {
+    footer::before {
       content: "";
       position: absolute;
       left: 0;
       right: 0;
+      top: 0;
       height: 1px;
       background: var(--border-subtle);
-    }
-    footer::before {
-      top: 0;
-    }
-    footer::after {
-      top: 6px;
     }
     .site-version {
       color: #444;
