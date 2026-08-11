@@ -823,6 +823,14 @@
       color: #ff2727;
       text-align: right;
     }
+    /* The mono header treatment adds letter-spacing + uppercase to every
+       thead th, but trailing letter-spacing after the last character can
+       render inconsistently across browsers/fonts for right-aligned text
+       — cancel it here specifically so "Best Lap" stays flush with the
+       lap times below it, which have no letter-spacing of their own. */
+    .leaderboard-frame thead th.lb-best {
+      letter-spacing: normal;
+    }
     .lb-total-time {
       font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
       font-weight: 700;
@@ -1801,9 +1809,9 @@
       const subtitleEl = document.getElementById("country-subtitle");
       if (subtitleEl) {
         const driverCountHtml = uniqueDriverCount
-          ? `🏁 <span class="country-count-number">${uniqueDriverCount}</span> Unique Drivers &nbsp;·&nbsp; `
+          ? `<span class="country-count-number">${uniqueDriverCount}</span> Unique Drivers &nbsp;·&nbsp; `
           : "";
-        subtitleEl.innerHTML = `${driverCountHtml}🌍 <span class="country-count-number">${nations.length}</span> Countries Represented`;
+        subtitleEl.innerHTML = `${driverCountHtml}<span class="country-count-number">${nations.length}</span> Countries Represented`;
       }
 
       const grid = document.createElement("div");
@@ -3631,10 +3639,10 @@
           parts.push(`<span class="discord-stat-dot"></span>${data.online_count} Online`);
         }
         if (data.member_count != null) {
-          parts.push(`${data.member_count} Members`);
+          parts.push(`[${data.member_count} Members]`);
         }
 
-        statsEl.innerHTML = parts.join(" &nbsp;· ");
+        statsEl.innerHTML = parts.join(" &nbsp;");
 
         discordPlayerCounts = data.server_players || {};
         updatePlayerCountDisplay(activeTrack);
