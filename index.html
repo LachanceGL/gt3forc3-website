@@ -491,7 +491,7 @@
       background: var(--surface-2);
       border: 1px solid #111;
       color: #eee;
-      padding: 8px 12px;
+      padding: 8px 28px 8px 12px;
       border-radius: 6px;
       font-size: 13px;
       outline: none;
@@ -584,6 +584,32 @@
     .leaderboard-search-wrap .leaderboard-search-input {
       max-width: none;
       margin-left: 0;
+    }
+    /* Hidden by default via the site's .visible-class-toggle convention;
+       JS adds .visible once the input has a value. */
+    .leaderboard-search-clear {
+      display: none;
+      position: absolute;
+      top: 50%;
+      right: 8px;
+      transform: translateY(-50%);
+      width: 18px;
+      height: 18px;
+      padding: 0;
+      background: none;
+      border: none;
+      color: #666;
+      font-size: 12px;
+      line-height: 1;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+    }
+    .leaderboard-search-clear.visible {
+      display: flex;
+    }
+    .leaderboard-search-clear:hover {
+      color: #eee;
     }
     /* Shown only while the box is focused AND still empty (using
        :placeholder-shown, which is only true when there's no value) —
@@ -1649,6 +1675,7 @@
           class="leaderboard-search-input"
           placeholder="Search"
           autocomplete="off">
+        <button type="button" class="leaderboard-search-clear" id="leaderboard-search-clear" aria-label="Clear search">✕</button>
         <div class="leaderboard-search-hint">
           <div class="leaderboard-search-hint-title">You can search by</div>
           <div class="leaderboard-search-hint-tags">
@@ -3125,6 +3152,8 @@
       const searchInput = document.getElementById("leaderboard-search");
       const query = (searchInput.value || "").trim().toLowerCase();
       const lbFrameEl = document.getElementById("leaderboard-frame");
+      const clearBtn = document.getElementById("leaderboard-search-clear");
+      if (clearBtn) clearBtn.classList.toggle("visible", !!query);
 
       if (!query) {
         lbFrameEl.innerHTML = "";
@@ -3144,6 +3173,13 @@
     }
 
     document.getElementById("leaderboard-search").addEventListener("input", applyLeaderboardSearch);
+
+    document.getElementById("leaderboard-search-clear").addEventListener("click", () => {
+      const searchInput = document.getElementById("leaderboard-search");
+      searchInput.value = "";
+      applyLeaderboardSearch();
+      searchInput.focus();
+    });
 
     // Called whenever new data that affects ranking/flagging/badges arrives
     // asynchronously after the leaderboard was first rendered — driver
