@@ -3206,6 +3206,14 @@
       const lbFrameEl = document.getElementById("leaderboard-frame");
       const config = LEADERBOARDS[track];
 
+      // Cleared eagerly (not just when we confirm this track is empty)
+      // because it's a global that outlives this function — an async
+      // refreshLeaderboardFlags() call landing mid-switch (driver identity
+      // data resolving, etc.) reads this to decide whether to repaint the
+      // frame, and would otherwise repaint the PREVIOUS track's rows into
+      // this track's frame while "No Leaderboard active yet" is showing.
+      currentLeaderboardEntries = [];
+
       // Serve from cache instantly if we've already fetched this track
       if (leaderboardCache[track]) {
         lbStatusEl.textContent = "";
