@@ -174,6 +174,19 @@ See `docs/TODO.md` for the full list with context. Short version:
   Confirmed stale for server4 as of this writing (still says "Laguna
   Seca... Race... 10 Laps" despite the site showing "Spa Francorchamps /
   Hot Lap"). Not a bug to fix here.
+- 🚩 **`www.gt3forc3.com` serves an invalid TLS cert** (`NET::ERR_CERT_COMMON_NAME_INVALID`
+  in Chrome, `SEC_E_WRONG_PRINCIPAL` via curl) — confirmed 2026-08-13, reported
+  by a user clicking an external Discord link. The apex domain
+  (`gt3forc3.com`) serves fine with a valid cert; only `www.` is broken.
+  DNS is correct (`www` CNAMEs to `lachancegl.github.io`, resolves to GitHub
+  Pages IPs) and `CNAME` in this repo is correct (`gt3forc3.com`) — so this
+  is **not fixable by editing repo files**. GitHub Pages has not
+  provisioned a cert covering the `www` subdomain, only the apex. Fix lives
+  in GitHub repo Settings → Pages: clear the custom domain field, save,
+  re-enter `gt3forc3.com`, save again (forces a DNS re-check + cert
+  reissue); toggle "Enforce HTTPS" off/on if it's still broken after that.
+  Needs someone with repo admin access — Claude has no Pages-settings
+  access. Remove this note once confirmed fixed.
 
 ## Conventions this codebase already follows — keep following them
 
