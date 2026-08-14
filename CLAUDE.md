@@ -174,27 +174,6 @@ See `docs/TODO.md` for the full list with context. Short version:
   Confirmed stale for server4 as of this writing (still says "Laguna
   Seca... Race... 10 Laps" despite the site showing "Spa Francorchamps /
   Hot Lap"). Not a bug to fix here.
-- 🚩 **`www.gt3forc3.com` serves an invalid TLS cert** (`NET::ERR_CERT_COMMON_NAME_INVALID`
-  in Chrome, `SEC_E_WRONG_PRINCIPAL` via curl) — confirmed 2026-08-13, reported
-  by a user clicking an external Discord link. The apex domain
-  (`gt3forc3.com`) serves fine with a valid cert; only `www.` is broken.
-  DNS is correct (`www` CNAMEs to `lachancegl.github.io`, resolves to GitHub
-  Pages IPs) and `CNAME` in this repo is correct (`gt3forc3.com`) — so this
-  is **not fixable by editing repo files**. GitHub Pages has not
-  provisioned a cert covering the `www` subdomain, only the apex. No CAA
-  record restricts issuance (checked via DNS-over-HTTPS), so it isn't that.
-  Fix lives in GitHub repo Settings → Pages: clear the custom domain field,
-  save, re-enter `gt3forc3.com`, save again (forces a DNS re-check + cert
-  reissue). User did this on 2026-08-13; Pages settings showed "DNS Check
-  in Progress" afterward (the expected transient state right after a
-  re-save — can take minutes to ~24h per GitHub's docs). **Don't touch the
-  custom domain field or Enforce HTTPS again while a check is in
-  progress** — editing it restarts the check from scratch. Needs someone
-  with repo admin access — Claude has no Pages-settings access. If it's
-  still showing "in progress" (or errors out) after a day, that's the
-  point to dig further rather than assume it'll self-resolve. Remove this
-  note once confirmed fixed.
-
 ## Conventions this codebase already follows — keep following them
 
 - **No build step, no framework.** `index.html` is intentionally a single

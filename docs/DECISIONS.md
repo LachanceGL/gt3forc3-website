@@ -285,3 +285,44 @@ Separately, the masked `<div>` had `filter: drop-shadow(...)` swapped for
 — this specific swap was reverted once, then explicitly re-applied once,
 so as of this writing the logo uses `box-shadow`, but don't be surprised
 if git history shows it flip-flopping.
+
+## `www.gt3forc3.com` served an invalid TLS cert — GitHub Pages issue, not a repo bug (resolved 2026-08-13)
+
+A user reported `NET::ERR_CERT_COMMON_NAME_INVALID` clicking a Discord
+link to `https://www.gt3forc3.com` — Chrome showed a cert issued for
+`*.github.io`, not the actual host. Reproduced independently via `curl`
+(not browser-specific): `schannel: SNI or certificate check failed:
+SEC_E_WRONG_PRINCIPAL`. The apex (`gt3forc3.com`) served fine throughout.
+
+**Ruled out as repo/DNS problems** before escalating to GitHub Pages
+settings: `CNAME` in this repo correctly held `gt3forc3.com`; `www`'s DNS
+correctly CNAMEs to `lachancegl.github.io` and resolves to GitHub Pages
+IPs; no CAA record restricts Let's Encrypt issuance (checked via
+DNS-over-HTTPS, since Windows `nslookup` doesn't support `CAA` queries).
+So this wasn't fixable by editing files in this repo at all — the cert
+GitHub had provisioned simply never covered the `www` variant.
+
+**Root cause (likely, per the user's own account):** at some earlier
+point, "Enforce HTTPS" in GitHub repo Settings → Pages was checked
+*before* the TLS certificate had finished being issued. That interrupts
+GitHub's provisioning flow, and — unlike the DNS check, which the UI
+visibly flags — there was nothing that automatically retried it
+afterward. It likely sat broken silently for days (`CNAME`'s git history
+shows no changes between its creation on 2026-08-07 and this fix on
+2026-08-13 — six days untouched) until someone opened Settings → Pages
+again.
+
+**Fix:** in Settings → Pages, clear the custom domain field, save, then
+re-enter `gt3forc3.com` and save again. This resets the DNS check (goes
+to "DNS Check in Progress," confirmed to take a few minutes here, GitHub's
+docs say up to 24h) and, once that passes, restarts a 3-step cert
+provisioning flow ("TLS certificate is being provisioned... up to 15
+minutes" per step, "Enforce HTTPS" stays disabled with the tooltip "Not
+yet available... certificate has not finished being issued" until it
+completes). **Critical: do not touch the domain field or click "Enforce
+HTTPS" again while either the DNS check or cert provisioning is
+in-progress** — doing so appears to silently reset progress back to step
+one, which is the likely original cause of this whole incident. Confirmed
+fixed via `curl` once "Enforce HTTPS" showed checked with a green
+checkmark: `https://www.gt3forc3.com` now cleanly 301-redirects to
+`https://gt3forc3.com/`.
