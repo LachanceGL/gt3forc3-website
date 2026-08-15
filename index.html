@@ -36,43 +36,6 @@
       z-index: -1;
       pointer-events: none;
     }
-    /* Ambient grid/dot texture (from a Uiverse.io snippet), painted as
-       its own layer so it blends with the html gradient + the ::before
-       photo beneath it via mix-blend-mode, instead of just sitting
-       flatly on top. Faded out via mask-image rather than opacity —
-       opacity would dim the layer's own colors before blending,
-       weakening the blend effect itself; mask-image just controls how
-       much of the (still fully "solid") texture shows through at each
-       point, top (fully visible) to bottom (gone). Deliberately
-       position:absolute (scrolls with the page), not fixed like the
-       photo — a fixed box can never be taller than one viewport (the
-       part past 100vh would just be permanently off-screen), so to
-       extend the fade further down the actual page than the photo's
-       one-screen-tall box, this needs real document height to fade
-       across. */
-    body::after {
-      content: "";
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 1400px;
-      /* The fine dot/line grid layers were dropped — just the diagonal
-         stripe pattern now. */
-      background-image:
-        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.022) 10px, rgba(255, 255, 255, 0.022) 20px);
-      /* No blend mode — every one tried (overlay, screen) either
-         depended on the base's luminance in ways that caused visible
-         inconsistencies, or added complexity for no real benefit. Plain
-         alpha compositing (the rgba() alpha above) looks identical
-         regardless of what's underneath, dark background or photo. */
-      /* One continuous fade, solid at the very top to alpha 0 at the
-         very bottom of the box — no plateau, no easing stops. */
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
-      z-index: -1;
-      pointer-events: none;
-    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: transparent;
