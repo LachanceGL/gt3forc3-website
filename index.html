@@ -87,15 +87,17 @@
         20px 20px,
         auto,
         60px 60px;
-      mix-blend-mode: overlay;
-      /* A straight two-stop linear fade doesn't read as "fading" against
-         a dark background — it looks essentially unchanged for most of
-         the range, then disappears late. Extra stops ease it down
-         visibly through the middle of the transition instead. Still
-         fully transparent well before 100% (not just at it), so nothing
-         lands right on the box's own bottom edge as a hard cut. */
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 15%, rgba(0, 0, 0, 0.2) 28%, transparent 42%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.55) 15%, rgba(0, 0, 0, 0.2) 28%, transparent 42%, transparent 100%);
+      /* screen, not overlay/multiply: both of those are luminance-
+         dependent and render close to nothing over a near-black base
+         (over pure black, overlay and multiply both mathematically
+         resolve to zero) — that's why the texture was only visible over
+         the photo (bright enough for overlay to react to) and invisible
+         over the plain dark background everywhere else, no matter how
+         the fade/mask was tuned. screen stays visible regardless of how
+         dark the base is. */
+      mix-blend-mode: screen;
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 42%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, transparent 42%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
