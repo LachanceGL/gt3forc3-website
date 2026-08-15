@@ -18,13 +18,6 @@
     html {
       background: linear-gradient(180deg, #000000 0%, #1e1e1e 600px, #1e1e1e 100%);
       background-attachment: fixed;
-      /* Positioned so body::after (absolute) can stretch to html's own
-         box via inset:0 — html's height auto-grows to the full page's
-         actual content height (unlike the viewport-sized initial
-         containing block body::after would otherwise fall back to),
-         so the texture always spans the true full page length, however
-         long it ends up being, without a guessed/hardcoded height. */
-      position: relative;
     }
     /* The background image lives in its own pseudo-element (not layered
        into html's own background) specifically so its opacity can be set
@@ -40,72 +33,39 @@
       height: 100vh;
       background: url('https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/refs/heads/main/images/BG_Nordschleife_03.png') no-repeat top right / 1100px auto;
       opacity: 0.4;
-      /* This box's own bottom edge (100vh — a fixed layer can't be
-         taller than the viewport) used to roughly line up with where
-         the grid texture below also ended, so its hard, unfaded cutoff
-         was never visible. Now that the texture extends well past this
-         point, its abrupt edge shows up as a seam — faded here the same
-         way, transparent well before 100% so nothing lands right on the
-         boundary. */
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 30%, transparent 95%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, #000 30%, transparent 95%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
     /* Ambient grid/dot texture (from a Uiverse.io snippet), painted as
-       its own layer so it blends with the html gradient + the ::before
-       photo beneath it via mix-blend-mode, instead of just sitting
-       flatly on top. Faded out via mask-image rather than opacity —
-       opacity would dim the layer's own colors before blending,
-       weakening the blend effect itself; mask-image just controls how
-       much of the (still fully "solid") texture shows through at each
-       point, top (fully visible) to bottom (gone). Deliberately
-       position:absolute (scrolls with the page), not fixed like the
-       photo — a fixed box can never be taller than one viewport (the
-       part past 100vh would just be permanently off-screen). Stretched
-       via inset:0 to html's box (see html's own `position: relative`)
-       instead of a hardcoded height, so it always spans the page's true
-       full length — past the 600px mark where html's own background
-       gradient flattens into solid grey, and past that too, however
-       tall the page ends up being. */
+       its own fixed layer so it blends with the html gradient + the
+       ::before photo beneath it via mix-blend-mode, instead of just
+       sitting flatly on top. Faded out via mask-image rather than
+       opacity — opacity would dim the layer's own colors before
+       blending, weakening the blend effect itself; mask-image just
+       controls how much of the (still fully "solid") texture shows
+       through at each point, top (fully visible) to bottom (gone). */
     body::after {
       content: "";
-      position: absolute;
+      position: fixed;
       top: 0;
-      right: 0;
-      bottom: 0;
       left: 0;
+      width: 100%;
+      height: 100vh;
       background-image:
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 1px, transparent 0),
-        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 0),
-        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.015) 10px, rgba(255, 255, 255, 0.015) 20px),
-        radial-gradient(circle, rgba(255, 255, 255, 0.036) 1px, transparent 1px);
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 1px, transparent 0),
+        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 0),
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.054) 10px, rgba(255, 255, 255, 0.054) 20px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.072) 1px, transparent 1px);
       background-size:
         40px 40px,
         20px 20px,
         20px 20px,
         auto,
         60px 60px;
-      /* screen, not overlay/multiply: both of those are luminance-
-         dependent and render close to nothing over a near-black base
-         (over pure black, overlay and multiply both mathematically
-         resolve to zero) — that's why the texture was only visible over
-         the photo (bright enough for overlay to react to) and invisible
-         over the plain dark background everywhere else, no matter how
-         the fade/mask was tuned. screen stays visible regardless of how
-         dark the base is. */
-      mix-blend-mode: screen;
-      /* A plain alpha fade dims the pattern's AREA coverage, but each
-         individual 1px line/dot stays a crisp, fully-defined edge right
-         up until it crosses some threshold and vanishes — that reads as
-         a "cut" no matter how long the fade zone is, because line edges
-         don't visually soften just because they're less opaque. blur
-         actually dissolves the lines themselves as they fade, instead
-         of just dimming sharp lines that suddenly aren't there anymore. */
-      filter: blur(1.5px);
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 8%, transparent 85%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, #000 8%, transparent 85%, transparent 100%);
+      mix-blend-mode: overlay;
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 35%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 35%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
