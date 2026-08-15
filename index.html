@@ -36,6 +36,37 @@
       z-index: -1;
       pointer-events: none;
     }
+    /* Ambient diagonal-stripe texture across the top of the page.
+       The two numbers that matter here are the stripe alpha and the
+       grain — both exist to stop the fade from banding, and lowering
+       either one brings the banding straight back:
+
+       A fade can only step through as many 8-bit values as the pattern
+       has contrast. At 2% white these stripes sit ~5 levels above the
+       page (rgb 35 vs 30), so the whole fade is 5 discrete jumps — a
+       hard horizontal line every ~250px, which reads as the texture
+       "cutting off" rather than fading. Lengthening the fade widens
+       those bands and makes it worse. 7.5% gives the ramp ~17 levels.
+
+       The noise layer then dithers what's left, breaking the step
+       boundaries into per-pixel randomness the eye averages out — the
+       same trick as Photoshop's "Dither" checkbox on a gradient. It's
+       far too faint (~2 levels) to read as grain on its own. */
+    body::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 1200px;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.9 0 0 0 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E"),
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.075) 10px, rgba(255, 255, 255, 0.075) 20px);
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+      z-index: -1;
+      pointer-events: none;
+    }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
       background: transparent;
