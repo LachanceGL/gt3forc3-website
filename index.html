@@ -79,7 +79,7 @@
         radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 1px, transparent 0),
         linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
         linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 0),
-        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.027) 10px, rgba(255, 255, 255, 0.027) 20px),
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.015) 10px, rgba(255, 255, 255, 0.015) 20px),
         radial-gradient(circle, rgba(255, 255, 255, 0.036) 1px, transparent 1px);
       background-size:
         40px 40px,
@@ -96,8 +96,16 @@
          the fade/mask was tuned. screen stays visible regardless of how
          dark the base is. */
       mix-blend-mode: screen;
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 10%, transparent 70%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, #000 10%, transparent 70%, transparent 100%);
+      /* A plain alpha fade dims the pattern's AREA coverage, but each
+         individual 1px line/dot stays a crisp, fully-defined edge right
+         up until it crosses some threshold and vanishes — that reads as
+         a "cut" no matter how long the fade zone is, because line edges
+         don't visually soften just because they're less opaque. blur
+         actually dissolves the lines themselves as they fade, instead
+         of just dimming sharp lines that suddenly aren't there anymore. */
+      filter: blur(1.5px);
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 8%, transparent 85%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 8%, transparent 85%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
