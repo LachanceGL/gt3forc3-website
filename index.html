@@ -70,12 +70,16 @@
         auto,
         60px 60px;
       mix-blend-mode: overlay;
-      /* Fully transparent well before 100% (not just at it) — otherwise
-         the last sliver of opacity right at the box's own bottom edge
-         reads as a hard cut against the plain background below it,
-         especially with mix-blend-mode exaggerating that contrast. */
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 15%, transparent 70%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, #000 15%, transparent 70%, transparent 100%);
+      /* One mask on the whole element, so it fades the composited result
+         of all five background-image layers together as a single unit,
+         not per-layer. A long, gradual descent (solid to 15%, easing
+         down through 35%/55%) into an extended very-faint plateau
+         (55%-85%, still only barely visible) before finally reaching
+         true 0 — and staying flat there well before 100%, not just
+         landing on it, so nothing sits right on the box's own bottom
+         edge as a hard cut. */
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 15%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0.05) 85%, transparent 96%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 15%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0.05) 85%, transparent 96%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
