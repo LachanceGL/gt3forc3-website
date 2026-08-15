@@ -326,3 +326,57 @@ one, which is the likely original cause of this whole incident. Confirmed
 fixed via `curl` once "Enforce HTTPS" showed checked with a green
 checkmark: `https://www.gt3forc3.com` now cleanly 301-redirects to
 `https://gt3forc3.com/`.
+
+## The background texture's "cut" was 8-bit colour banding, not a broken fade
+
+A faint diagonal-stripe texture (`body::after`) fades out down the page.
+For a long stretch it showed a hard horizontal line near the bottom
+instead of fading away. Roughly ten fixes were tried — longer masks,
+multi-stop easing curves, `mix-blend-mode` swaps (`overlay` → `screen` →
+none), `filter: blur()`, dropping layers, `position: fixed` → `absolute`
+— and **none of them moved the problem**, because none of them addressed
+the actual cause.
+
+**The cause is colour depth, not geometry.** A fade can only step through
+as many distinct values as the pattern has contrast against its
+background. At `rgba(255,255,255,0.022)` over `#1e1e1e` the stripes
+composite to rgb(35) against a rgb(30) page — **5 levels**. So the entire
+fade was 5 discrete jumps. Measured in canvas, the transitions landed at
+y = 28, 277, 527, 776 and 1025px: five hard horizontal lines ~250px
+apart. The lowest one is the "cut". The ramp also reached zero at 1025 of
+1400px, so the last 375px of the box was dead.
+
+Two corollaries, both of which made earlier attempts actively
+counterproductive:
+
+- **Lengthening the fade makes banding worse, not better.** Band spacing
+  is `fade_distance / levels_of_contrast`. Stretching the fade just
+  spreads the same 5 steps further apart, making each one more isolated
+  and easier to see.
+- **Lowering the alpha makes it worse too.** The alpha was halved more
+  than once while chasing this, each time removing levels the ramp needed.
+
+**The fix is contrast + dithering:**
+
+1. Raise the stripe alpha (0.022 → 0.075) so the ramp has ~17 levels
+   instead of 5.
+2. Layer a very faint `feTurbulence` noise (~2 levels) as an SVG data URI
+   in the same `background-image`. It perturbs pixels randomly around
+   each quantisation boundary so the eye averages them into a smooth
+   ramp — the same technique as Photoshop's "Dither" checkbox on a
+   gradient, or dithering in a game engine's sky gradient.
+
+**How it was verified** (worth reusing — the Browser pane's screenshots
+are unreliable here, see `CLAUDE.md`): replicate the composite in a
+`<canvas>` with the same alpha maths, then read back per-row mean
+brightness. Before: 5 distinct gradations over 1200px, means forming a
+flat integer staircase (35, 34, 34, 33, 33…). After: 829 gradations, means
+forming a continuous ramp (47.60, 46.53, 45.15, 43.09…).
+
+**If you ever need to tune this**, keep the ratio in mind rather than
+adjusting by feel: any near-black, very-low-alpha pattern that has to
+fade over a long distance will band, and the only real levers are more
+contrast, a shorter fade, or dithering. A long *near-zero* tail is the
+worst case of all — that's precisely where the fewest levels remain — so
+"make the faint part longer" and "make it fade cleanly" pull against each
+other.
