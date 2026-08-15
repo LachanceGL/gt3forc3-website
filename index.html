@@ -19,6 +19,25 @@
       background: linear-gradient(180deg, #000000 0%, #1e1e1e 600px, #1e1e1e 100%);
       background-attachment: fixed;
     }
+    /* Dither grain for the stripe texture below — deliberately its OWN
+       layer rather than a `background-image` inside `body::after`.
+       A dither only works while its amplitude stays above one 8-bit
+       level, so grain that shares the texture's fade mask dies exactly
+       where it's needed most: measured across the faint tail, grain
+       inside the faded layer produced 1 gradation in 560 rows (i.e. one
+       hard step, then flat), while constant-amplitude grain produced
+       544. Fixed + full-viewport so it has no edges of its own to give
+       away, and ~1 level average lift — far below anything readable as
+       grain, but enough to break the quantisation boundaries. */
+    html::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      background-image:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.9 0 0 0 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.015'/%3E%3C/svg%3E");
+      z-index: -1;
+      pointer-events: none;
+    }
     /* The background image lives in its own pseudo-element (not layered
        into html's own background) specifically so its opacity can be set
        independently — opacity on a background-image layer itself would
@@ -37,33 +56,29 @@
       pointer-events: none;
     }
     /* Ambient diagonal-stripe texture across the top of the page.
-       The two numbers that matter here are the stripe alpha and the
-       grain — both exist to stop the fade from banding, and lowering
-       either one brings the banding straight back:
-
+       Don't lower the stripe alpha to make it subtler — use the mask.
        A fade can only step through as many 8-bit values as the pattern
-       has contrast. At 2% white these stripes sit ~5 levels above the
-       page (rgb 35 vs 30), so the whole fade is 5 discrete jumps — a
-       hard horizontal line every ~250px, which reads as the texture
-       "cutting off" rather than fading. Lengthening the fade widens
-       those bands and makes it worse. 7.5% gives the ramp ~17 levels.
+       has contrast, and at 2% white these stripes sit just ~5 levels
+       above the page (rgb 35 vs 30), so the whole fade collapses into 5
+       discrete jumps: a hard horizontal line every ~250px, which reads
+       as the texture "cutting off" rather than fading. Lengthening the
+       fade widens those bands and makes it worse. 7.5% gives the ramp
+       ~17 levels; the dither grain on `html::after` handles the rest.
 
-       The noise layer then dithers what's left, breaking the step
-       boundaries into per-pixel randomness the eye averages out — the
-       same trick as Photoshop's "Dither" checkbox on a gradient. It's
-       far too faint (~2 levels) to read as grain on its own. */
+       The mask is front-loaded on purpose — most of the drop happens in
+       the first third, leaving a long, barely-there tail rather than a
+       linear ramp that stays obvious and then stops. */
     body::after {
       content: "";
       position: absolute;
       top: 0;
       left: 0;
       width: 100%;
-      height: 1200px;
+      height: 1600px;
       background-image:
-        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='matrix' values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0.9 0 0 0 0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.022'/%3E%3C/svg%3E"),
         repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.075) 10px, rgba(255, 255, 255, 0.075) 20px);
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.35) 30%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0.04) 78%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, rgba(0, 0, 0, 0.35) 30%, rgba(0, 0, 0, 0.12) 55%, rgba(0, 0, 0, 0.04) 78%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
