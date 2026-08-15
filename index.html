@@ -57,24 +57,10 @@
       left: 0;
       width: 100%;
       height: 1400px;
+      /* The fine dot/line grid layers were dropped — just the diagonal
+         stripe pattern now. */
       background-image:
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 1px, transparent 0),
-        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 0),
-        /* Solid 10px bands, not 1px lines like the other layers — far
-           more visually dominant at the same alpha, so it was still
-           reading as strongly visible well into the fade zone while
-           everything else had already faded proportionally. Toned down
-           on its own so it fades in step with the rest instead of
-           lingering. */
-        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.022) 10px, rgba(255, 255, 255, 0.022) 20px),
-        radial-gradient(circle, rgba(255, 255, 255, 0.072) 1px, transparent 1px);
-      background-size:
-        40px 40px,
-        20px 20px,
-        20px 20px,
-        auto,
-        60px 60px;
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.022) 10px, rgba(255, 255, 255, 0.022) 20px);
       mix-blend-mode: overlay;
       /* One mask on the whole element, so it fades the composited result
          of all five background-image layers together as a single unit,
