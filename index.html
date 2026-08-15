@@ -66,14 +66,15 @@
          inconsistencies, or added complexity for no real benefit. Plain
          alpha compositing (the rgba() alpha above) looks identical
          regardless of what's underneath, dark background or photo. */
-      /* One mask on the whole element, so it fades the composited result
-         of all five background-image layers together as a single unit,
-         not per-layer. A long, gradual descent (solid to 15%, easing
-         down through 35%/55%) into an extended very-faint plateau
-         (55%-85%, still only barely visible) before finally reaching
-         true 0 — and staying flat there well before 100%, not just
-         landing on it, so nothing sits right on the box's own bottom
-         edge as a hard cut. */
+      /* A long, gradual mask (solid to 15%, easing down through
+         35%/55%, an extended very-faint plateau through 85%, true 0 by
+         96%) still isn't enough on its own — each 10px stripe is a
+         hard-edged band, and alpha only dims its overall coverage, not
+         the sharpness of that edge. A crisp edge at 5% opacity still
+         reads as an edge, so it looks like it "cuts off" once it drops
+         below visibility rather than dissolving. blur softens the
+         edges themselves so they genuinely dissolve into the fade. */
+      filter: blur(2px);
       -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 15%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0.05) 85%, transparent 96%, transparent 100%);
       mask-image: linear-gradient(180deg, #000 0%, #000 15%, rgba(0, 0, 0, 0.85) 35%, rgba(0, 0, 0, 0.15) 55%, rgba(0, 0, 0, 0.05) 85%, transparent 96%, transparent 100%);
       z-index: -1;
