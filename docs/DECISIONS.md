@@ -329,6 +329,14 @@ checkmark: `https://www.gt3forc3.com` now cleanly 301-redirects to
 
 ## The background texture's "cut" was 8-bit colour banding, not a broken fade
 
+**Update:** the texture described below was removed from the live site
+after this fix — the constant-amplitude dither eliminated the hard line,
+but a faint one was still visible at the very end of the fade and it was
+cut rather than pursued further. `body::after`/`html::after` no longer
+exist in `index.html`. Kept this entry anyway: the banding diagnosis and
+the "dither must not share the fade mask" rule apply to any future
+low-alpha texture over a dark background, not just this one.
+
 A faint diagonal-stripe texture (`body::after`) fades out down the page.
 For a long stretch it showed a hard horizontal line near the bottom
 instead of fading away. Roughly ten fixes were tried — longer masks,
