@@ -40,6 +40,15 @@
       height: 100vh;
       background: url('https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/refs/heads/main/images/BG_Nordschleife_03.png') no-repeat top right / 1100px auto;
       opacity: 0.4;
+      /* This box's own bottom edge (100vh — a fixed layer can't be
+         taller than the viewport) used to roughly line up with where
+         the grid texture below also ended, so its hard, unfaded cutoff
+         was never visible. Now that the texture extends well past this
+         point, its abrupt edge shows up as a seam — faded here the same
+         way, transparent well before 100% so nothing lands right on the
+         boundary. */
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 92%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 92%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
