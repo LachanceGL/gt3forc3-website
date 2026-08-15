@@ -373,10 +373,43 @@ brightness. Before: 5 distinct gradations over 1200px, means forming a
 flat integer staircase (35, 34, 34, 33, 33…). After: 829 gradations, means
 forming a continuous ramp (47.60, 46.53, 45.15, 43.09…).
 
-**If you ever need to tune this**, keep the ratio in mind rather than
-adjusting by feel: any near-black, very-low-alpha pattern that has to
-fade over a long distance will band, and the only real levers are more
-contrast, a shorter fade, or dithering. A long *near-zero* tail is the
-worst case of all — that's precisely where the fewest levels remain — so
-"make the faint part longer" and "make it fade cleanly" pull against each
-other.
+### The tail needs a *constant-amplitude* dither — this is the crux
+
+Raising contrast and adding grain fixed the body of the fade but left one
+hard line right at the end, because the grain was a `background-image`
+layer *inside* `body::after` and therefore shared its fade mask. A dither
+only works while its amplitude stays above one 8-bit level, so grain that
+fades along with the signal switches itself off exactly where the signal
+gets faint enough to need it. Measured across the faint tail (last 35% of
+the box): grain inside the faded layer gave **1 gradation in 560 rows** —
+one step, then flat — versus **544** for constant-amplitude grain.
+
+So the grain lives on `html::after` instead: `position: fixed`, full
+viewport, no mask, ~1 level average lift. Being viewport-sized and
+unmasked it has no edge of its own to give away, it's far below what
+reads as grain, and it keeps dithering all the way to zero. It sits at
+`z-index: -1` like the other background layers, and because a pseudo-element
+of `html` comes after `body` in tree order it paints above the texture
+but still below all page content.
+
+**If you need to tune this**, reason about levels, not appearance:
+
+- **Stripe alpha is the contrast budget.** Don't lower it to make the
+  texture subtler — that's what put the original 5-level version in this
+  mess. Use the mask instead; it costs no levels.
+- **Fade length is free once dithered.** Before the constant grain,
+  "make the faint part longer" and "make it fade cleanly" pulled against
+  each other, since a long near-zero tail is where the fewest levels
+  remain. With a constant dither that tension goes away, which is what
+  allowed the front-loaded mask and the long run-out.
+- **Never let the dither inherit the fade.** Any future variation on this
+  effect must keep the grain on a separate unmasked layer, or the tail
+  cut comes straight back.
+
+**Verification method** (reuse it — the Browser pane's screenshots are
+unreliable here, see `CLAUDE.md`, and this effect is far too subtle to
+eyeball): replicate the composite in a `<canvas>` with the same alpha
+maths, then read back per-row mean brightness and count how many rows
+differ from their predecessor. Banded output shows a handful of flat
+integer plateaus; a properly dithered ramp changes on nearly every row
+with fractional means.
