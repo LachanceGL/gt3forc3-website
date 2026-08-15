@@ -47,8 +47,8 @@
          point, its abrupt edge shows up as a seam — faded here the same
          way, transparent well before 100% so nothing lands right on the
          boundary. */
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 92%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, #000 70%, transparent 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 30%, transparent 95%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 30%, transparent 95%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
@@ -76,11 +76,11 @@
       bottom: 0;
       left: 0;
       background-image:
-        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.08) 1px, transparent 0),
-        linear-gradient(rgba(255, 255, 255, 0.06) 1px, transparent 0),
-        linear-gradient(90deg, rgba(255, 255, 255, 0.06) 1px, transparent 0),
-        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.054) 10px, rgba(255, 255, 255, 0.054) 20px),
-        radial-gradient(circle, rgba(255, 255, 255, 0.072) 1px, transparent 1px);
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.04) 1px, transparent 0),
+        linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 0),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 0),
+        repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(255, 255, 255, 0.027) 10px, rgba(255, 255, 255, 0.027) 20px),
+        radial-gradient(circle, rgba(255, 255, 255, 0.036) 1px, transparent 1px);
       background-size:
         40px 40px,
         20px 20px,
@@ -96,8 +96,8 @@
          the fade/mask was tuned. screen stays visible regardless of how
          dark the base is. */
       mix-blend-mode: screen;
-      -webkit-mask-image: linear-gradient(180deg, #000 0%, transparent 42%, transparent 100%);
-      mask-image: linear-gradient(180deg, #000 0%, transparent 42%, transparent 100%);
+      -webkit-mask-image: linear-gradient(180deg, #000 0%, #000 10%, transparent 70%, transparent 100%);
+      mask-image: linear-gradient(180deg, #000 0%, #000 10%, transparent 70%, transparent 100%);
       z-index: -1;
       pointer-events: none;
     }
