@@ -124,3 +124,26 @@ JSON) that it still said `"GT3FORC3.COM // RACE // Laguna Seca – 10 Laps
 / Q8"` despite the site now branding that track "Spa Francorchamps / Hot
 Lap" — fixing this requires a change on AssettoHosting's own control
 panel (the server's own name/description setting), not anything here.
+
+## 2026-08-18
+
+**Fixed a stale `TRACK_KEYWORDS` entry in `workers.js` that had been
+silently dropping one server's live player count since 2026-08-09.**
+
+The `/discord/stats` endpoint doesn't read player counts from
+AssettoHosting — it regex-scrapes the Discord bot's own status embeds and
+uses `TRACK_KEYWORDS` to map a track id to the exact embed title the bot
+posts. When the bot's servers were renamed/reshuffled on 2026-08-09, four
+of the five keywords were updated to match, but `nurburgringtour` was
+left on the pre-reshuffle title `"EVO Nürburgring – TOURING #2"`. The bot
+actually posts `"EVO Nürburgring – TOURING (H Shifter)"`.
+
+Because the lookup is `endsWith`, the mismatch never threw — it just
+matched no embed, so `server_players.nurburgringtour` has been quietly
+absent from the stats payload for over a week. The other four ids were
+unaffected. Verified against the bot repo's live `GAME_SERVERS` table
+(`forc3-discordbot/index.js`) rather than guessing at the title.
+
+**Not deployed by this commit.** `workers.js` has no `wrangler.toml` and
+no CI in this repo — it's a manual Cloudflare Workers deploy, so the live
+site keeps showing the missing count until the Worker is redeployed.

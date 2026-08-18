@@ -218,7 +218,7 @@ export default {
         redbullring: "EVO Nürburgring GP – RACE", // server3 (fr...:60795), was Red Bull Ring
         lagunaseca: "EVO Spa Francorchamps – HOT LAP", // server4 (ca...:10648), was (guessed) Laguna Seca
         spa: "EVO Nürburgring – TOURING", // server2 (de8...:60350), was Spa Francorchamps
-        nurburgringtour: "EVO Nürburgring – TOURING #2" // server5 (fr...:60785)
+        nurburgringtour: "EVO Nürburgring – TOURING (H Shifter)" // server5 (fr...:60785)
       };
 
       const serverPlayers = {};
