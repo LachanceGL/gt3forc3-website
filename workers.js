@@ -232,9 +232,9 @@ export default {
           for (const [trackId, keyword] of Object.entries(TRACK_KEYWORDS)) {
             for (const msg of messages) {
               // endsWith, not includes: "EVO Nürburgring – TOURING" is a
-              // prefix of "EVO Nürburgring – TOURING #2"'s title, so a
-              // loose substring match would let the shorter keyword
-              // accidentally match the wrong (², nurburgringtour) server.
+              // prefix of "EVO Nürburgring – TOURING (H Shifter)"'s title,
+              // so a loose substring match would let the shorter keyword
+              // accidentally match the wrong (nurburgringtour) server.
               const embed = (msg.embeds || []).find(e => (e.title || "").endsWith(keyword));
               if (!embed) continue;
               const text = JSON.stringify(embed);
