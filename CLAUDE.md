@@ -160,13 +160,15 @@ See `docs/TODO.md` for the full list with context. Short version:
   leaderboard-rows endpoint doesn't need it and already works).
 - The Worker's `/discord/stats` `TRACK_KEYWORDS` map is keyed by the same
   `LEADERBOARDS` ids (`spa`, `redbullring`, etc.) and matches against
-  `bot.js`'s embed *titles* by substring — since those ids' displayed
-  tracks changed but the ids/keywords weren't touched, this should still
-  work mechanically (it matches physical-server identity via the bot's
-  current embed text, not the site's display name) as long as `bot.js`'s
-  own embed titles haven't changed independently. If live per-track player
-  counts on the site ever look wrong for one of the three rebranded
-  tracks, check this coupling first — see `docs/BOT-HANDOFF.md`.
+  `bot.js`'s embed *titles* via `endsWith` — it matches physical-server
+  identity through the bot's current embed text, not the site's display
+  name, which is why the ids could be rebranded without touching it.
+  **Verified end-to-end on 2026-08-18 and currently correct:** all five
+  keywords match the bot's `GAME_SERVERS` `trackName` strings
+  byte-for-byte, and live `/discord/stats` returns all five ids. If a
+  per-track count ever goes missing again, check the separator codepoint
+  first — every one of these titles uses U+2013 (en dash), and `endsWith`
+  fails silently against a plain hyphen. See `docs/BOT-HANDOFF.md`.
 - The header's live server-name status line reflects whatever
   AssettoHosting itself reports as that server's name/session — this is
   **not** driven by anything in this repo and won't match the site's

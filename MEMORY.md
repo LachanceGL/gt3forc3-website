@@ -147,3 +147,68 @@ unaffected. Verified against the bot repo's live `GAME_SERVERS` table
 **Not deployed by this commit.** `workers.js` has no `wrangler.toml` and
 no CI in this repo — it's a manual Cloudflare Workers deploy, so the live
 site keeps showing the missing count until the Worker is redeployed.
+
+**Deployed later the same day, and verified live.** The person redeployed
+the Worker to Cloudflare by hand. Confirmed from this end rather than
+taken on trust:
+
+- `GET /discord/stats` now returns all five ids in `server_players`
+  (`nordschleife`, `redbullring`, `lagunaseca`, `spa`, `nurburgringtour`)
+  — the route only writes a key when an embed *and* its "N Players
+  Online" regex both matched, so a present key proves the match worked.
+  `nurburgringtour` had been absent since 2026-08-09.
+- The deployed Worker matches this repo's tracked copy: `/discord/stats`
+  still sends `Cache-Control: public, max-age=120`, exactly as
+  `workers.js` sets it.
+- All five `TRACK_KEYWORDS` values compared byte-for-byte against the bot
+  repo's live `GAME_SERVERS` `trackName` strings: five exact matches,
+  zero orphaned bot titles, and every separator is U+2013 (en dash) on
+  both sides — the failure mode most likely to silently break `endsWith`
+  again, so it's worth re-checking that specific codepoint if a count
+  ever vanishes.
+
+This closes `docs/TODO.md`'s long-standing "never re-verified against a
+real posted embed after the rebrand" item.
+
+## 2026-08-18 (later) — why the Nordschleife board feels slow
+
+Investigated a report that the Nordschleife leaderboard takes noticeably
+longer to load than the others. **No code changed** — this is a
+measurement writeup, and the fix it points to is still open (see
+`docs/TODO.md`).
+
+Two unrelated costs, three orders of magnitude apart:
+
+| | Nordschleife | Other boards |
+|---|---|---|
+| `/rows` payload | 268 KB / 1,581 rows | ~1 KB / ~2 rows |
+| `/rows` load time | ~1.6 s | ~0.4 s |
+| Session files (`/api/v1/results`) | **815** | 36–39 |
+| Driver/flag cold load | **~283 s** | ~12 s |
+
+**The leaderboard table itself is not the problem.** Its ~1.6 s is
+AssettoHosting generating a 1,581-row board — timed directly against
+`ca.assettohosting.com:10647`, bypassing the Worker entirely: 1.58 s. The
+Worker adds ~0.02 s and already brotli-compresses the response for free
+(268 KB → 42 KB on the wire, negotiated at the Cloudflare edge; upstream
+itself sends it uncompressed). Rendering is capped to
+`LEADERBOARD_MAX_ENTRIES` before any DOM is built, so 1,581 rows never
+reach the table.
+
+**The slow part is the driver-nationality/flag data.**
+`fetchTrackDriverData()` walks every session results file one at a time
+with a 30 ms gap between requests. Nordschleife has 815 of them at
+~316 ms each ≈ 4.7 minutes cold; that's what the "Loading drivers
+data... (This can take some time, only on 1st visit)" message covers, and
+why flags trickle in late on that board specifically. If any fetch fails,
+the retry re-runs the *entire* 815-file loop, roughly doubling it.
+
+The sequential design is deliberate and should stay — the comment above
+the loop records that parallel bursts were failing outright on some
+mobile networks. The real lever is that `/serverN/*` is a bare
+pass-through with no `Cache-Control` and no `caches.default`, so every
+visitor re-fetches all 815 files from origin every hour
+(`COUNTRY_CACHE_TTL_MS`). `/discord/stats` already does edge caching
+correctly — the pattern exists, it just isn't applied to the proxy
+route. A completed session's results file is immutable, which is what
+makes caching it safe and effective.
