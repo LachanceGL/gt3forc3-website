@@ -313,15 +313,127 @@ export default {
       headers["Authorization"] = `Bearer ${env[apiKeyName]}`;
     }
 
+    // Edge-cache the proxied response where the upstream data allows it.
+    // Without this, every visitor re-fetched everything from
+    // AssettoHosting on every visit, which is what made the Nordschleife
+    // board so slow: the site's driver-nationality/flag pass walks every
+    // session results file ONE AT A TIME (deliberately — parallel bursts
+    // were failing on some mobile networks, see index.html), and server1
+    // alone has 815 of them at ~316ms each ≈ 4.7 minutes cold. Those
+    // files are immutable, so almost all of that is re-fetching bytes
+    // that provably cannot have changed. Same caches.default pattern
+    // /discord/stats above already uses.
+    const cacheControl = request.method === "GET" ? cacheControlFor(forwardPath) : null;
+    const cache = caches.default;
+    let cacheKey = null;
+    if (cacheControl) {
+      cacheKey = new Request(url.toString(), request);
+      const cachedRes = await cache.match(cacheKey);
+      if (cachedRes) return cachedRes;
+    }
+
     const res = await fetch(apiUrl, { headers });
     const data = await res.text();
 
-    return new Response(data, {
+    const responseHeaders = {
+      "Content-Type": "application/json",
+      "Access-Control-Allow-Origin": "*"
+    };
+
+    // Only ever cache a genuine success. Caching a 401/500 would pin an
+    // upstream outage in place for the whole TTL — and for a session
+    // file that TTL is 30 days, which would turn a momentary blip into a
+    // month of missing driver data with no way to flush it from here.
+    const cacheable = Boolean(cacheControl) && res.status === 200;
+    if (cacheable) responseHeaders["Cache-Control"] = cacheControl;
+
+    const response = new Response(data, {
       status: res.status,
-      headers: {
-        "Content-Type": "application/json",
-        "Access-Control-Allow-Origin": "*"
-      }
+      headers: responseHeaders
     });
+
+    // waitUntil so the cache write doesn't delay the response itself.
+    // .clone() because a Response body can only be consumed once, and the
+    // browser needs this one.
+    if (cacheable) ctx.waitUntil(cache.put(cacheKey, response.clone()));
+
+    return response;
   }
+}
+
+// How long a given proxied upstream path may be cached, as a
+// Cache-Control value — or null for "always go to origin".
+//
+// This doubles as the browser's cache policy, not just Cloudflare's,
+// since it's sent on the response: a returning visitor serves the
+// immutable session files straight from disk cache without a request at
+// all, which is where the repeat-visit win comes from.
+function cacheControlFor(forwardPath) {
+  // An individual session's results file. Once that session is over its
+  // file never changes again — the filename encodes the session's own
+  // timestamp (results_20260706_234049_qualify), so a later session is
+  // always a NEW url rather than a rewrite of this one. That's what
+  // makes hard-caching safe, and this is the entry that actually
+  // matters: it's ~99% of the site's cold-load time.
+  //
+  // "Once that session is over" is doing real work in that sentence
+  // though — see isSettledSessionFile(). A file for a session that is
+  // still running can still grow, and pinning a partial one for 30 days
+  // would silently drop those drivers from the nationality counts with
+  // no way to flush it from this repo.
+  const sessionFile = forwardPath.match(/^\/api\/v1\/results\/(.+)$/);
+  if (sessionFile) {
+    return isSettledSessionFile(sessionFile[1])
+      ? "public, max-age=2592000, immutable" // 30 days
+      : "public, max-age=300";               // 5 min, still-moving target
+  }
+
+  // The index of those files, which does grow — a new entry appears
+  // whenever a session ends. Short TTL: being a minute late to notice a
+  // brand-new session only delays that session's drivers appearing in
+  // the nationality counts, and the next visit picks them up.
+  if (forwardPath === "/api/v1/results") {
+    return "public, max-age=60";
+  }
+
+  // The public leaderboard rows. This board is described in the site's
+  // own UI as "Ranks updated every new session", so it was never
+  // real-time — but it IS the number a driver refreshes to see their own
+  // new lap on, so keep the window short enough to feel immediate.
+  // Under load (a busy race night) this also collapses every concurrent
+  // viewer into one origin fetch per window, which matters more than the
+  // per-visitor saving: Nordschleife's board is 1,581 rows / 268KB and
+  // takes AssettoHosting ~1.6s to generate.
+  if (/^\/leaderboards\/embed\/[^/]+\/rows$/.test(forwardPath)) {
+    return "public, max-age=30";
+  }
+
+  // Anything else (live session state, /api/v1/* control endpoints,
+  // anything added later) goes to origin every time. Deliberately a
+  // whitelist, not a blacklist — a new upstream endpoint should have to
+  // opt IN to being cached rather than silently inherit a TTL that might
+  // be wrong for it.
+  return null;
+}
+
+// Is this session's results file old enough that it's certainly final?
+//
+// Deliberately coarse. The filename's date is compared in UTC while the
+// game server stamps it in its own local time, and these servers live in
+// three different regions (ca/de8/fr) — so rather than guess an offset,
+// require the file to be a full 2 days old. Any real timezone gap is at
+// most ±14h, so 2 days clears it with a day to spare in either
+// direction.
+//
+// The cost of being coarse here is close to zero: on the 815-file
+// Nordschleife server all but the newest handful are far older than
+// this, so ~99% still get the 30-day cache. The cost of being wrong the
+// other way is a month of stale driver data, so this errs hard toward
+// caution — an unparseable filename is treated as still-changing, not
+// as settled.
+function isSettledSessionFile(filename) {
+  const m = filename.match(/^results_(\d{4})(\d{2})(\d{2})_/);
+  if (!m) return false;
+  const fileDayUtc = Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]));
+  return (Date.now() - fileDayUtc) > 2 * 24 * 60 * 60 * 1000;
 }

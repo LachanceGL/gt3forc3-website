@@ -212,3 +212,45 @@ visitor re-fetches all 815 files from origin every hour
 correctly — the pattern exists, it just isn't applied to the proxy
 route. A completed session's results file is immutable, which is what
 makes caching it safe and effective.
+
+**Then fixed it.** Added a cache layer to the `/serverN/*` proxy,
+reusing the `caches.default` pattern `/discord/stats` already used. The
+policy lives in `cacheControlFor()` at the bottom of `workers.js`, kept
+as a whitelist so a new upstream endpoint has to opt in rather than
+silently inherit someone else's TTL: settled session files 30 days
+`immutable`, the results list 60s, `/rows` 30s, everything else straight
+to origin.
+
+Because the `Cache-Control` goes out on the response, this is also the
+*browser's* cache policy — a returning visitor serves the session files
+from disk without a request at all, which is where the repeat-visit win
+comes from, on top of the edge cache helping first-time visitors.
+
+Two things deliberately guarded, both learned by thinking through what
+"immutable" actually promises:
+
+- **Only a `200` is ever cached.** Caching a 401/500 would pin an
+  upstream outage in place for the entire TTL — 30 days for a session
+  file, unflushable from this repo.
+- **A results file isn't hard-cached until it's 2 days old**
+  (`isSettledSessionFile()`). The immutability claim only holds *after*
+  the session ends; a live session's file can still grow, and pinning a
+  partial one would silently drop those drivers from the nationality
+  counts. The 2-day threshold is deliberately coarse because the
+  filename's date is read as UTC while the three server regions
+  (ca/de8/fr) stamp it in their own local time — 2 days clears any real
+  offset with a day to spare. It costs ~nothing: all but the newest
+  handful of the 815 files are far older than that. An unparseable
+  filename is treated as still-changing.
+
+`/rows` landed at 30s rather than the 60–120s first floated — it's the
+number a driver refreshes to see their own new lap, and the per-visitor
+saving is only ~1.6s regardless. Its real value is collapsing concurrent
+viewers on a race night into one origin fetch per window.
+
+Verified `cacheControlFor()`/`isSettledSessionFile()` against real paths
+and real filenames (including today's, a 2-day-old one, and a malformed
+one) before shipping, since a regex that silently matches nothing would
+have looked exactly like success here. **Not deployed** — same manual
+Cloudflare deploy story as the `TRACK_KEYWORDS` fix above; this does
+nothing live until the Worker is redeployed by hand.

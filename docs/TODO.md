@@ -36,7 +36,13 @@ product decisions.
 
 ## Performance
 
-- [ ] **Edge-cache the `/serverN/*` proxy route in `workers.js`.** The
+- [x] ~~**Edge-cache the `/serverN/*` proxy route in `workers.js`.**~~
+      **Implemented 2026-08-18 — but NOT deployed.** `workers.js` has no
+      `wrangler.toml` and no CI in this repo, so this does nothing live
+      until the Worker is redeployed to Cloudflare by hand. Details of
+      what was measured and why, kept for context:
+
+      The
       Nordschleife board's driver-nationality/flag data takes ~4.7 min on
       a cold visit: `fetchTrackDriverData()` fetches all **815** session
       files one at a time (~316 ms each + a 30 ms gap), and server1 has
@@ -58,10 +64,34 @@ product decisions.
       | `/api/v1/results` (the list) | 60 s | grows when a session ends |
       | `/leaderboards/embed/.../rows` | 60–120 s | "updated every new session" |
 
-      Open decision: the `/rows` TTL trades freshness for speed — 60 s
-      means a driver's new lap can take up to a minute to appear. Caching
-      only the session files (where nearly all the time actually goes)
-      and leaving `/rows` uncached is a valid, fully-safe subset.
+      **What shipped**, via `cacheControlFor()` at the bottom of
+      `workers.js` — a whitelist, so any endpoint added later has to opt
+      in rather than silently inherit a TTL:
+
+      | Route | TTL | Why |
+      |---|---|---|
+      | `/api/v1/results/<file>`, ≥2 days old | 30 days, `immutable` | that session is over; its file can't change |
+      | `/api/v1/results/<file>`, newer | 5 min | the session may still be running |
+      | `/api/v1/results` (the list) | 60 s | grows when a session ends |
+      | `/leaderboards/embed/.../rows` | 30 s | "updated every new session" |
+      | anything else | not cached | goes to origin every time |
+
+      Two guards worth not undoing: only a `200` is ever cached (caching
+      a 401/500 would pin an upstream outage for the full TTL, and for a
+      session file that's 30 days with no way to flush it from here), and
+      `isSettledSessionFile()` refuses to hard-cache a results file until
+      it's a full 2 days old, because a still-running session's file can
+      still grow and the servers stamp filenames in three different
+      regions' local time. An unparseable filename counts as
+      still-changing.
+
+      `/rows` landed at 30 s rather than the 60–120 s originally floated:
+      it's the number a driver refreshes to see their own new lap on, and
+      the per-visitor saving there is only ~1.6 s anyway — the real value
+      of caching it is collapsing a busy race night's concurrent viewers
+      into one origin fetch per window. Lower it further, or drop the
+      `/rows` rule entirely, if even 30 s feels stale; nearly all the
+      speedup lives in the session files, not here.
 
       Note the leaderboard *table* is not the problem and needs no work:
       its ~1.6 s is AssettoHosting generating a 1,581-row board (timed
