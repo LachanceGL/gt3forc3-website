@@ -173,9 +173,10 @@ See `docs/TODO.md` for the full list with context. Short version:
   AssettoHosting itself reports as that server's name/session — this is
   **not** driven by anything in this repo and won't match the site's
   branding until someone updates it on AssettoHosting's own control panel.
-  Confirmed stale for server4 as of this writing (still says "Laguna
-  Seca... Race... 10 Laps" despite the site showing "Spa Francorchamps /
-  Hot Lap"). Not a bug to fix here.
+  **All five were re-checked on 2026-08-18 and now match the site's
+  branding**, including server4, which had been stale on "Laguna Seca //
+  RACE // 10 Laps" since the rebrand. If one drifts again it's a control
+  panel edit, not a bug to fix here.
 ## Conventions this codebase already follows — keep following them
 
 - **No build step, no framework.** `index.html` is intentionally a single

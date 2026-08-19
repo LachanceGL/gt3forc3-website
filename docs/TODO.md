@@ -6,14 +6,19 @@ product decisions.
 
 ## Needs action outside this repo (AssettoHosting control panel)
 
-- [ ] Server4 (currently `lagunaseca` id, displays "Spa Francorchamps /
-      Hot Lap") still broadcasts its own name as `"GT3FORC3.COM // RACE
-      // Laguna Seca – 10 Laps / Q8"` — confirmed directly against the
-      latest session's raw data. This needs the server's own
-      name/session-description setting changed on AssettoHosting's side;
-      nothing in this repo can fix it. Worth checking servers 2 and 3
-      (`spa`/"Nürburgring" and `redbullring`/"Nürburgring GP") for the
-      same staleness, since they were rebranded the same way.
+- [x] ~~Server4 broadcasts a stale name ("Laguna Seca – 10 Laps / Q8"),
+      and servers 2/3 may be stale the same way.~~ **Fixed on
+      AssettoHosting's side; re-verified 2026-08-18, closed.** All five
+      servers' `server_name` strings were read back from their own latest
+      session data and all five now match the site's branding:
+
+      | server | broadcasts |
+      |---|---|
+      | 1 | `HOT LAP // Nürburgring Nordschleife – Leaderboard` |
+      | 2 | `TOURING // Nürburgring – Road & Track Cars – Weather` |
+      | 3 | `RACE // Nürburgring GP – 5 Laps / Q5` |
+      | 4 | `HOT LAP // Spa Francorchamps – Leaderboard` |
+      | 5 | `TOURING // Nürburgring – H SHIFTER Road Cars` |
 - [ ] If any *other* `LEADERBOARDS` entry gets repointed to a new share
       key in the future, expect a `401` from `/leaderboards/embed/.../rows`
       until the person publishes it on AssettoHosting's side — not a bug,
@@ -21,12 +26,11 @@ product decisions.
 
 ## Infrastructure
 
-- [ ] Set `ASSETTO_API_KEY_5` in the Cloudflare Worker's environment
-      (dashboard or `wrangler secret put ASSETTO_API_KEY_5`) — without it,
-      `/api/v1/*` requests to server5 will fail auth (the public
-      leaderboard-rows endpoint doesn't need it and already works).
-      Status unconfirmed as of this writing — verify before assuming it's
-      still outstanding.
+- [x] ~~Set `ASSETTO_API_KEY_5` in the Cloudflare Worker's
+      environment.~~ **Already set; verified 2026-08-18, closed.**
+      `/api/v1/results` returns `200` through the Worker for all five
+      server prefixes, which only happens if each one's Bearer key is
+      present server-side.
 - [ ] `bot.js` (in `forc3-discordbot`, not this repo): still has server
       entries present but `enabled: false` per that repo's own docs,
       waiting on real `.env` credentials and real status-image URLs. Not
