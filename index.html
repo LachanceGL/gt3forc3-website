@@ -48,7 +48,7 @@
        centered/padded 900px column using the standard "100vw + negative
        margin" trick, and cancels body's own top padding so it sits flush
        against the top edge of the viewport instead of leaving a gap. */
-    .patreon-topbar {
+    .powered-topbar {
       display: flex;
       align-items: center;
       justify-content: flex-end;
@@ -72,7 +72,7 @@
       padding: 6px 20px;
       transition: background 0.15s ease;
     }
-    .patreon-topbar:hover {
+    .powered-topbar:hover {
       background: #232323;
       color: #ccc;
     }
@@ -82,16 +82,28 @@
        brings that black up to a specific gray level — reliable recoloring
        to one flat tone no matter what the original SVG looked like. Kept
        at a mid-gray (not pushed as low as pure black) so it stays visible
-       against this bar's #1a1a1a background rather than disappearing. */
-    .patreon-topbar-icon {
+       against this bar's #1a1a1a background rather than disappearing.
+
+       This matters more for the FORC3MOD wordmark than it did for the
+       Patreon one it replaced: the source file paints itself with a blue
+       gradient (#4fb3ff → #2f6fff), and blue is off-palette for this site
+       — red is the house color and purple is reserved for the Touring
+       boards. Flattening it to the same gray as the bar's own text keeps
+       the attribution understated instead of dropping a saturated blue
+       wordmark above a red-bordered bar. Remove the filter if the brand
+       blue is ever wanted verbatim; the gradient is intact in the file. */
+    .powered-topbar-logo {
       display: inline-block;
+      /* Wordmark, not an icon — 589x70 in the source, so 9px tall renders
+         it ~76px wide, close to the ~65px the Patreon wordmark occupied
+         at this same height. */
       height: 9px;
       width: auto;
       flex-shrink: 0;
       filter: brightness(0) invert(50%);
       transition: filter 0.15s ease;
     }
-    .patreon-topbar:hover .patreon-topbar-icon {
+    .powered-topbar:hover .powered-topbar-logo {
       filter: brightness(0) invert(65%);
     }
     .title-link {
@@ -101,7 +113,7 @@
       opacity: 0.85;
     }
     /* Was a plain <img>. filter can only push a source SVG toward one flat
-       tone (see the Patreon/Discord icon recoloring elsewhere in this
+       tone (see the top bar / Discord icon recoloring elsewhere in this
        file), not a real multi-color gradient — so this is now an empty
        div, painted with a gradient background and shaped by the same SVG
        used purely as a mask (mask-image reveals the gradient only where
@@ -1561,9 +1573,9 @@
   <!-- Umami Analytics --><script defer src="https://cloud.umami.is/script.js" data-website-id="b86daa6e-9440-444b-8033-d814a8273437"></script><!-- End Umami Analytics -->
 </head>
 <body>
-  <a class="patreon-topbar" href="https://www.patreon.com/cw/forc3mod/membership" target="_blank" rel="noopener">
-    Support GT3 FORC3 on
-    <img class="patreon-topbar-icon" src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/b26d038a3d517e935f740cb17d0cf85c7a8bb9fb/images/Patreon_logo.svg" alt="">
+  <a class="powered-topbar" href="https://www.forc3mod.com" target="_blank" rel="noopener">
+    GT3FORC3 powered by
+    <img class="powered-topbar-logo" src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/8ea3076847be5b70270221e596a08ccc2d7b7567/images/forc3mod-logo.svg" alt="FORC3MOD">
   </a>
 
   <div class="admin-panel" id="admin-panel">
