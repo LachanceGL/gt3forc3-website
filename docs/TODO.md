@@ -108,12 +108,15 @@ product decisions.
 - [ ] Spot-check the "unconfirmed guess" car-image pairings listed in
       `docs/DATA-REFERENCE.md` (GT3 Cup trio, GT3 RS pair, Dallara Stradale
       Coupe/Spider) against the actual game if/when possible.
-- [ ] No confirmed allowed-cars list exists for `spa` (the "Nürburgring —
-      Road & Track Cars" board). It currently has no `carClassList` at
-      all, so the "Allowed Cars" dropdown just stays hidden for it. If a
-      real car list for that specific server/session pool is ever
-      provided, add it — don't reuse `nurburgringtour`'s 29-car list,
-      they're different servers.
+- [x] ~~No confirmed allowed-cars list exists for `spa` (the
+      "Nürburgring — Road & Track Cars" board), so its dropdown stays
+      hidden.~~ **Answered 2026-08-22, closed.** Per the person, that
+      server allows every car except F1 — so there was never a list to
+      find, just a rule to state. Added `carClassNote`, a config field
+      that renders one line in place of the car table; the dropdown now
+      opens as "Road & Track Cars List" and reads "All cars available
+      except F1". Still don't reuse `nurburgringtour`'s 29-car list here;
+      different servers.
 
 ## Product decisions not yet made (deferred, not urgent)
 

@@ -94,13 +94,15 @@ cache-key link — unrelated to what `spa` currently displays.
 - **`GT3_CAR_CLASS_LIST`** — one shared 11-car list, currently reused by
   **three** tracks (Nordschleife, `redbullring`/"Nürburgring GP",
   `lagunaseca`/"Spa Francorchamps") — not four; `spa` (currently
-  "Nürburgring") has no car class list at all. Red-themed, button label
+  "Nürburgring") has no car class *list* — it uses `carClassNote`
+  instead, see below. Red-themed, button label
   "GT3 Cars List".
 - **`nurburgringtour`'s own `carClassList`** (inline in its config entry)
   — 29-car list, purple-themed (was turquoise — see
   `docs/DATA-REFERENCE.md` for the palette swap), button label "Road Cars
   List". Not shared with anything else, including the *other*
-  Touring-templated board (`spa`), which has no car list of its own.
+  Touring-templated board (`spa`), which describes its roster with a
+  one-line `carClassNote` rather than a car list.
 - **The "Allowed Cars" dropdown** (`.car-class-dropdown` /
   `renderCarClassSection()` / `renderCarClassRows()`) is a single reused
   DOM widget, not duplicated per track — its button label, panel title,
@@ -144,11 +146,15 @@ See `docs/TODO.md` for the full list with context. Short version:
   share an identical ratio with no way to tell which image file is which
   trim. These are flagged with inline comments in `GT3_CAR_CLASS_LIST` and
   the `nurburgringtour` `carClassList` — grep for "unconfirmed guess".
-- `spa` (currently "Nürburgring", the "Road & Track Cars" board) has no
-  `carClassList` at all — no confirmed allowed-cars data exists for that
-  specific server/session pool. The "Allowed Cars" dropdown just stays
-  hidden for it. Don't reuse `nurburgringtour`'s list for it; they're
-  different servers.
+- `spa` (currently "Nürburgring", the "Road & Track Cars" board) still
+  has no enumerated `carClassList`, and doesn't need one: per the person,
+  that server allows every car except F1. It now sets **`carClassNote`**
+  — a config field that renders a single line in place of the car table,
+  so the dropdown opens and says "All cars available except F1" instead
+  of staying hidden. Button label "Road & Track Cars List", purple theme.
+  A board with a `carClassNote` and no list also hides the panel's sort
+  button, since there are no rows to reorder. Still don't reuse
+  `nurburgringtour`'s 29-car list here; they're different servers.
 - `bot.js` has two server entries (referenced there as Laguna Seca,
   Nürburgring Touring — bot-side naming, may now be stale relative to the
   site's rebrand) present but `enabled: false`, waiting on real `.env`
