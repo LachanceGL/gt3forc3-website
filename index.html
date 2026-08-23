@@ -143,15 +143,14 @@
       /* Stroke first, fill on top — the whole reason the outer half reads
          as a clean outline instead of eating into the letterforms. */
       paint-order: stroke fill;
-      /* Carried over unchanged from the masked-div version, so the stroke
-         is the only intended visual change here. Worth knowing that the
-         original reason for box-shadow over filter: drop-shadow no longer
-         applies: that was about a filter resampling a MASKED graphic's
-         edges, and there's no mask any more — this is real vector
-         geometry now, which a filter rasterizes at full device
-         resolution. So a silhouette-hugging drop-shadow is available if
-         the rectangular halo ever looks wrong against the new outline. */
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.9), 0 0 8px rgba(0, 0, 0, 0.6);
+      /* Deliberately NO box-shadow. It used to carry one, back when this
+         was a masked div and a box-shaped halo was the only shadow
+         available — box-shadow follows the element's BOX, so it drew a
+         dark rectangle around the whole 252x38 area regardless of the
+         letters inside it. Harmless while the logo was a flat masked
+         shape; obvious and wrong the moment the artwork got its own
+         outline, since the rectangle reads as a border around the logo.
+         The stroke is the separation from the background now. */
       transition: fill 0.2s ease;
     }
     /* vector-effect is NOT an inherited property, so unlike fill/stroke it
