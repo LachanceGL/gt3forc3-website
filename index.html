@@ -1433,6 +1433,42 @@
       border-radius: 4px;
       transition: width 0.2s ease-out;
     }
+    /* Indeterminate variant, for the leaderboard.
+
+       The drivers-data bar above is determinate: it walks a known number
+       of session files, so completed/total is a real number and the fill
+       reports honest progress. A leaderboard load is a single fetch with
+       no progress events — there is nothing truthful to express as a
+       percentage, and a fake creeping bar would be worse than none. So
+       this reuses the same track geometry and red fill but sweeps across
+       instead, which reads as "working" without claiming to know how far
+       along it is. */
+    .loading-bar-track.indeterminate .loading-bar-fill {
+      width: 35%;
+      /* Kill the inherited width transition — this variant animates via
+         transform, and leaving a width transition armed would make the
+         two fight if anything ever set a width on this fill. */
+      transition: none;
+      animation: loading-bar-sweep 1.1s ease-in-out infinite;
+    }
+    @keyframes loading-bar-sweep {
+      /* translateX percentages resolve against the ELEMENT's own width,
+         not the track's. The fill is 35% of the track, so clearing the
+         full track means travelling 100/35 ≈ 286% of itself — starting
+         at -100% (fully off the left edge) and ending there, so it
+         enters and exits cleanly rather than stopping short of each end. */
+      0%   { transform: translateX(-100%); }
+      100% { transform: translateX(286%); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      /* Still show *a* cue, just not a moving one — a dimmed static bar
+         beats either a strobing sweep or no feedback at all. */
+      .loading-bar-track.indeterminate .loading-bar-fill {
+        animation: none;
+        width: 100%;
+        opacity: 0.45;
+      }
+    }
     #status:not(:empty) {
       padding: 12px 0;
     }
@@ -1700,6 +1736,9 @@
       </div>
     </div>
     <div id="leaderboard-status"></div>
+    <div class="loading-bar-track indeterminate" id="leaderboard-loading-bar">
+      <div class="loading-bar-fill"></div>
+    </div>
     <div class="rank-toggle-row" id="rank-toggle-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Ranked by</span>
@@ -3220,6 +3259,7 @@
       const requestId = ++leaderboardRequestId;
       const lbStatusEl = document.getElementById("leaderboard-status");
       const lbFrameEl = document.getElementById("leaderboard-frame");
+      const lbBarEl = document.getElementById("leaderboard-loading-bar");
       const config = LEADERBOARDS[track];
 
       // Cleared eagerly (not just when we confirm this track is empty)
@@ -3233,6 +3273,14 @@
       // Serve from cache instantly if we've already fetched this track
       if (leaderboardCache[track]) {
         lbStatusEl.textContent = "";
+        // Nothing is loading on this path, so make sure no bar is left
+        // running. This matters more than it looks: if a slow request for
+        // another track is still in flight, it has just been superseded
+        // by this one and will bail out as stale WITHOUT clearing the bar
+        // (it no longer owns it — see the finally block below), so if
+        // this path didn't clear it the sweep would run forever over an
+        // already-rendered board.
+        if (lbBarEl) lbBarEl.classList.remove("visible");
         // A previous track's empty-message styling (red border/background
         // box) doesn't get cleared just by emptying the text — it's a
         // CSS class, and this cache-hit path is the one spot that forgot
@@ -3248,6 +3296,7 @@
       lbStatusEl.textContent = "Loading leaderboard...";
       lbStatusEl.className = "";
       lbFrameEl.innerHTML = "";
+      if (lbBarEl) lbBarEl.classList.add("visible");
       updateLeaderboardTitle(track, 0);
 
       try {
@@ -3284,6 +3333,15 @@
         if (requestId !== leaderboardRequestId) return;
         lbStatusEl.textContent = "Error loading leaderboard: " + err.message;
         lbStatusEl.className = "error";
+      } finally {
+        // Only the newest request owns the bar. A superseded one must
+        // leave it alone — it reaches here via the stale-guard `return`
+        // above, and hiding it would yank the cue out from under the
+        // request that's still genuinely loading. `finally` covers every
+        // exit (success, empty board, error, and that stale return).
+        if (lbBarEl && requestId === leaderboardRequestId) {
+          lbBarEl.classList.remove("visible");
+        }
       }
     }
 
