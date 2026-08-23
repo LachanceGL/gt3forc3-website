@@ -1475,6 +1475,14 @@
     .loading-bar-track.visible {
       display: block;
     }
+    /* Gap between "Loading leaderboard..." and the bar. Sits on the BAR
+       rather than on the status text so it can't ever strand a phantom
+       gap: the track is display:none until .visible, so the margin simply
+       doesn't exist while nothing is loading. Scoped by id so it doesn't
+       also push the drivers-data bar, which has its own spacing. */
+    #leaderboard-loading-bar {
+      margin-top: 10px;
+    }
     .loading-bar-fill {
       height: 100%;
       width: 0%;
@@ -1538,7 +1546,13 @@
       padding: 20px 16px;
       margin: 4px 0 16px;
     }
-    #status.loading {
+    /* Shared by both status lines — the drivers-data one (#status) and
+       the leaderboard's (#leaderboard-status). Kept id-scoped rather than
+       collapsed to a bare `.loading`, because #status carries its own
+       `color: #999` at id specificity, which a plain class selector would
+       lose to. */
+    #status.loading,
+    #leaderboard-status.loading {
       color: #ff2727;
       font-weight: 700;
       text-transform: uppercase;
@@ -3417,7 +3431,7 @@
       }
 
       lbStatusEl.textContent = "Loading leaderboard...";
-      lbStatusEl.className = "";
+      lbStatusEl.className = "loading";
       lbFrameEl.innerHTML = "";
       if (lbBarEl) lbBarEl.classList.add("visible");
       updateLeaderboardTitle(track, 0);
@@ -3449,6 +3463,10 @@
         leaderboardCache[track] = rows;
 
         lbStatusEl.textContent = "";
+        // Emptying the text is not enough — the styling is a class, and
+        // leaving "loading" on a now-empty element is exactly the bug the
+        // cache-hit path already had once (see docs/DECISIONS.md).
+        lbStatusEl.className = "";
         lbFrameEl.innerHTML = "";
         lbFrameEl.appendChild(renderLeaderboardRows(rows));
         updateLeaderboardTitle(track, currentLeaderboardEntries.length);
