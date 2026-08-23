@@ -201,8 +201,13 @@ See `docs/TODO.md` for the full list with context. Short version:
     theming — it's fine to introduce the CSS-variable version for *new*
     themed things, no need to retrofit everything.
 - **`box-shadow`, not `filter: drop-shadow`, on anything already using a
-  CSS `mask-image` or otherwise being composited/rasterized (the site
-  logo is the current example).** `filter` forces the element through an
+  CSS `mask-image` or otherwise being composited/rasterized.** (The site
+  logo *used* to be the example here and no longer is — as of 2026-08-22
+  it's an inlined `<svg>`, not a masked div, so the rasterization concern
+  below doesn't apply to it any more. It still uses `box-shadow`, but now
+  by inheritance rather than necessity; a silhouette-hugging
+  `drop-shadow` would be legitimate on it today.) `filter` forces the
+  element through an
   offscreen rasterization pass to compute the shadow, which can resample
   a masked/vector graphic's edges at visibly lower quality than normal
   rendering. `box-shadow` reads the element's box geometry directly
