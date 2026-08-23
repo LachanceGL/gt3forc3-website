@@ -121,7 +121,16 @@
        accessible the way alt text did on the old <img>. */
     .site-logo {
       display: block;
-      width: 252px;
+      /* 256.72, not 252. The source viewBox was cropped tight to the
+         artwork — zero slack on all four edges — and an <svg> is
+         overflow:hidden by default, so the outer half of the stroke was
+         being clipped off on every side (most visibly at the top-right,
+         where the flag squares sit right in the corner). The viewBox now
+         carries 3 user units of padding, and the width is scaled by the
+         same ratio (326.01172/320.01172) so the letterforms render at
+         exactly the size they did before rather than shrinking ~2% to
+         make room. */
+      width: 256.72px;
       max-width: 100%;
       /* The viewBox gives the element its own intrinsic ratio, so height
          follows automatically — no aspect-ratio needed (and the old
@@ -1679,7 +1688,7 @@
              Fill/stroke are set in CSS (not as attributes here) so the
              hover state can override the gradient with one rule. -->
         <svg class="site-logo" role="img" aria-label="GT3FORC3.COM — Sim Racing Community"
-             viewBox="0 0 320.01172 48.47705" xmlns="http://www.w3.org/2000/svg">
+             viewBox="-3 -3 326.01172 54.47705" xmlns="http://www.w3.org/2000/svg">
           <defs>
             <!-- userSpaceOnUse, spanning the whole viewBox: the default
                  (objectBoundingBox) resolves per-element, which would give
