@@ -1,0 +1,60 @@
+name: Rebuild driver index
+
+# Hourly, which is not arbitrary: it matches COUNTRY_CACHE_TTL_MS in
+# index.html, the interval the browser used to re-derive this data for
+# itself. So nothing on the site gets staler than it already was.
+#
+# workflow_dispatch is here so the index can be rebuilt on demand after a
+# server is added or rebranded, without waiting for the hour.
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+
+# Least privilege: the job only needs to push the regenerated file.
+permissions:
+  contents: write
+
+# A run started while the previous one is still going would race on the
+# same file and the same branch. Queue instead, and don't cancel a run
+# mid-push.
+concurrency:
+  group: driver-index
+  cancel-in-progress: false
+
+jobs:
+  rebuild:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # No pip install step on purpose -- the script deliberately uses only
+      # the standard library, so there's nothing to resolve, pin or break.
+      - name: Rebuild the index
+        run: python scripts/build_driver_index.py --out data/driver-index.json
+
+      # Commit ONLY when the content actually changed. Most hours nothing
+      # will have: a new session appears constantly, but a new *driver*
+      # doesn't, and only drivers affect this file. Without this guard the
+      # repo would take an empty 1.1MB commit every hour forever.
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- data/driver-index.json; then
+            echo "No change to the driver index; nothing to commit."
+            exit 0
+          fi
+          git config user.name  "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/driver-index.json
+          git commit -m "Rebuild driver index
+
+          Automated hourly rebuild via .github/workflows/driver-index.yml.
+          Committed only because the content actually changed."
+          # Rebase rather than force: a human push landing between the
+          # checkout and this push must not be discarded by a bot job.
+          git pull --rebase --autostash origin main
+          git push origin HEAD:main
