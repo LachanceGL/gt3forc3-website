@@ -81,6 +81,52 @@ JSON) — it's deliberately not coupled to the bot's internal code, only to
 the text it happens to post, so the two can be deployed/changed
 independently.
 
+## Where per-lap times and sector splits live
+
+Checked against the live API on 2026-08-26, prompted by a standing
+belief that lap times couldn't be retrieved at all. They can — just not
+from the endpoint the leaderboard uses.
+
+**`/leaderboards/embed/<shareKey>/rows`** (the public embed endpoint the
+site renders) returns only `Position`, `FullName`, `Nickname`, `CarName`,
+`BestLap`, `SessionType`, `SessionDate`. `BestLap` is a preformatted
+`"M:SS.mmm"` string. There is no lap history and no sector data here, and
+there never was — this endpoint is a summary.
+
+**`/api/v1/results/<file>`** (API-keyed, one file per session) carries the
+real thing, in a `laps` array:
+
+```json
+{
+  "car_key":    { "a": "...", "b": "..." },
+  "driver_key": { "a": "...", "b": "..." },
+  "time": 466173,                          // whole lap, MILLISECONDS
+  "split": [123456, 159189, 183528],       // three sectors, ms
+  "flags": 1
+}
+```
+
+`driver_key` joins to `drivers[].guid` — the same `{a, b}` pair shape.
+Verified against a real session: 35 of 35 laps matched a driver, so the
+join is reliable, not best-effort. Note this is NOT `player_id`; that
+field exists on `drivers[]` too but does not appear on a lap.
+
+**Why it looks like lap data doesn't exist.** Most sessions have
+`laps: []`. In a 31-session sample spread across the full history, only
+10 (~32%) had any laps at all — the rest are a single driver joining and
+leaving without completing one. Sampling a handful of recent sessions is
+therefore very likely to return nothing but empty arrays and give the
+impression the field is never populated. Across the ~815 sessions on
+server1 that extrapolates to roughly 260 sessions carrying real lap data.
+
+**Not established:** what `flags` means. Values `1` and `2` were both
+observed on laps that otherwise look normal, and the guess that it's a
+valid/invalidated marker is only a guess — confirm before filtering on it.
+
+`time_standings` is a parallel array of raw millisecond integers (not
+objects), positionally aligned with `drivers`/`driver_standings` — that's
+the one `ensureRaceTotalTimesLoaded()` already reads for Race boards.
+
 ## Data flow for a leaderboard tab load
 
 1. Person clicks a track tab (or loads a URL with `#track` hash).
