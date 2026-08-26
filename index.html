@@ -2016,9 +2016,6 @@
       return `https://www.hltv.org/img/static/flags/30x20/${iso2}.gif`;
     }
 
-    const COUNTRY_CACHE_KEY = "gt3_country_data_v11";
-    const COUNTRY_CACHE_TTL_MS = 60 * 60 * 1000; // 1 hour
-
     function renderCountryData(nationCounts, uniqueDriverCount) {
       // BVT (Bouvet Island) and ALA (Åland Islands) excluded from display
       // — almost certainly GeoIP misreads rather than real driver
@@ -2087,118 +2084,15 @@
     const EXCLUDED_NATIONS = new Set(["REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN", "BES", "ATF", "GGY", "GIB", "BLM", "NCL", "VGB", "XKX"]);
 
     // Fetches and tallies driver/nation data for ONE track's session pool.
-    // Kept per-track (rather than one combined fetch across every track) so
-    // that adding more tracks in the future doesn't make every visitor pay
-    // for fetching every track's full session history — a track's data is
-    // only ever fetched when that track is actually viewed.
-    async function fetchTrackDriverData(workerPrefix, onProgress) {
-      const seenPlayers = new Set();
-      const nationCounts = {};
-      // Best-effort "First Last" -> nation lookup, used to show a flag next
-      // to a driver's name on the leaderboard. The leaderboard's own data
-      // source (/rows) doesn't include nation at all, so this is the only
-      // way to attach one — matched purely by name, since that's the only
-      // field both sources share. Not guaranteed unique or complete.
-      const nameToNation = {};
-
-      // "First Last" (lowercase) -> player_id (Steam64), and the reverse:
-      // player_id -> every lowercase name seen under that account. /rows
-      // (what the leaderboard itself is built from) has no persistent ID at
-      // all — only these session-results files do — so this is the only
-      // way to recognize "same driver, renamed" rather than treating a
-      // rename as an unrelated new person. Used to make FLAGGED_DRIVERS and
-      // VERIFIED_DRIVERS follow the account instead of the exact string.
-      const nameToPlayerId = {};
-      const playerIdToNames = {};
-
-      // player_id -> nation, taking whichever nation was set on their MOST
-      // RECENT session overall (sessions are processed newest-first, so
-      // "first seen for this player_id" already means "most recent"). A
-      // leaderboard row can be frozen under an old name from long ago, but
-      // the flag next to it should show the driver's current nationality,
-      // not whatever nation happened to be set back when that old name was
-      // last used — this is what makes that possible.
-      const playerIdToNation = {};
-
-      const listRes = await fetch(WORKER_URL + workerPrefix + "/api/v1/results");
-      if (!listRes.ok) throw new Error("Server returned " + listRes.status);
-      const listData = await listRes.json();
-
-      const sessions = (listData.results || [])
-        .slice()
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      // Fetch one session at a time, sequentially, with a short gap between
-      // requests. A batch of parallel requests was failing entirely on some
-      // mobile networks/browsers even with retries — going fully sequential
-      // removes any "burst" pattern that a carrier, router, or content
-      // blocker might be flagging.
-      let hadFailures = false;
-      let completed = 0;
-      if (onProgress) onProgress(0, sessions.length);
-      for (const session of sessions) {
-        let value;
-        try {
-          value = await fetchWithRetry(WORKER_URL + workerPrefix + session.download_url, 3);
-        } catch (err) {
-          hadFailures = true;
-          completed++;
-          if (onProgress) onProgress(completed, sessions.length);
-          await new Promise(r => setTimeout(r, 30));
-          continue;
-        }
-        await new Promise(r => setTimeout(r, 30));
-
-        completed++;
-        if (onProgress) onProgress(completed, sessions.length);
-
-        const drivers = value.drivers || [];
-        drivers.forEach(driver => {
-          const key = driver.player_id || `${driver.first_name}-${driver.last_name}`;
-          const nation = driver.nation;
-
-          const fullName = `${driver.first_name || ""} ${driver.last_name || ""}`.trim();
-          const nameKey = fullName.toLowerCase();
-          if (nameKey && nation && !(nameKey in nameToNation)) {
-            nameToNation[nameKey] = nation;
-          }
-
-          if (nameKey && driver.player_id) {
-            if (!(nameKey in nameToPlayerId)) nameToPlayerId[nameKey] = driver.player_id;
-            if (!playerIdToNames[driver.player_id]) playerIdToNames[driver.player_id] = new Set();
-            playerIdToNames[driver.player_id].add(nameKey);
-          }
-
-          if (driver.player_id && nation && !(driver.player_id in playerIdToNation)) {
-            playerIdToNation[driver.player_id] = nation;
-          }
-
-          if (seenPlayers.has(key)) return;
-          seenPlayers.add(key);
-
-          if (!nation || EXCLUDED_NATIONS.has(nation)) return;
-          nationCounts[nation] = (nationCounts[nation] || 0) + 1;
-        });
-      }
-
-      return { nationCounts, nameToNation, nameToPlayerId, playerIdToNames, playerIdToNation, seenPlayerKeys: seenPlayers, hadFailures };
-    }
-
-    // Holds each track's fetched nation data once loaded, keyed by track id
-    // (e.g. "nordschleife"). Used to recompute the combined country grid and
-    // driver flag lookup as more tracks get loaded over time.
+    // Holds each source's driver/nation data once the index has loaded,
+    // keyed by the LEADERBOARDS driver-data source id (e.g. "nordschleife").
+    // Used to recompute the combined country grid and driver flag lookup.
     const loadedTrackData = {};
 
-    // Merged across every track loaded so far. Used to show a flag next to
-    // a driver's name on the leaderboard.
+    // Merged across every source. Used to show a flag next to a driver's
+    // name on the leaderboard.
     let driverNationMap = {};
 
-    // Recomputes the combined "Drivers Around The World" grid and the
-    // merged flag lookup from whatever tracks have been loaded so far, then
-    // re-renders both. A driver who has raced more than one loaded track
-    // will be counted once per track here (each track dedupes its own
-    // drivers, but there's no cross-track identity check) — a minor
-    // over-count, traded for keeping each track's fetch independent.
     // Lowercase driver-name sets, expanded from FLAGGED_DRIVERS/VERIFIED_DRIVERS
     // to also include every other name the same underlying account (by
     // player_id) has raced under — so a rename doesn't let a flagged driver
@@ -2292,146 +2186,91 @@
       refreshLeaderboardFlags();
     }
 
-    // Loads a single track's driver/nation data (from cache if fresh, else
-    // network), merges it in, and re-renders. Safe to call repeatedly for
-    // the same track — it no-ops if that track is already loaded in memory.
-    // Tracks an in-progress fetch per dataKey, so a second trigger (e.g.
-    // switching tabs while the initial eager-load is still running) awaits
-    // the SAME fetch instead of starting a duplicate one. Without this,
-    // two "sequential" fetch loops could run concurrently for the same
-    // track — exactly the kind of request burst the sequential design was
-    // meant to avoid — which was causing individual session fetches to
-    // fail and a degraded partial result to get cached as if complete.
-    const pendingTrackDataFetch = {};
+    // Loads the precomputed driver index (data/driver-index.json) exactly
+    // once per page, then fills loadedTrackData for every source it
+    // contains.
+    //
+    // This replaced a per-track walk of every session results file, one
+    // request at a time, in the browser: 954 files on server1 alone, ~31MB
+    // and ~4.7 minutes on a cold visit, re-done hourly by every visitor,
+    // all to rebuild a nation histogram and a name->nation lookup that are
+    // identical for everyone. That aggregation now happens once in CI
+    // (scripts/build_driver_index.py, rebuilt hourly by
+    // .github/workflows/driver-index.yml) and ships as a single ~379KB
+    // gzipped file.
+    //
+    // No localStorage layer any more, deliberately. It existed to avoid
+    // repeating a 4.7-minute walk; for one cacheable static file, HTTP
+    // caching already does the job better — a repeat visit is a 304 of a
+    // few hundred bytes, and there's no hand-rolled TTL to go stale or
+    // corrupt.
+    let driverIndexPromise = null;
 
-    async function ensureTrackDataLoaded(trackId) {
-      // Some tracks (e.g. Spa, now that the server runs Kyalami) don't have
-      // their own live driver pool anymore — they alias to whichever track
-      // actually shares their underlying server, so we fetch/cache once
-      // under that track's id instead of duplicating the same live data.
-      const dataKey = (LEADERBOARDS[trackId] && LEADERBOARDS[trackId].driverDataSource) || trackId;
-
-      if (loadedTrackData[dataKey]) return; // already loaded this session
-
-      // A fetch for this exact track is already in flight — wait on it
-      // rather than starting a second one.
-      if (pendingTrackDataFetch[dataKey]) return pendingTrackDataFetch[dataKey];
-
-      const config = LEADERBOARDS[dataKey];
-      if (!config) return;
-
-      const cacheKey = COUNTRY_CACHE_KEY + "_" + dataKey;
-
-      let cached = null;
-      try {
-        const raw = localStorage.getItem(cacheKey);
-        if (raw) cached = JSON.parse(raw);
-      } catch (err) {
-        // Ignore corrupt cache
-      }
-
-      // localStorage only stores plain JSON — playerIdToNames was serialized
-      // as arrays for storage, so rebuild it into Sets here to match the
-      // shape fresh network results use.
-      if (cached && cached.playerIdToNames) {
-        const rebuilt = {};
-        Object.entries(cached.playerIdToNames).forEach(([pid, names]) => {
-          rebuilt[pid] = new Set(names);
-        });
-        cached.playerIdToNames = rebuilt;
-      }
-      if (cached && cached.seenPlayerKeys) {
-        cached.seenPlayerKeys = new Set(cached.seenPlayerKeys);
-      }
-
-      if (cached && cached.nationCounts) {
-        loadedTrackData[dataKey] = cached;
-        recomputeAndRenderTrackData();
-      } else {
-        statusEl.textContent = "Loading drivers data... (This can take some time, only on 1st visit)";
-        statusEl.className = "loading";
-      }
-
-      const isStale = !cached || (Date.now() - cached.timestamp > COUNTRY_CACHE_TTL_MS);
-      if (!isStale) return; // cache is fresh enough, skip the network entirely
+    function loadDriverIndex() {
+      if (driverIndexPromise) return driverIndexPromise;
 
       const barTrackEl = document.getElementById("loading-bar-track");
       const barFillEl = document.getElementById("loading-bar-fill");
-      // Only show progress for a genuine cold load (no usable cache yet).
-      // When we already have cached data on screen, this fetch is just a
-      // silent background revalidation — showing a progress bar for that
-      // would make an already-loaded page look like it's re-loading from
-      // scratch, which is confusing on a 2nd+ visit.
-      const hadCache = Boolean(cached && cached.nationCounts);
-      const showProgress = (completed, total) => {
-        if (hadCache || !barTrackEl || !barFillEl || !total) return;
-        barTrackEl.classList.add("visible");
-        barFillEl.style.width = `${Math.min(100, (completed / total) * 100)}%`;
-      };
-      const hideProgress = () => {
-        if (hadCache || !barTrackEl || !barFillEl) return;
-        barTrackEl.classList.remove("visible");
-        barFillEl.style.width = "0%";
-      };
+      // One fetch has no meaningful percentage to report, so use the
+      // indeterminate sweep rather than a progress bar that would be
+      // making its numbers up. The fill's own width is driven by the
+      // .indeterminate rule, so clear any inline width left behind.
+      if (barTrackEl) {
+        barTrackEl.classList.add("indeterminate", "visible");
+        if (barFillEl) barFillEl.style.width = "";
+      }
+      statusEl.textContent = "Loading drivers data...";
+      statusEl.className = "loading";
 
-      const fetchPromise = (async () => {
+      driverIndexPromise = (async () => {
         try {
-          let result = await fetchTrackDriverData(config.workerPrefix, showProgress);
+          const res = await fetch("data/driver-index.json");
+          if (!res.ok) throw new Error("Server returned " + res.status);
+          const index = await res.json();
 
-          // If the first pass had failures, retry once and keep whichever
-          // attempt found more drivers — a failure-prone fetch (e.g. from a
-          // transient network blip) is likely to succeed cleanly on a
-          // second, unhurried attempt.
-          if (result.hadFailures) {
-            const retryResult = await fetchTrackDriverData(config.workerPrefix, showProgress);
-            const countTotal = r => Object.values(r.nationCounts).reduce((a, b) => a + b, 0);
-            if (countTotal(retryResult) >= countTotal(result)) {
-              result = retryResult;
-            }
-          }
+          Object.entries(index.sources || {}).forEach(([sourceId, data]) => {
+            // Sets don't survive JSON, same as the old localStorage cache:
+            // rehydrate the two that recomputeAndRenderTrackData expects to
+            // be real Sets, or the cross-track de-duplication silently
+            // stops working.
+            const playerIdToNames = {};
+            Object.entries(data.playerIdToNames || {}).forEach(([pid, names]) => {
+              playerIdToNames[pid] = new Set(names);
+            });
+            loadedTrackData[sourceId] = {
+              nationCounts: data.nationCounts || {},
+              nameToNation: data.nameToNation || {},
+              nameToPlayerId: data.nameToPlayerId || {},
+              playerIdToNames,
+              playerIdToNation: data.playerIdToNation || {},
+              seenPlayerKeys: new Set(data.seenPlayerKeys || [])
+            };
+          });
 
-          const { nationCounts, nameToNation, nameToPlayerId, playerIdToNames, playerIdToNation, seenPlayerKeys, hadFailures } = result;
-          loadedTrackData[dataKey] = { nationCounts, nameToNation, nameToPlayerId, playerIdToNames, playerIdToNation, seenPlayerKeys };
+          statusEl.textContent = "";
+          statusEl.className = "";
           recomputeAndRenderTrackData();
-          // Don't persist a degraded result — if some session fetches
-          // failed even after the retry, let the next visit try again
-          // fresh rather than being stuck for an hour with an undercounted
-          // cache.
-          if (!hadFailures) {
-            try {
-              // Sets don't survive JSON.stringify, so serialize
-              // playerIdToNames as plain arrays for storage.
-              const playerIdToNamesArrays = {};
-              Object.entries(playerIdToNames).forEach(([pid, namesSet]) => {
-                playerIdToNamesArrays[pid] = Array.from(namesSet);
-              });
-              localStorage.setItem(cacheKey, JSON.stringify({
-                nationCounts,
-                nameToNation,
-                nameToPlayerId,
-                playerIdToNames: playerIdToNamesArrays,
-                playerIdToNation,
-                seenPlayerKeys: Array.from(seenPlayerKeys),
-                timestamp: Date.now()
-              }));
-            } catch (err) {
-              // Storage full or unavailable — not critical, just skip caching
-            }
-          }
         } catch (err) {
-          // If we already rendered from cache, fail silently in the background.
-          if (!cached) {
-            statusEl.textContent = "Error loading driver data: " + err.message;
-            statusEl.className = "error";
-          }
+          statusEl.textContent = "Error loading drivers data: " + err.message;
+          statusEl.className = "error";
+          // Let a later call retry rather than caching the failure for the
+          // lifetime of the page.
+          driverIndexPromise = null;
         } finally {
-          hideProgress();
-          delete pendingTrackDataFetch[dataKey];
+          if (barTrackEl) barTrackEl.classList.remove("visible");
         }
       })();
 
-      pendingTrackDataFetch[dataKey] = fetchPromise;
-      return fetchPromise;
+      return driverIndexPromise;
+    }
+
+    // Kept as the entry point every caller already uses. The index covers
+    // every track in one file, so the trackId no longer selects what to
+    // fetch — but switchToTrack() and the startup loop both still call
+    // this, and it stays the right place to hang per-track behaviour if
+    // that's ever needed again.
+    function ensureTrackDataLoaded(trackId) {
+      return loadDriverIndex();
     }
 
     // ---- Race total time (Total Time column, Race-type leaderboards only) ----

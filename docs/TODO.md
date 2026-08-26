@@ -41,67 +41,24 @@ product decisions.
 ## Performance
 
 - [x] ~~**Edge-cache the `/serverN/*` proxy route in `workers.js`.**~~
-      **Implemented 2026-08-18 — but NOT deployed.** `workers.js` has no
-      `wrangler.toml` and no CI in this repo, so this does nothing live
-      until the Worker is redeployed to Cloudflare by hand. Details of
-      what was measured and why, kept for context:
+      **Implemented, still NOT deployed.** No `wrangler.toml` and no CI
+      for the Worker in this repo, so it does nothing live until the
+      Worker is redeployed to Cloudflare by hand. See `MEMORY.md` for the
+      per-route TTLs and the two guards (200-only, and the 2-day
+      settle window before a session file is hard-cached).
 
-      The
-      Nordschleife board's driver-nationality/flag data takes ~4.7 min on
-      a cold visit: `fetchTrackDriverData()` fetches all **815** session
-      files one at a time (~316 ms each + a 30 ms gap), and server1 has
-      815 sessions where every other server has 36–39. Measured
-      2026-08-18; see `MEMORY.md` for the full numbers.
+      **Its rationale changed on 2026-08-26** and it is now much less
+      urgent than when it was written. The thing it was meant to rescue
+      — the browser walking every session file to build the country grid
+      and driver flags — no longer happens: that aggregation moved to
+      `scripts/build_driver_index.py`, run hourly in CI, and the site
+      fetches one precomputed file instead. Measured after the switch:
+      **954 session requests per visit became 12.**
 
-      Don't "fix" this by parallelizing the loop — it is sequential on
-      purpose, because parallel bursts were failing outright on some
-      mobile networks (see the comment above the loop). The real problem
-      is that `/serverN/*` is a bare pass-through: no `Cache-Control`, no
-      `caches.default`, so **every** visitor re-fetches all 815 files
-      from origin every hour (`COUNTRY_CACHE_TTL_MS`).
-      `/discord/stats` already caches correctly at `workers.js:187` —
-      apply that same pattern here:
-
-      | Route | Suggested TTL | Why |
-      |---|---|---|
-      | `/api/v1/results/<file>` | 30 days | a completed session's result is immutable |
-      | `/api/v1/results` (the list) | 60 s | grows when a session ends |
-      | `/leaderboards/embed/.../rows` | 60–120 s | "updated every new session" |
-
-      **What shipped**, via `cacheControlFor()` at the bottom of
-      `workers.js` — a whitelist, so any endpoint added later has to opt
-      in rather than silently inherit a TTL:
-
-      | Route | TTL | Why |
-      |---|---|---|
-      | `/api/v1/results/<file>`, ≥2 days old | 30 days, `immutable` | that session is over; its file can't change |
-      | `/api/v1/results/<file>`, newer | 5 min | the session may still be running |
-      | `/api/v1/results` (the list) | 60 s | grows when a session ends |
-      | `/leaderboards/embed/.../rows` | 30 s | "updated every new session" |
-      | anything else | not cached | goes to origin every time |
-
-      Two guards worth not undoing: only a `200` is ever cached (caching
-      a 401/500 would pin an upstream outage for the full TTL, and for a
-      session file that's 30 days with no way to flush it from here), and
-      `isSettledSessionFile()` refuses to hard-cache a results file until
-      it's a full 2 days old, because a still-running session's file can
-      still grow and the servers stamp filenames in three different
-      regions' local time. An unparseable filename counts as
-      still-changing.
-
-      `/rows` landed at 30 s rather than the 60–120 s originally floated:
-      it's the number a driver refreshes to see their own new lap on, and
-      the per-visitor saving there is only ~1.6 s anyway — the real value
-      of caching it is collapsing a busy race night's concurrent viewers
-      into one origin fetch per window. Lower it further, or drop the
-      `/rows` rule entirely, if even 30 s feels stale; nearly all the
-      speedup lives in the session files, not here.
-
-      Note the leaderboard *table* is not the problem and needs no work:
-      its ~1.6 s is AssettoHosting generating a 1,581-row board (timed
-      directly, bypassing the Worker), the Worker adds ~0.02 s and
-      already brotli-compresses it 268 KB → 42 KB, and rendering is
-      capped to `LEADERBOARD_MAX_ENTRIES` before any DOM is built.
+      What the cache would still help: the hourly CI rebuild (currently
+      ~2m28s of mostly-repeated fetches of immutable files), and the two
+      small walks still done in the browser — `fetchRaceTotalTimes()`
+      and `fetchCrashReport()`. Worth doing, no longer urgent.
 
 ## Data accuracy (low urgency, cosmetic/informational only)
 
