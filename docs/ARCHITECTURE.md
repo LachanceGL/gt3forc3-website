@@ -27,14 +27,28 @@ Major sections in the file, top to bottom:
 
 ### 2. `workers.js` — the Cloudflare Worker
 
+**This Worker is shared with `forc3mod.com`, which is a different site in
+a different repo.** One deployed Worker backs both, so this file is not
+solely ours: `/contact` exists only for forc3mod.com and nothing in this
+repo calls it. That has already caused one near-miss — the tracked copy
+here drifted behind the live Worker after the other project added
+`/contact` through the dashboard, and pasting this file over the live one
+would have silently deleted their contact form.
+
+**So: before deploying this file, diff it against what's actually in the
+Cloudflare dashboard.** The dashboard is the source of truth, not this
+repo — there's no `wrangler.toml` and no CI, so nothing keeps them in
+step automatically.
+
 Stateless request router/proxy. Every route:
 
 | Route | Method | Purpose |
 |---|---|---|
-| `/serverN/...` (N = 1-5, or unprefixed = server1) | GET | Proxies to that Assetto Corsa server's own web API, injecting a Bearer API key server-side for `/api/v1/*` paths so the key never reaches the browser. |
+| `/serverN/...` (N = 1-5, or unprefixed = server1) | GET | Proxies to that Assetto Corsa server's own web API, injecting a Bearer API key server-side for `/api/v1/*` paths so the key never reaches the browser. Edge-caches GETs per `cacheControlFor()`: settled session files 30 days, the results list 60s, `/rows` 30s, everything else uncached. |
 | `/discord/stats` | GET | Returns `{ member_count, online_count, server_players }` for the Discord widget. Reads the Discord guild's approximate counts via the bot token, and separately reads recent messages in a specific channel (where `bot.js` posts its status embeds) to extract live per-track player counts by regex-matching `"X Players Online"` in each embed. Edge-cached 2 minutes via Cloudflare's Cache API. |
 | `/discord/verify-request` | POST | Handles "Get Verified" form submissions from the site — DMs a fixed admin Discord user (via bot token) with the driver's submitted details. Public/unauthenticated, so every field is trimmed and length-capped. |
 | `/discord/notify-verified` | GET | Admin-triggered (visited manually in a browser after approving a request), protected by a shared secret query param. Looks up a Discord member by username and DMs them a "you're verified" confirmation. Never exposed in the site's HTML/JS. |
+| `/contact` | POST | **Serves forc3mod.com, not this site.** Relays that site's contact form into a FORC3MOD Discord channel via the bot token, so a static site needs no webhook or token of its own. Sets `allowed_mentions: { parse: [] }` — without it, anyone could type `@everyone` into a public form and have the bot fire it. Nothing here calls this; do not remove it as dead code. |
 | OPTIONS (any path) | OPTIONS | CORS preflight. |
 
 Required Worker environment variables: `DISCORD_BOT_TOKEN`,

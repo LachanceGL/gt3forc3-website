@@ -17,7 +17,7 @@ HTTP — there is no shared codebase or build step between them:
 | Component | File | Language | Deploy target |
 |---|---|---|---|
 | Website | `index.html` | Single-file HTML/CSS/JS (no framework, no build) | Static hosting (e.g. GitHub Pages / Cloudflare Pages) |
-| API proxy | `workers.js` | Cloudflare Worker (JS) | Cloudflare Workers |
+| API proxy | `workers.js` | Cloudflare Worker (JS) | Cloudflare Workers (manual dashboard deploy — **shared with forc3mod.com, diff against the dashboard before deploying**) |
 | Status bot | `bot.js` | Node.js (discord.js + Puppeteer) | Long-running Node process (VPS/host you control) |
 
 **Scope note carried over from the prior chat:** the person explicitly

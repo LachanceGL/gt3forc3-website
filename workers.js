@@ -180,6 +180,87 @@ export default {
       }
     }
 
+    // Contact form relay for forc3mod.com. The site POSTs the form here and
+    // this writes it into the FORC3MOD contact channel using the bot token,
+    // so the public (static) site never needs a webhook URL or a token of
+    // its own. Same reasoning as /discord/stats and /discord/verify-request.
+    //
+    // NOTE FOR THIS REPO: this route serves forc3mod.com, NOT gt3forc3.com.
+    // It is the reason this file is shared between two projects — see
+    // docs/ARCHITECTURE.md. Nothing in this repo calls it; do not delete it
+    // as dead code, and never paste this file over the live Worker without
+    // checking the dashboard first.
+    if (url.pathname === "/contact" && request.method === "POST") {
+      const CONTACT_CHANNEL_ID = "1534649367573827879";
+
+      let body;
+      try {
+        body = await request.json();
+      } catch (err) {
+        return new Response(JSON.stringify({ error: "Invalid request body" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+
+      const clean = (val, maxLen) => String(val || "").trim().slice(0, maxLen);
+      const name = clean(body.name, 100);
+      const email = clean(body.email, 150);
+      const type = clean(body.type, 60);
+      // Capped well under Discord's 4096-char embed description limit.
+      const message = clean(body.message, 1500);
+
+      if (!name || !email || !type || !message) {
+        return new Response(JSON.stringify({ error: "Missing required fields" }), {
+          status: 400,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+
+      try {
+        const messageRes = await fetch(
+          `https://discord.com/api/v10/channels/${CONTACT_CHANNEL_ID}/messages`,
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              // Required: without this someone can type @everyone into a
+              // public form and have the bot fire it for them.
+              allowed_mentions: { parse: [] },
+              embeds: [{
+                title: `New contact message — ${type}`,
+                // Message goes in description (4096 cap), NOT a field (1024
+                // cap) - a long message in a field makes Discord return 400.
+                description: message,
+                color: 0x2f6fff,
+                fields: [
+                  { name: "Name", value: name, inline: true },
+                  { name: "Email", value: email, inline: true }
+                ],
+                timestamp: new Date().toISOString()
+              }]
+            })
+          }
+        );
+
+        if (!messageRes.ok) {
+          throw new Error("Could not post contact message: " + messageRes.status);
+        }
+
+        return new Response(JSON.stringify({ success: true }), {
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      } catch (err) {
+        return new Response(JSON.stringify({ error: "Failed to deliver message" }), {
+          status: 502,
+          headers: { "Content-Type": "application/json", "Access-Control-Allow-Origin": "*" }
+        });
+      }
+    }
+
     // Discord server stats (member count + online count + live per-track
     // player counts), fetched server-side using the bot token so it's
     // never exposed to the browser.
