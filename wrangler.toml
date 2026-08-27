@@ -25,12 +25,29 @@
 #    means this config deploys identical behaviour rather than quietly
 #    upgrading the runtime as a side effect.
 #
-# 3. Secrets are NOT in this file and must never be. `wrangler deploy`
-#    leaves existing secrets alone, so the seven already set in the
-#    dashboard (DISCORD_BOT_TOKEN, ADMIN_SECRET, ASSETTO_API_KEY and _2
-#    through _5) survive a deploy untouched. Do not add them as [vars] --
-#    that would both commit them to git and downgrade them from secrets to
-#    plaintext environment variables.
+# 3. ⚠️ THE FIRST DEPLOY FROM THIS CONFIG WIPED ALL SEVEN CREDENTIALS.
+#    Learned the hard way on 2026-08-26, live: every API-keyed route and
+#    every Discord call started returning 401 immediately after deploy.
+#
+#    The distinction that matters, and that got missed:
+#
+#      * ENCRYPTED SECRETS survive `wrangler deploy`. They live on the
+#        Worker, not in this file, and wrangler never removes them.
+#      * PLAINTEXT ENVIRONMENT VARIABLES do not. wrangler treats the
+#        [vars] block here as the authoritative list, so deploying with no
+#        [vars] deletes every plaintext variable the dashboard had.
+#
+#    These seven had been added as plaintext variables, not secrets, so
+#    they were deleted. They must be re-added as SECRETS (encrypted) --
+#    either the dashboard's "Secret" type, or `wrangler secret put NAME`,
+#    which prompts for the value so it never lands in a file or a shell
+#    history. Stored that way, this cannot happen again.
+#
+#    Still never add them as [vars] here: that would commit live
+#    credentials to a public repo.
+#
+#    The seven: DISCORD_BOT_TOKEN, ADMIN_SECRET, ASSETTO_API_KEY, and
+#    ASSETTO_API_KEY_2 through _5.
 #
 # 4. TWO SITES DEPEND ON THIS WORKER, and deploying replaces the whole
 #    script. Confirmed by grepping the sibling repos rather than assuming:
