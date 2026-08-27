@@ -1,0 +1,57 @@
+name: Deploy Worker
+
+# Only when the Worker itself changes. This repo's day-to-day work is
+# index.html, which has nothing to do with the Worker -- deploying on every
+# push would mean redeploying live infrastructure dozens of times a week
+# for changes that can't affect it.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "workers.js"
+      - "wrangler.toml"
+      - ".github/workflows/deploy-worker.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+# Never let two deploys of the same Worker overlap. cancel-in-progress is
+# false on purpose: cancelling a half-finished deploy is worse than
+# queueing behind it.
+concurrency:
+  group: deploy-worker
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # Fail early and legibly if the token was never added, rather than
+      # letting wrangler fail with an auth error that reads like the config
+      # is broken.
+      - name: Check credentials are present
+        run: |
+          if [ -z "${{ secrets.CLOUDFLARE_API_TOKEN }}" ]; then
+            echo "::error::CLOUDFLARE_API_TOKEN is not set on this repo."
+            echo "Add it under Settings > Secrets and variables > Actions."
+            echo "Create the token in Cloudflare with the 'Edit Cloudflare Workers' template."
+            exit 1
+          fi
+
+      # Deploys workers.js as configured by wrangler.toml. Secrets already
+      # set on the Worker (DISCORD_BOT_TOKEN, ADMIN_SECRET, ASSETTO_API_KEY
+      # and _2 through _5) are NOT touched by a deploy -- they live on the
+      # Worker, not in this repo, and must stay that way.
+      #
+      # NOTE: this replaces the ENTIRE script, including /contact, which
+      # belongs to forc3mod.com. That is safe only while this repo stays the
+      # single source of truth for the Worker. If anyone edits it in the
+      # Cloudflare dashboard again, the next run here silently reverts them.
+      # See wrangler.toml's header for the full consumer map.
+      - name: Deploy
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}

@@ -35,10 +35,27 @@ here drifted behind the live Worker after the other project added
 `/contact` through the dashboard, and pasting this file over the live one
 would have silently deleted their contact form.
 
-**So: before deploying this file, diff it against what's actually in the
-Cloudflare dashboard.** The dashboard is the source of truth, not this
-repo — there's no `wrangler.toml` and no CI, so nothing keeps them in
-step automatically.
+**That is now fixed the right way round: this repo is the source of
+truth.** `wrangler.toml` + `.github/workflows/deploy-worker.yml` deploy
+`workers.js` automatically whenever it changes on `main`, so the dashboard
+should never be hand-edited again by anyone. If someone does edit it
+there, the next push here silently reverts them — which is the intended
+behaviour, but only works if everyone routes changes through this repo.
+
+Who actually calls this Worker (grepped, not assumed):
+
+| Caller | Routes it depends on |
+|---|---|
+| gt3forc3.com (this repo) | `/serverN/*`, `/discord/stats`, `/discord/verify-request`, `/discord/notify-verified` |
+| forc3mod.com (`forc3mod-website`) | `/contact`, **and `/discord/stats`** (`js/main.js` lines 11 and 105) |
+| `forc3-discordbot` | **none** — it talks to Discord directly |
+
+`/discord/stats` is the trap: forc3mod.com reads
+`server_players.nordschleife` out of it, so changing that response shape,
+or letting that `TRACK_KEYWORDS` key drift the way `nurburgringtour` once
+did, silently breaks a live counter on a site whose repo cannot notice.
+That project's own `CLAUDE.md` documents the dependency and says the fix
+always belongs here.
 
 Stateless request router/proxy. Every route:
 

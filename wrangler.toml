@@ -1,0 +1,69 @@
+# Deploy config for the Cloudflare Worker in workers.js.
+#
+# Exists so the Worker stops being hand-pasted into the dashboard. Doing
+# that is what let this repo's copy drift behind the live one: forc3mod.com
+# added a /contact route through the dashboard, nothing here noticed, and
+# deploying our stale copy would have deleted their contact form.
+#
+# ------------------------------------------------------------------
+# READ THIS BEFORE THE FIRST DEPLOY
+# ------------------------------------------------------------------
+#
+# 1. `name` MUST match the existing Worker exactly. It's derived from the
+#    live URL -- raspy-salad-d894.contact-eb9.workers.dev -- where
+#    "raspy-salad-d894" is the Worker and "contact-eb9" is the account's
+#    workers.dev subdomain. Get this wrong and wrangler does NOT error: it
+#    happily creates a SECOND Worker under the new name, leaves the real
+#    one running untouched, and every deploy after that goes to the wrong
+#    place while the site keeps serving the old code.
+#
+# 2. `compatibility_date` below is a guess and should be checked against
+#    the dashboard (Workers > raspy-salad-d894 > Settings) before the
+#    first deploy. Deploying a date far newer than the Worker was written
+#    against can change runtime behaviour. This Worker only uses fetch,
+#    Request/Response and the Cache API, so the risk is low -- but "low"
+#    is not "none", and it costs one look to remove the guess.
+#
+# 3. Secrets are NOT in this file and must never be. `wrangler deploy`
+#    leaves existing secrets alone, so the seven already set in the
+#    dashboard (DISCORD_BOT_TOKEN, ADMIN_SECRET, ASSETTO_API_KEY and _2
+#    through _5) survive a deploy untouched. Do not add them as [vars] --
+#    that would both commit them to git and downgrade them from secrets to
+#    plaintext environment variables.
+#
+# 4. TWO SITES DEPEND ON THIS WORKER, and deploying replaces the whole
+#    script. Confirmed by grepping the sibling repos rather than assuming:
+#
+#      gt3forc3.com   -> /serverN/*, /discord/stats, /discord/verify-request,
+#                        /discord/notify-verified
+#      forc3mod.com   -> /contact  AND  /discord/stats
+#                        (forc3mod-website/js/main.js, lines 11 and 105)
+#
+#    forc3-discordbot does NOT call this Worker at all -- it talks to
+#    Discord directly. It was an early suspect; it references neither the
+#    Worker URL nor the contact channel id.
+#
+#    /discord/stats is the sharper trap of the two: forc3mod.com reads
+#    `server_players.nordschleife` from it, so changing that response shape
+#    -- or letting the TRACK_KEYWORDS key `nordschleife` drift, the way
+#    `nurburgringtour` already did once -- silently breaks a live counter on
+#    a site whose repo has no way to notice. That project's own CLAUDE.md
+#    documents this dependency and says the fix always belongs here.
+#
+#    Ownership is already agreed in writing: forc3mod-website's CLAUDE.md
+#    says "That Worker lives in gt3forc3-website ... Don't edit it from
+#    here." The /contact route got added through the dashboard anyway,
+#    which is how this repo's copy went stale. This config is the fix for
+#    that -- but it only works if deploys actually go through this repo
+#    from now on.
+
+name = "raspy-salad-d894"
+main = "workers.js"
+
+# Verify against the dashboard before the first deploy -- see note 2.
+compatibility_date = "2026-08-01"
+
+# The site calls this Worker at its workers.dev URL, so that route has to
+# stay enabled. Setting this to false would silently take the whole site's
+# API offline.
+workers_dev = true
