@@ -934,6 +934,16 @@
       text-decoration: line-through;
       opacity: 0.6;
     }
+    /* Deliberately understated: the version qualifies a lap time, it isn't
+       a result in its own right, so it should be readable without
+       competing with the driver name or the time itself. */
+    .lb-version {
+      text-align: right;
+      color: rgba(238, 238, 238, 0.4);
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 12px;
+      white-space: nowrap;
+    }
     .lb-session {
       text-align: right;
       color: rgba(238, 238, 238, 0.4);
@@ -2675,6 +2685,12 @@
         workerPrefix: "/server1",
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
+        // A separate, 0.9-only leaderboard on the same server. Any row on
+        // the main board whose driver+lap time also appears here was set on
+        // 0.9; everything else falls back to GAME_VERSION_DEFAULT.
+        versionOverrides: [
+          { version: "0.9", shareKey: "9733e693-3e7f-4bbe-be23-e215c2e98c4a" }
+        ],
         title: "Hot Lap",
         updateNote: "Ranks updated every new session",
         carClassList: GT3_CAR_CLASS_LIST,
@@ -2982,6 +2998,7 @@
             <th>Car</th>
             <th class="lb-best">Best Lap</th>
             ${isRace ? `<th class="lb-total-time${bestLapModeActive ? " lb-total-time-grayed" : ""}">Race Time</th>` : ""}
+            <th class="lb-version" title="Assetto Corsa EVO build this lap was set on">Ver</th>
             <th class="lb-session">Session</th>
           </tr>
         </thead>
@@ -3043,6 +3060,7 @@
           <td class="lb-car">${row.CarName || "—"}</td>
           <td class="lb-best">${row.BestLap || "-"}</td>
           ${totalTimeCell}
+          <td class="lb-version">${gameVersionForRow(activeTrack, row)}</td>
           <td class="lb-session">${formatSessionDate(row.SessionDate)}</td>
         `;
         tbody.appendChild(tr);
@@ -3230,6 +3248,85 @@
     // Total Time data loading in. Recomputes from the raw cached rows
     // (not just the already-rendered entries) so a row can move rank,
     // get filtered out, or gain/lose a badge without needing a reload.
+    // The Assetto Corsa EVO build a lap was set on. Tyre models and physics
+    // change between releases, so a time from an older build isn't strictly
+    // comparable to a newer one — showing the version lets a reader judge
+    // that for themselves rather than silently ranking them together.
+    const GAME_VERSION_DEFAULT = "0.8";
+
+    // trackId -> Set of "namekey|bestlap" strings, one per version override
+    // board, keyed by the version it tags. Populated by
+    // ensureVersionDataLoaded().
+    const versionOverrideData = {};
+    const pendingVersionFetch = {};
+
+    // Resolves a row to its game version. Falls back to the default for
+    // anything not explicitly matched, so a board with no overrides (or one
+    // whose override board hasn't loaded yet) simply reads as the default
+    // rather than blank.
+    function gameVersionForRow(trackId, row) {
+      const overrides = versionOverrideData[trackId];
+      if (!overrides || !row.FullName) return GAME_VERSION_DEFAULT;
+      const key = row.FullName.trim().toLowerCase() + "|" + (row.BestLap || "");
+      for (const [version, keys] of Object.entries(overrides)) {
+        if (keys.has(key)) return version;
+      }
+      return GAME_VERSION_DEFAULT;
+    }
+
+    // Loads each version-override leaderboard for a track and records which
+    // of its rows belong to that version.
+    //
+    // Matched on driver name + BestLap, deliberately NOT on session date.
+    // The main board is an all-time best-lap ranking, so a driver whose
+    // newer lap is SLOWER than their old one still shows the old lap there —
+    // and that old lap belongs to the older build. Keying on the lap time
+    // itself tags exactly the rows whose time was actually set on the
+    // override board, and leaves everyone else on the default. Verified
+    // against live data: of 36 rows on the 0.9 board, 30 matched, and all 6
+    // that didn't have a faster main-board lap from July/early August —
+    // correctly staying 0.8. The name+BestLap pair is unique across the
+    // main board, so there's no ambiguity to resolve.
+    async function ensureVersionDataLoaded(trackId) {
+      const config = LEADERBOARDS[trackId];
+      if (!config || !config.versionOverrides || !config.versionOverrides.length) return;
+      if (versionOverrideData[trackId]) return;
+      if (pendingVersionFetch[trackId]) return pendingVersionFetch[trackId];
+
+      const fetchPromise = (async () => {
+        const result = {};
+        for (const override of config.versionOverrides) {
+          try {
+            const res = await fetch(
+              WORKER_URL + `${config.workerPrefix}/leaderboards/embed/${override.shareKey}/rows`
+            );
+            // A 401 here means that board simply isn't published on
+            // AssettoHosting yet (see docs/DECISIONS.md) — not a bug, and
+            // not worth failing the page over. Those rows just stay on the
+            // default version until it's published.
+            if (!res.ok) continue;
+            const rows = await res.json();
+            if (!Array.isArray(rows)) continue;
+            const keys = new Set();
+            rows.forEach(r => {
+              if (!r.FullName) return;
+              keys.add(r.FullName.trim().toLowerCase() + "|" + (r.BestLap || ""));
+            });
+            if (keys.size) result[override.version] = keys;
+          } catch (err) {
+            // Same reasoning — a failed override fetch degrades to the
+            // default version rather than breaking the leaderboard.
+          }
+        }
+        versionOverrideData[trackId] = result;
+        delete pendingVersionFetch[trackId];
+        if (activeTrack === trackId) refreshLeaderboardFlags();
+      })();
+
+      pendingVersionFetch[trackId] = fetchPromise;
+      return fetchPromise;
+    }
+
     function refreshLeaderboardFlags() {
       const rawRows = leaderboardCache[activeTrack];
       if (rawRows) {
@@ -3689,6 +3786,7 @@
 
       loadLeaderboard(track);
       loadServerName(track);
+      ensureVersionDataLoaded(track);
       ensureTrackDataLoaded(track);
       ensureRaceTotalTimesLoaded(track);
       ensureCrashReportLoaded(track);
@@ -3761,6 +3859,7 @@
 
     ensureRaceTotalTimesLoaded(activeTrack);
     ensureCrashReportLoaded(activeTrack);
+    ensureVersionDataLoaded(activeTrack);
     loadLeaderboard(activeTrack);
 
     document.getElementById("copyright").textContent =
