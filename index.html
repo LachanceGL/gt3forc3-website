@@ -566,6 +566,45 @@
     .rank-toggle-row.visible {
       display: flex;
     }
+    /* Small version tag hung under a filter button, same idea as
+       .leaderboard-tab-corner-note under a track tab. Deliberately neutral
+       rather than themed: this is metadata about which build a view's laps
+       come from, the same role the Ver column plays, so it uses that
+       column's muted treatment instead of competing with the red/purple
+       track theming. */
+    .filter-version-note {
+      position: absolute;
+      bottom: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface-dim);
+      border: 1px solid #3a3a3a;
+      color: #999;
+      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
+      font-size: 8px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      padding: 0 4px;
+      border-radius: 4px;
+      white-space: nowrap;
+      /* Same reasoning as the tab corner note: this box hugs its content,
+         so vertical centring comes from a fixed height/line-height pair,
+         not padding or flex. */
+      height: 12px;
+      line-height: 12px;
+      display: inline-flex;
+      align-items: center;
+      pointer-events: none;
+    }
+    /* The note hangs outside the button, so the button has to be the
+       positioning context and the row has to leave room for it — without
+       the extra margin it would overlap the table below. */
+    #verified-filter-row .rank-toggle-btn {
+      position: relative;
+    }
+    #verified-filter-row.has-version-notes {
+      margin-bottom: 18px;
+    }
     .rank-toggle-label {
       color: #999;
       font-size: 11px;
@@ -588,12 +627,14 @@
     /* Sub 7 Club only makes sense on Nordschleife — hidden everywhere else
        the "Filter by" row now appears (e.g. Spa), unlike TOP 200 and the
        invert button, which are useful on any leaderboard. */
-    #sub7-filter-btn,
-    #v09-filter-btn {
+    /* Only SUB 7 CLUB needs this now. The version buttons used to be here
+       too, but they're rendered per track from versionOverrides — a board
+       without that config simply gets no button, so there is nothing to
+       hide. */
+    #sub7-filter-btn {
       display: none;
     }
-    #sub7-filter-btn.nordschleife-only-visible,
-    #v09-filter-btn.nordschleife-only-visible {
+    #sub7-filter-btn.nordschleife-only-visible {
       display: inline-block;
     }
     .rank-toggle-btn:hover {
@@ -1992,7 +2033,11 @@
       <span class="rank-toggle-label">Filter by</span>
       <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
       <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
-      <button type="button" class="rank-toggle-btn" id="v09-filter-btn" data-filter-mode="v0.9" title="Only laps set on Assetto Corsa EVO 0.9">0.9 ONLY</button>
+      <!-- One button per entry in the active board's versionOverrides —
+           rendered by renderVersionFilterButtons(), not written out here,
+           so adding 1.0 (or 1.1, or any later build) is a config entry
+           rather than an edit to markup, CSS and JS. -->
+      <span id="version-filter-buttons"></span>
     </div>
   </div>
   <div class="leaderboard-frame-border">
@@ -3332,7 +3377,18 @@
       nordschleifeFilterMode = "top200";
       const count = computeFilteredEntries(rawRows).length;
       nordschleifeFilterMode = savedMode;
-      btn.textContent = `TOP ${count}`;
+      // Write into the label's own text node rather than setting
+      // btn.textContent, which replaces ALL children — that silently
+      // deleted the .filter-version-note badge hanging under this button
+      // every time the count was recalculated, leaving TOP 200 as the only
+      // filter without its version tag.
+      const label = `TOP ${count}`;
+      const firstText = [...btn.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
+      if (firstText) {
+        firstText.textContent = label;
+      } else {
+        btn.insertBefore(document.createTextNode(label), btn.firstChild);
+      }
     }
 
     function applyLeaderboardSearch() {
@@ -3456,6 +3512,59 @@
 
       pendingVersionFetch[trackId] = fetchPromise;
       return fetchPromise;
+    }
+
+    // Builds one filter button per version-override board the active track
+    // defines. There is no way to discover these automatically -- verified
+    // against the live API: session results carry no game-version field
+    // anywhere, and the server exposes no endpoint that lists its
+    // leaderboards. So the share key of each new build's board has to be
+    // supplied by hand in LEADERBOARDS. Everything downstream of that is
+    // automatic, and this function is what keeps it that way: a new build
+    // needs a versionOverrides entry and nothing else.
+    function renderVersionFilterButtons(trackId) {
+      const host = document.getElementById("version-filter-buttons");
+      if (!host) return;
+      host.innerHTML = "";
+
+      const overrides = (LEADERBOARDS[trackId] || {}).versionOverrides || [];
+
+      // Tag the non-version filters with the build their laps come from,
+      // so "TOP 200" and "SUB 7 CLUB" say which version you're looking at.
+      // Read from GAME_VERSION_DEFAULT rather than written out, so when the
+      // default eventually moves to 0.9 (and later 1.0) these labels follow
+      // on their own instead of becoming quietly wrong.
+      //
+      // Only on boards that actually have version overrides: elsewhere the
+      // distinction doesn't exist and a version tag would raise a question
+      // the page can't answer. The version buttons get no tag — their own
+      // label already names the build.
+      const row = document.getElementById("verified-filter-row");
+      if (row) {
+        row.querySelectorAll(".filter-version-note").forEach(n => n.remove());
+        row.classList.toggle("has-version-notes", overrides.length > 0);
+        if (overrides.length) {
+          row.querySelectorAll(".rank-toggle-btn[data-filter-mode]").forEach(btn => {
+            if ((btn.dataset.filterMode || "").startsWith("v")) return;
+            const note = document.createElement("span");
+            note.className = "filter-version-note";
+            note.textContent = GAME_VERSION_DEFAULT;
+            btn.appendChild(note);
+          });
+        }
+      }
+
+      overrides.forEach(override => {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "rank-toggle-btn";
+        // Mode is "v" + the version, which is the same convention
+        // activeVersionFilter() parses back out — so the two can't drift.
+        btn.dataset.filterMode = "v" + override.version;
+        btn.title = `Only laps set on Assetto Corsa EVO ${override.version}`;
+        btn.textContent = `${override.version} ONLY`;
+        host.appendChild(btn);
+      });
     }
 
     // Fills in and shows/hides the toolbar notice badge for a track. Board
@@ -3954,8 +4063,12 @@
       if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
       const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
       if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", track === "nordschleife");
-      const v09BtnForVisibility = document.getElementById("v09-filter-btn");
-      if (v09BtnForVisibility) v09BtnForVisibility.classList.toggle("nordschleife-only-visible", track === "nordschleife");
+
+
+      // Rendered before the reset below, which sets .active by querying
+      // these buttons — if they don't exist yet, the active state lands on
+      // nothing.
+      renderVersionFilterButtons(track);
 
       // Reset to the default filter mode whenever the active track changes.
       nordschleifeFilterMode = "top200";
@@ -4007,8 +4120,7 @@
       if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
       const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
       if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", activeTrack === "nordschleife");
-      const v09BtnForVisibility = document.getElementById("v09-filter-btn");
-      if (v09BtnForVisibility) v09BtnForVisibility.classList.toggle("nordschleife-only-visible", activeTrack === "nordschleife");
+
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
@@ -4043,6 +4155,7 @@
       }
     })();
 
+    renderVersionFilterButtons(activeTrack);
     renderUpdateNotice(activeTrack);
     ensureRaceTotalTimesLoaded(activeTrack);
     ensureCrashReportLoaded(activeTrack);
@@ -4132,23 +4245,28 @@
       });
     });
 
-    // ---- Nordschleife filter mode: TOP 200 / SUB 7 CLUB (radio-style) ----
-    document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
-      btn.addEventListener("click", () => {
+    // ---- Filter mode: TOP 200 / SUB 7 CLUB / <version> ONLY (radio-style) ----
+    // Delegated from the row rather than bound per button: the version
+    // buttons are rendered per track by renderVersionFilterButtons(), so
+    // they don't exist when this runs and a direct binding would silently
+    // miss them.
+    const verifiedFilterRowForClicks = document.getElementById("verified-filter-row");
+    if (verifiedFilterRowForClicks) {
+      verifiedFilterRowForClicks.addEventListener("click", (e) => {
+        const btn = e.target.closest(".rank-toggle-btn[data-filter-mode]");
+        if (!btn || !verifiedFilterRowForClicks.contains(btn)) return;
         const mode = btn.dataset.filterMode;
         if (mode === nordschleifeFilterMode) return; // already active
         nordschleifeFilterMode = mode;
         document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(b => {
           b.classList.toggle("active", b.dataset.filterMode === nordschleifeFilterMode);
         });
-        const rawRows = leaderboardCache[activeTrack];
-        if (rawRows) {
-          currentLeaderboardEntries = computeFilteredEntries(rawRows);
-          updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
-          applyLeaderboardSearch();
-        }
+        const rawRows = leaderboardCache[activeTrack] || [];
+        currentLeaderboardEntries = computeFilteredEntries(rawRows);
+        updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
+        applyLeaderboardSearch();
       });
-    });
+    }
 
     // ---- Sort direction toggle (every leaderboard, one button per visible row) ----
     document.querySelectorAll(".sort-direction-btn").forEach(sortDirectionBtnEl => {
