@@ -3488,6 +3488,14 @@
       nordschleife: 6 * 60 * 1000 // 6:00.000 — the Nordschleife TF layout is ~26km, so anything under this is not a real lap
     };
 
+    // The other end of the same idea: a lap slower than this isn't a
+    // competitive time, it's someone touring, recovering from an off, or
+    // sitting in the pits mid-lap. Only set where a sensible ceiling
+    // exists; a track with no entry here has no upper bound applied.
+    const MAX_VALID_LAP_MS = {
+      nordschleife: 9 * 60 * 1000 // 9:00.000
+    };
+
     function isFlagged(row) {
       if (FLAGGED_DRIVERS[row.FullName] || FLAGGED_LAP_TIMES[row.BestLap]) return true;
       const nameKey = row.FullName ? row.FullName.trim().toLowerCase() : null;
@@ -3497,6 +3505,14 @@
       if (minMs != null) {
         const lapMs = parseLapTimeToMs(row.BestLap);
         if (lapMs != null && lapMs < minMs) return true;
+      }
+
+      const maxMs = MAX_VALID_LAP_MS[activeTrack];
+      if (maxMs != null) {
+        const lapMs = parseLapTimeToMs(row.BestLap);
+        // Deliberately > and not >=, so a lap of exactly 9:00.000 is kept
+        // — the bound is "over 9:00", not "9:00 or worse".
+        if (lapMs != null && lapMs > maxMs) return true;
       }
 
       // On Race-type leaderboards, Total Time is only a fair comparison
