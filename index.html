@@ -588,10 +588,12 @@
     /* Sub 7 Club only makes sense on Nordschleife — hidden everywhere else
        the "Filter by" row now appears (e.g. Spa), unlike TOP 200 and the
        invert button, which are useful on any leaderboard. */
-    #sub7-filter-btn {
+    #sub7-filter-btn,
+    #v09-filter-btn {
       display: none;
     }
-    #sub7-filter-btn.nordschleife-only-visible {
+    #sub7-filter-btn.nordschleife-only-visible,
+    #v09-filter-btn.nordschleife-only-visible {
       display: inline-block;
     }
     .rank-toggle-btn:hover {
@@ -1903,6 +1905,7 @@
       <span class="rank-toggle-label">Filter by</span>
       <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
       <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
+      <button type="button" class="rank-toggle-btn" id="v09-filter-btn" data-filter-mode="v0.9" title="Only laps set on Assetto Corsa EVO 0.9">0.9 ONLY</button>
     </div>
   </div>
   <div class="leaderboard-frame-border">
@@ -2972,7 +2975,8 @@
       // Lowercase on purpose — that's exactly how it appears in the
       // leaderboard's FullName field, and this Set is matched against
       // that string verbatim.
-      "hocus focus"
+      "hocus focus",
+      "Ron Rico"
     ]);
     const VERIFIED_BADGE_URL = "https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/refs/heads/main/GT3FORC3_VerifiedBadge01.png";
 
@@ -3145,7 +3149,28 @@
       if (noteEl) noteEl.classList.toggle("visible", raceRankMode === "total_time");
     }
 
+    // Which version-filter mode is active, if any. Filter modes are named
+    // after the version they show ("v0.9"), so the version is read straight
+    // back out of the mode rather than kept in a second lookup that could
+    // drift out of step with it.
+    function activeVersionFilter() {
+      if (activeTrack !== "nordschleife") return null;
+      const m = /^v(.+)$/.exec(nordschleifeFilterMode);
+      return m ? m[1] : null;
+    }
+
     function computeFilteredEntries(rows) {
+      // A version filter shows that version's OWN board, not the main board
+      // filtered down to it -- see the comment where these rows are stored.
+      // If its data hasn't loaded yet, show nothing rather than falling back
+      // to the main rows, which would silently present 0.8 laps under a 0.9
+      // filter.
+      const version = activeVersionFilter();
+      if (version) {
+        const data = (versionOverrideData[activeTrack] || {})[version];
+        rows = (data && data.rows) || [];
+      }
+
       const cleanRows = rows.filter(row => !isFlagged(row));
       const raceConfig = LEADERBOARDS[activeTrack];
       const isRace = Boolean(raceConfig && raceConfig.isRace);
@@ -3166,7 +3191,7 @@
       // leaderboard (isFlagged() already filtered `rows` down to just
       // sub-7 drivers before we ever got here).
       const isSub7Mode = nordschleifeFilterMode === "sub7" && activeTrack === "nordschleife";
-      const visibleRows = isSub7Mode
+      const visibleRows = (isSub7Mode || version)
         ? orderedRows
         : orderedRows.slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
 
@@ -3268,8 +3293,8 @@
       const overrides = versionOverrideData[trackId];
       if (!overrides || !row.FullName) return GAME_VERSION_DEFAULT;
       const key = row.FullName.trim().toLowerCase() + "|" + (row.BestLap || "");
-      for (const [version, keys] of Object.entries(overrides)) {
-        if (keys.has(key)) return version;
+      for (const [version, data] of Object.entries(overrides)) {
+        if (data.keys.has(key)) return version;
       }
       return GAME_VERSION_DEFAULT;
     }
@@ -3312,7 +3337,12 @@
               if (!r.FullName) return;
               keys.add(r.FullName.trim().toLowerCase() + "|" + (r.BestLap || ""));
             });
-            if (keys.size) result[override.version] = keys;
+            // Rows are kept alongside the keys so a version filter can show
+            // this board on its own terms, rather than showing the main
+            // board intersected with it. Those differ: a driver whose 0.9
+            // lap is slower than their old 0.8 one appears here with their
+            // 0.9 time, but on the main board with the 0.8 time.
+            if (keys.size) result[override.version] = { keys, rows };
           } catch (err) {
             // Same reasoning — a failed override fetch degrades to the
             // default version rather than breaking the leaderboard.
@@ -3773,6 +3803,8 @@
       if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
       const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
       if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", track === "nordschleife");
+      const v09BtnForVisibility = document.getElementById("v09-filter-btn");
+      if (v09BtnForVisibility) v09BtnForVisibility.classList.toggle("nordschleife-only-visible", track === "nordschleife");
 
       // Reset to the default filter mode whenever the active track changes.
       nordschleifeFilterMode = "top200";
@@ -3823,6 +3855,8 @@
       if (verifiedFilterRowEl) verifiedFilterRowEl.classList.toggle("visible", Boolean(config && !config.isRace));
       const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
       if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", activeTrack === "nordschleife");
+      const v09BtnForVisibility = document.getElementById("v09-filter-btn");
+      if (v09BtnForVisibility) v09BtnForVisibility.classList.toggle("nordschleife-only-visible", activeTrack === "nordschleife");
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
@@ -3921,12 +3955,13 @@
         });
         updateRankToggleNote();
         // Re-derive rank/order from the raw cached rows under the new mode.
-        const rawRows = leaderboardCache[activeTrack];
-        if (rawRows) {
-          currentLeaderboardEntries = computeFilteredEntries(rawRows);
-          updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
-          applyLeaderboardSearch();
-        }
+        // Pass the main rows through even in a version mode:
+        // computeFilteredEntries swaps the source itself, so every caller
+        // stays unaware of which board is actually being shown.
+        const rawRows = leaderboardCache[activeTrack] || [];
+        currentLeaderboardEntries = computeFilteredEntries(rawRows);
+        updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
+        applyLeaderboardSearch();
       });
     });
 
