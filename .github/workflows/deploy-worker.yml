@@ -1,16 +1,27 @@
 name: Deploy Worker
 
-# Only when the Worker itself changes. This repo's day-to-day work is
-# index.html, which has nothing to do with the Worker -- deploying on every
-# push would mean redeploying live infrastructure dozens of times a week
-# for changes that can't affect it.
+# MANUAL ONLY. The push trigger was removed on 2026-08-26 after the first
+# automated deploy took the live Worker down: all seven credentials
+# disappeared, and every API-keyed route plus /discord/stats returned 401
+# until a dashboard rollback restored them. The public /rows endpoint,
+# which needs no key, kept working throughout -- that split is what
+# identified it as missing credentials rather than bad code.
+#
+# The cause is NOT yet understood. The obvious explanation is that the
+# values were plaintext environment variables, which `wrangler deploy`
+# deletes when the config declares no [vars] -- but after the rollback
+# they present as encrypted secrets, and secrets are supposed to survive a
+# deploy untouched. Those two facts don't reconcile, so the real mechanism
+# is still unknown.
+#
+# DO NOT restore the push trigger until it is. Running this workflow will
+# most likely repeat the outage. If you need to deploy, verify first that
+# every credential is stored as a Secret (not a Variable), and be ready to
+# roll back from Workers > raspy-salad-d894 > Deployments.
+#
+# Worth knowing: the rollback restored the credentials WITHOUT reverting
+# the edge-caching code, so nothing was lost that time.
 on:
-  push:
-    branches: [main]
-    paths:
-      - "workers.js"
-      - "wrangler.toml"
-      - ".github/workflows/deploy-worker.yml"
   workflow_dispatch:
 
 permissions:

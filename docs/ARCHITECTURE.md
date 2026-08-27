@@ -35,12 +35,17 @@ here drifted behind the live Worker after the other project added
 `/contact` through the dashboard, and pasting this file over the live one
 would have silently deleted their contact form.
 
-**That is now fixed the right way round: this repo is the source of
-truth.** `wrangler.toml` + `.github/workflows/deploy-worker.yml` deploy
-`workers.js` automatically whenever it changes on `main`, so the dashboard
-should never be hand-edited again by anyone. If someone does edit it
-there, the next push here silently reverts them — which is the intended
-behaviour, but only works if everyone routes changes through this repo.
+**Deploy by hand, via the Cloudflare dashboard.** `wrangler.toml` and
+`.github/workflows/deploy-worker.yml` exist, but the workflow is
+**manual-dispatch only and currently unsafe to run** — the first
+automated deploy wiped all seven credentials and took every API-keyed
+route down until a rollback restored them. The cause is not understood
+(the values present as encrypted secrets, which should survive a deploy),
+so treat the dashboard as the deploy path until someone works out why.
+See the header comment in that workflow file.
+
+Keeping `workers.js` here accurate still matters regardless — that alone
+prevents the drift that nearly deleted forc3mod.com's `/contact` route.
 
 Who actually calls this Worker (grepped, not assumed):
 
