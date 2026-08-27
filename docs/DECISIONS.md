@@ -421,3 +421,31 @@ maths, then read back per-row mean brightness and count how many rows
 differ from their predecessor. Banded output shows a handful of flat
 integer plateaus; a properly dithered ramp changes on nearly every row
 with fractional means.
+
+## Game-version tagging is by 0.9-board membership, never by session date
+
+The `Ver` column and the `0.9 ONLY` filter decide a lap's build by asking
+whether that exact driver + lap time appears on the separate 0.9-only
+leaderboard. Date is not consulted at all. Two independent reasons, both
+confirmed against real data rather than reasoned about:
+
+**1. The main board shows a driver's BEST lap, which may predate the
+build you'd infer from its date.** Of the 36 rows on the 0.9 board, only
+30 appear on the main board — the other 6 drivers set a *faster* lap back
+on 0.8, so that older lap is what the main board displays. Tagging those
+rows 0.9 would have been wrong; they correctly stay 0.8. Matching on the
+lap time itself is what gets this right.
+
+**2. Dates are UTC and don't reliably tell you which build was running.**
+Ron Rico's row displays `2026-08-26`, squarely inside the 0.9 board's date
+range (26–27 Aug), yet he isn't on the 0.9 board. Per the person, that lap
+was most likely set on the **25th** local time and was **on 0.8** — the
+UTC date just pushes a late-evening North American lap onto the next day
+(see `docs/ARCHITECTURE.md`'s timezone section). A date-based rule would
+have confidently mis-tagged it 0.9, and nothing would have looked wrong.
+
+So: if a row's date *looks* like it should be 0.9 but shows 0.8, that is
+the system working, not a bug. The 0.9 leaderboard is the sole authority
+on what ran on 0.9. If a lap genuinely belongs to 0.9 and isn't tagged,
+the fix is on AssettoHosting's side — that lap is missing from the 0.9
+board — not here.
