@@ -3002,8 +3002,8 @@
             <th>Car</th>
             <th class="lb-best">Best Lap</th>
             ${isRace ? `<th class="lb-total-time${bestLapModeActive ? " lb-total-time-grayed" : ""}">Race Time</th>` : ""}
-            <th class="lb-version" title="Assetto Corsa EVO build this lap was set on">Ver</th>
             <th class="lb-session">Session</th>
+            <th class="lb-version" title="Assetto Corsa EVO build this lap was set on">Ver</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -3064,8 +3064,8 @@
           <td class="lb-car">${row.CarName || "—"}</td>
           <td class="lb-best">${row.BestLap || "-"}</td>
           ${totalTimeCell}
-          <td class="lb-version">${gameVersionForRow(activeTrack, row)}</td>
           <td class="lb-session">${formatSessionDate(row.SessionDate)}</td>
+          <td class="lb-version">${gameVersionForRow(activeTrack, row)}</td>
         `;
         tbody.appendChild(tr);
       });
