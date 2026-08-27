@@ -117,6 +117,30 @@ JSON) — it's deliberately not coupled to the bot's internal code, only to
 the text it happens to post, so the two can be deployed/changed
 independently.
 
+## Timestamps are UTC, everywhere
+
+Established 2026-08-26 by measurement, not assumption — it had previously
+been guessed at (wrongly) in the Worker's cache logic.
+
+- **Session filenames** (`results_20260827_011556_practice`) are UTC.
+- **The listing's `timestamp`** carries an explicit `Z`, matches the
+  filename exactly, and is genuine UTC rather than local time wearing a
+  `Z`: the newest session measured 14 minutes old against both the system
+  clock and the origin's own HTTP `Date` header.
+- **`/rows`' `SessionDate` is the UTC date.** Confirmed across a midnight
+  boundary, which is the only test that distinguishes it: a session
+  starting 00:28:26Z on the 27th reports `2026-08-27`. Under any timezone
+  west of UTC it would have read the 26th.
+
+**User-visible consequence worth knowing:** `formatSessionDate()` only
+strips the century (`2026-08-27` → `26-08-27`) and does no conversion, so
+the site shows UTC dates verbatim. For a mostly North-American community
+that pushes late-evening laps onto the next day — a lap set at 9pm
+Eastern displays as tomorrow's date. Not a bug, and changing it would be
+a product decision needing care: `SessionDate` is also a join key for race
+total times and lap counts, so it has to keep matching the raw data rather
+than what's displayed.
+
 ## Where per-lap times and sector splits live
 
 Checked against the live API on 2026-08-26, prompted by a standing

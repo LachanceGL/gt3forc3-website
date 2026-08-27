@@ -499,12 +499,27 @@ function cacheControlFor(forwardPath) {
 
 // Is this session's results file old enough that it's certainly final?
 //
-// Deliberately coarse. The filename's date is compared in UTC while the
-// game server stamps it in its own local time, and these servers live in
-// three different regions (ca/de8/fr) — so rather than guess an offset,
-// require the file to be a full 2 days old. Any real timezone gap is at
-// most ±14h, so 2 days clears it with a day to spare in either
-// direction.
+// Deliberately coarse, but NOT for the reason originally written here.
+//
+// This used to say the window existed to absorb an unknown timezone
+// offset, on the assumption each server stamped filenames in its own
+// local time. That was wrong, and was checked properly on 2026-08-26:
+// the filenames are UTC. The listing's `timestamp` carries an explicit
+// Z, matches the filename exactly, and lines up with real UTC (the
+// newest session read 14 minutes old against both a system clock and
+// the origin's own HTTP Date header). /rows' SessionDate is the UTC
+// date too, confirmed across a midnight boundary — a session at
+// 00:28Z on the 27th reports 2026-08-27, not the 26th.
+//
+// So there is no offset to absorb. The window is still worth keeping
+// for a different reason: the filename records when a session STARTED,
+// and a long practice session on a persistent server can still be
+// running (and its file still growing) well after that. 2 days is
+// comfortably longer than any session run here.
+//
+// That means this could safely be tightened — a few hours would do —
+// letting recent files reach the 30-day cache sooner. Low value, and it
+// needs a Worker deploy, so it hasn't been changed.
 //
 // The cost of being coarse here is close to zero: on the 815-file
 // Nordschleife server all but the newest handful are far older than
