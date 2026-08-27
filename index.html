@@ -874,11 +874,32 @@
       overflow-y: auto;
       border-radius: 6px;
       background: var(--surface-1);
-      scrollbar-width: thin;
-      scrollbar-color: #444 #111;
+      /* No scrollbar-width or scrollbar-color here — see the @supports
+         block below. Setting EITHER standard property opts Chrome into the
+         standard scrollbar model, which ignores ::-webkit-scrollbar
+         entirely and leaves the width stuck on thin/auto. Measured while
+         working this out: with `thin` the gutter was 10px, with `auto`
+         15px, and the declared ::-webkit-scrollbar width changed nothing
+         in either case. */
+    }
+    /* Firefox has no ::-webkit-scrollbar, so it needs the standard
+       properties — but Chrome must NOT see them or it stops honouring the
+       webkit rules below. `not selector(::-webkit-scrollbar)` is exactly
+       that test: true in Firefox, false in Chrome. Chrome therefore styles
+       via the webkit pseudo-elements (exact width available), Firefox via
+       the standard ones (thin, dark, no width control). */
+    @supports not selector(::-webkit-scrollbar) {
+      .leaderboard-frame {
+        scrollbar-width: thin;
+        scrollbar-color: #444 #111;
+      }
     }
     .leaderboard-frame::-webkit-scrollbar {
-      width: 8px;
+      /* The thumb has no width of its own — it fills the scrollbar, so
+         widening the handle means widening this. The bar actually rendered
+         at 10px before (Chrome's "thin"), not the 8px this rule used to
+         declare and never applied, so +2 lands at 12. */
+      width: 12px;
     }
     .leaderboard-frame::-webkit-scrollbar-track {
       background: var(--surface-1);
