@@ -952,6 +952,19 @@
     .update-notice {
       display: none;
       position: relative;
+      /* Needed on the BADGE, not just the tooltip. This element carries a
+         drop-shadow filter (see the per-element filter list further down),
+         and a filter creates a stacking context — which traps the
+         tooltip's own z-index inside it, leaving the whole badge to paint
+         in plain DOM order. That put the tooltip behind the sticky table
+         header and the filter-row buttons, both of which come later in the
+         document.
+
+         6 places it above the table header (1) and the search hint (5),
+         while deliberately staying below the car-class dropdown (9-11) and
+         the verify modal (100): a panel the reader actively opened should
+         cover a tooltip they're only hovering. */
+      z-index: 6;
       align-items: center;
       font-size: 11px;
       font-weight: 700;
