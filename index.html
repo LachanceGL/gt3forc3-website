@@ -3095,6 +3095,24 @@
       if (version) {
         const data = (versionOverrideData[activeTrack] || {})[version];
         rows = (data && data.rows) || [];
+      } else if ((LEADERBOARDS[activeTrack] || {}).versionOverrides) {
+        // The non-version views are tagged with GAME_VERSION_DEFAULT, so
+        // they have to actually contain only that version — otherwise the
+        // "0.8" label under TOP 200 is a characterisation rather than a
+        // fact. The main board really does carry a few newer laps mixed
+        // in (a 0.9 lap fast enough to make the top 200 sat there), and
+        // those now move out to their own filter instead of sitting
+        // unlabelled among the older ones.
+        //
+        // Only on boards with overrides: everywhere else there's no
+        // version split to honour, and this would filter against a
+        // default nothing is tagged with.
+        //
+        // Safe before the override board loads: gameVersionForRow() falls
+        // back to the default for everything, so nothing is dropped, and
+        // ensureVersionDataLoaded() calls refreshLeaderboardFlags() once
+        // it resolves.
+        rows = rows.filter(row => gameVersionForRow(activeTrack, row) === GAME_VERSION_DEFAULT);
       }
 
       const cleanRows = rows.filter(row => !isFlagged(row));
