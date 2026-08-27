@@ -437,12 +437,26 @@ rows 0.9 would have been wrong; they correctly stay 0.8. Matching on the
 lap time itself is what gets this right.
 
 **2. Dates are UTC and don't reliably tell you which build was running.**
-Ron Rico's row displays `2026-08-26`, squarely inside the 0.9 board's date
-range (26–27 Aug), yet he isn't on the 0.9 board. Per the person, that lap
-was most likely set on the **25th** local time and was **on 0.8** — the
-UTC date just pushes a late-evening North American lap onto the next day
-(see `docs/ARCHITECTURE.md`'s timezone section). A date-based rule would
-have confidently mis-tagged it 0.9, and nothing would have looked wrong.
+Ron Rico's main-board row displays `2026-08-26`, squarely inside the 0.9
+board's date range, yet it is a **0.8** lap — most likely set on the
+**25th** local time, with the UTC date pushing a late-evening North
+American lap onto the next day (see `docs/ARCHITECTURE.md`'s timezone
+section). A date-based rule would have confidently mis-tagged it 0.9 and
+nothing would have looked wrong.
+
+He is now also a clean example of reason 1, which is worth following
+because it initially looked like a bug. He has since set a 0.9 lap
+(6:37.680, 27 Aug) and appears on the 0.9 board — but his main-board row
+still reads **6:28.731 / 0.8**, because that older lap is faster and the
+main board ranks by best lap. Both are correct simultaneously: the 0.9
+ONLY filter shows him at 6:37.680 tagged 0.9, the main board shows him at
+6:28.731 tagged 0.8. A driver appearing on both boards with *different
+times and different versions* is the system working, not a
+double-entry bug.
+
+An earlier version of this entry said he "isn't on the 0.9 board". That
+was true when written and is no longer — these boards grow, so check the
+live data before treating any specific driver named here as fixed.
 
 So: if a row's date *looks* like it should be 0.9 but shows 0.8, that is
 the system working, not a bug. The 0.9 leaderboard is the sole authority
