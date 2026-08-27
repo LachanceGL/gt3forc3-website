@@ -832,7 +832,11 @@
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface-dim);
       color: #888;
     }
-    .leaderboard-frame thead th.lb-session {
+    /* Session and Ver share the dimmer header treatment: both are
+       metadata about a lap rather than the result itself, so they read as
+       one trailing block set slightly back from the timing columns. */
+    .leaderboard-frame thead th.lb-session,
+    .leaderboard-frame thead th.lb-version {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface-dim);
     }
     .leaderboard-frame thead th:nth-child(2),
