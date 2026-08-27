@@ -596,6 +596,15 @@
       align-items: center;
       pointer-events: none;
     }
+    /* Take the colour of the button it hangs from, so the tag reads as
+       part of that button rather than as a separate chip that happens to
+       sit nearby. Inactive buttons are already grey (#999/#333), which the
+       base rule above matches; this handles the active state, where the
+       button turns red. */
+    .rank-toggle-btn.active .filter-version-note {
+      border-color: #ff2727;
+      color: #ff6b6b;
+    }
     /* The note hangs outside the button, so the button has to be the
        positioning context and the row has to leave room for it — without
        the extra margin it would overlap the table below. */
@@ -832,7 +841,12 @@
     }
     .leaderboard-frame {
       width: 100%;
-      max-height: 578px;
+      /* 690, up from 578. Header is 40px and a row 39.5px, so this goes
+         from ~13.6 rows visible to ~16.5. Deliberately NOT a whole number
+         of rows: the half-row peeking at the bottom is what tells the
+         reader the list continues, and landing exactly on a row boundary
+         makes a scrollable table look like it ends there. */
+      max-height: 690px;
       overflow-y: auto;
       border-radius: 6px;
       background: var(--surface-1);
