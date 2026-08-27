@@ -1236,63 +1236,6 @@
       font-weight: 700;
     }
 
-    .crash-report-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-      gap: 6px;
-      margin-top: 2px;
-    }
-    .crash-stat-card {
-      background: var(--surface-2);
-      border-radius: 6px;
-      padding: 8px 10px;
-    }
-    .crash-stat-label {
-      color: #999;
-      font-size: 14px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      margin-bottom: 2px;
-    }
-    .crash-stat-value {
-      color: #999;
-      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-      font-size: 17px;
-      font-weight: 700;
-    }
-    .crash-stat-detail {
-      color: #999;
-      font-size: 11px;
-      margin-top: 1px;
-    }
-    .crash-stat-driver {
-      font-size: 14px;
-      text-decoration: none;
-    }
-    .crash-stat-joke {
-      color: #666;
-      font-style: italic;
-      text-decoration: none;
-    }
-    .crash-stat-joke-emoji {
-      font-style: normal;
-      display: inline-block;
-    }
-    .crash-report-empty {
-      color: #999;
-      font-size: 13px;
-    }
-
-    .section-box {
-      background: var(--surface-1);
-      border-radius: 10px;
-      padding: 24px;
-      margin-bottom: 8px;
-    }
-    #crash-report-section {
-      padding: 14px 16px;
-    }
     .section-box .section-title {
       border-top: none;
       padding-top: 0;
@@ -2044,11 +1987,6 @@
     <div id="leaderboard-frame" class="leaderboard-frame"></div>
   </div>
 
-  <div class="section-box" id="crash-report-section">
-    <div class="section-subtitle" id="crash-report-subtitle">💥 Loading crash data...</div>
-    <div id="crash-report-content"></div>
-  </div>
-
   <div class="section-box">
     <h2 class="section-title">GT3 FORC3 DRIVERS AROUND THE WORLD</h2>
     <div class="section-subtitle" id="country-subtitle">🌍 Countries represented</div>
@@ -2606,184 +2544,6 @@
       })();
 
       pendingRaceTotalTimeFetch[trackId] = fetchPromise;
-      return fetchPromise;
-    }
-
-    // ---- Crash Report (most recent session's collision data) ----
-
-    // Below this impact speed, a logged "collision" is almost always just
-    // resting/scraping contact (a car sitting against a wall, wheel-to-wheel
-    // touching at parking speed) rather than a real hit — confirmed by
-    // checking a real session's data, where roughly 40% of all entries were
-    // under 1 km/h. 15 km/h is a reasonable line for "this was an actual
-    // impact worth counting."
-    const CRASH_IMPACT_THRESHOLD_KMH = 15;
-
-    const crashReportData = {};
-    const crashReportLoadedAt = {};
-    const pendingCrashReportFetch = {};
-    const CRASH_REPORT_TTL_MS = 3 * 60 * 1000; // 3 minutes, same reasoning as race total times
-
-    async function fetchCrashReport(workerPrefix) {
-      const listRes = await fetch(WORKER_URL + workerPrefix + "/api/v1/results");
-      if (!listRes.ok) throw new Error("Server returned " + listRes.status);
-      const listData = await listRes.json();
-
-      const sessions = (listData.results || [])
-        .slice()
-        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-
-      if (sessions.length === 0) return null;
-
-      // "Today" = whatever calendar date the most recent session falls on
-      // (its own timestamp's date, not the visitor's local date) — that
-      // sidesteps timezone mismatches between different servers, and
-      // matches what "today" means to whoever's actually racing on this
-      // server right now. Sessions run ~8 hours each, so a full day is
-      // usually only 1-3 sessions — still cheap to fetch in full.
-      const todayDate = (sessions[0].timestamp || "").slice(0, 10);
-      const todaySessions = sessions.filter(s => (s.timestamp || "").slice(0, 10) === todayDate);
-
-      const countsByDriver = {};
-      let highest = null;
-      let totalIncidents = 0;
-      let sawAnyCollisionsField = false;
-
-      for (const session of todaySessions) {
-        let detail;
-        try {
-          detail = await fetchWithRetry(WORKER_URL + workerPrefix + session.download_url, 3);
-        } catch (err) {
-          continue; // skip this one session, the rest of today can still count
-        }
-
-        const collisions = detail.collisions || [];
-        if (!collisions.length) continue;
-        sawAnyCollisionsField = true;
-
-        // Resolve car_id -> driver name via the same join used for Total
-        // Time: car_standings and driver_standings share index positions,
-        // and driver_standings holds the guid that identifies the driver.
-        // Rebuilt fresh per session since car_id assignments aren't
-        // guaranteed stable across different sessions.
-        const nameByGuid = {};
-        (detail.drivers || []).forEach(d => {
-          if (!d.guid) return;
-          nameByGuid[`${d.guid.a}-${d.guid.b}`] = `${d.first_name || ""} ${d.last_name || ""}`.trim();
-        });
-        const nameByCarId = {};
-        (detail.car_standings || []).forEach((car, i) => {
-          if (!car.car_id) return;
-          const guid = (detail.driver_standings || [])[i];
-          if (!guid) return;
-          const name = nameByGuid[`${guid.a}-${guid.b}`];
-          if (name) nameByCarId[`${car.car_id.a}-${car.car_id.b}`] = name;
-        });
-
-        const realHits = collisions.filter(c => (c.relative_impact_kmh || 0) >= CRASH_IMPACT_THRESHOLD_KMH);
-        totalIncidents += realHits.length;
-
-        realHits.forEach(c => {
-          const carKey = c.car_id ? `${c.car_id.a}-${c.car_id.b}` : null;
-          const driverName = carKey ? (nameByCarId[carKey] || "Unknown driver") : "Unknown driver";
-          countsByDriver[driverName] = (countsByDriver[driverName] || 0) + 1;
-          if (!highest || c.relative_impact_kmh > highest.relative_impact_kmh) {
-            highest = { relative_impact_kmh: c.relative_impact_kmh, driverName };
-          }
-        });
-      }
-
-      if (!sawAnyCollisionsField) {
-        return { todayDate, totalIncidents: 0 };
-      }
-
-      let topDriver = null;
-      Object.entries(countsByDriver).forEach(([name, count]) => {
-        if (!topDriver || count > topDriver.count) topDriver = { name, count };
-      });
-
-      return {
-        todayDate,
-        sessionCount: todaySessions.length,
-        totalIncidents,
-        topDriver,
-        highest
-      };
-    }
-
-    // Randomized each render, just for a little variety in the joke text.
-    const CRASH_JOKE_EMOJIS = ["🤣", "😅", "😂", "😝", "😛", "😋", "🤪", "😜"];
-    function randomJokeEmoji() {
-      return CRASH_JOKE_EMOJIS[Math.floor(Math.random() * CRASH_JOKE_EMOJIS.length)];
-    }
-
-    function renderCrashReport() {
-      const subtitleEl = document.getElementById("crash-report-subtitle");
-      const contentEl = document.getElementById("crash-report-content");
-      if (!subtitleEl || !contentEl) return;
-
-      const data = crashReportData[activeTrack];
-      if (!data) {
-        contentEl.innerHTML = `<div class="crash-report-empty">Loading crash data...</div>`;
-        return;
-      }
-
-      const trackConfig = LEADERBOARDS[activeTrack];
-      const trackName = (trackConfig && trackConfig.displayName) || activeTrack;
-      subtitleEl.innerHTML = `Crash Report · 💥 <strong>${trackName}</strong> · Today · ${formatSessionDate(data.todayDate)}`;
-
-      if (!data.totalIncidents) {
-        contentEl.innerHTML = `<div class="crash-report-empty">No significant incidents today. 🎉</div>`;
-        return;
-      }
-
-      contentEl.innerHTML = `
-        <div class="crash-report-grid">
-          <div class="crash-stat-card">
-            <div class="crash-stat-label">Real Incidents</div>
-            <div class="crash-stat-value">${data.totalIncidents}</div>
-            <div class="crash-stat-detail">≥ ${CRASH_IMPACT_THRESHOLD_KMH} km/h impact</div>
-          </div>
-          <div class="crash-stat-card">
-            <div class="crash-stat-label">Most Incidents</div>
-            <div class="crash-stat-value">${data.topDriver ? data.topDriver.count : "-"}</div>
-            <div class="crash-stat-detail">${data.topDriver ? `<span class="crash-stat-driver">${data.topDriver.name}</span> <span class="crash-stat-joke">← avoid this driver <span class="crash-stat-joke-emoji">${randomJokeEmoji()}</span></span>` : "-"}</div>
-          </div>
-          <div class="crash-stat-card">
-            <div class="crash-stat-label">Highest Impact</div>
-            <div class="crash-stat-value">${data.highest ? Math.round(data.highest.relative_impact_kmh) + " km/h" : "-"}</div>
-            <div class="crash-stat-detail">${data.highest ? `<span class="crash-stat-driver">${data.highest.driverName}</span> <span class="crash-stat-joke">← avoid this driver <span class="crash-stat-joke-emoji">${randomJokeEmoji()}</span></span>` : "-"}</div>
-          </div>
-        </div>
-      `;
-    }
-
-    async function ensureCrashReportLoaded(trackId) {
-      const config = LEADERBOARDS[trackId];
-      if (!config) return;
-
-      const loadedAt = crashReportLoadedAt[trackId];
-      if (loadedAt && Date.now() - loadedAt < CRASH_REPORT_TTL_MS) {
-        renderCrashReport();
-        return;
-      }
-
-      if (pendingCrashReportFetch[trackId]) return pendingCrashReportFetch[trackId];
-
-      const fetchPromise = (async () => {
-        try {
-          crashReportData[trackId] = await fetchCrashReport(config.workerPrefix);
-          crashReportLoadedAt[trackId] = Date.now();
-        } catch (err) {
-          // Leave any previously-loaded data in place rather than wiping
-          // it out on a transient failure.
-        } finally {
-          delete pendingCrashReportFetch[trackId];
-        }
-        renderCrashReport();
-      })();
-
-      pendingCrashReportFetch[trackId] = fetchPromise;
       return fetchPromise;
     }
 
@@ -4086,7 +3846,6 @@
       ensureVersionDataLoaded(track);
       ensureTrackDataLoaded(track);
       ensureRaceTotalTimesLoaded(track);
-      ensureCrashReportLoaded(track);
     }
 
     // Clicking a tab just changes the URL hash (native <a> behavior);
@@ -4158,7 +3917,6 @@
     renderVersionFilterButtons(activeTrack);
     renderUpdateNotice(activeTrack);
     ensureRaceTotalTimesLoaded(activeTrack);
-    ensureCrashReportLoaded(activeTrack);
     ensureVersionDataLoaded(activeTrack);
     loadLeaderboard(activeTrack);
 
@@ -4200,12 +3958,6 @@
     // on page load. The Worker's edge cache (2 min, matching the bot's own
     // refresh rate) absorbs the actual Discord API load, so this is cheap.
     setInterval(loadDiscordStats, 90 * 1000);
-
-    // Re-render the crash report every minute just to reshuffle the joke
-    // emoji — renderCrashReport() only reads from already-cached data, so
-    // this costs nothing network-wise, it just picks a new random emoji
-    // each time via randomJokeEmoji().
-    setInterval(renderCrashReport, 60 * 1000);
 
     // The anomalies-notice tooltip previously here has been removed
     // entirely, along with its mobile tap-toggle handler.

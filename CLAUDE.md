@@ -8,8 +8,9 @@ for deeper detail before making changes.
 GT3FORC3.COM is a sim racing community site for an Assetto Corsa EVO (and
 one legacy Assetto Corsa 1) Discord community. It shows live leaderboards
 scraped from Assetto Corsa game servers, a Discord member-count widget, a
-"Get Verified" driver-verification flow, and a couple of stats sections
-(crash reports, driver nationality breakdown).
+"Get Verified" driver-verification flow, and a driver-nationality
+breakdown. (A crash-report section existed until 2026-08-27; it and its
+per-session collision walk were removed.)
 
 The system has **three separate components** that only communicate over
 HTTP — there is no shared codebase or build step between them:

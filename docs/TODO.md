@@ -56,9 +56,10 @@ product decisions.
       **954 session requests per visit became 12.**
 
       What the cache would still help: the hourly CI rebuild (currently
-      ~2m28s of mostly-repeated fetches of immutable files), and the two
-      small walks still done in the browser — `fetchRaceTotalTimes()`
-      and `fetchCrashReport()`. Worth doing, no longer urgent.
+      ~2m28s of mostly-repeated fetches of immutable files), and the one
+      small walk still done in the browser, `fetchRaceTotalTimes()`.
+      (`fetchCrashReport()` was the other, removed with the crash-report
+      section on 2026-08-27.) Worth doing, no longer urgent.
 
 ## Data accuracy (low urgency, cosmetic/informational only)
 

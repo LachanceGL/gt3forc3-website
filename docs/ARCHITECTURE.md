@@ -20,7 +20,8 @@ Major sections in the file, top to bottom:
    toolbar (title, search) + rank/filter toggle rows + the "Allowed Cars"
    dropdown.
 5. The leaderboard table itself (`#leaderboard-frame`, populated by JS).
-6. Crash report section, driver-nationality world map/flag grid.
+6. Driver-nationality world map/flag grid. (A crash-report section
+   also lived here until 2026-08-27, when it was removed.)
 7. Footer (version string, Discord + Patreon links).
 8. `<script>` — all JS: the `LEADERBOARDS` config, data fetching,
    rendering functions, event wiring.
@@ -193,7 +194,7 @@ the one `ensureRaceTotalTimesLoaded()` already reads for Race boards.
 2. `switchToTrack(track)` resets per-track UI state, then calls
    `loadLeaderboard(track)`, `loadServerName(track)`,
    `ensureTrackDataLoaded(track)`, `ensureRaceTotalTimesLoaded(track)` (Race
-   tracks only), `ensureCrashReportLoaded(track)`.
+   tracks only).
 3. `loadLeaderboard` fetches `WORKER_URL + config.workerPrefix +
    "/leaderboards/embed/" + config.shareKey + "/rows"` — this is the
    public leaderboard-embed endpoint Assetto Corsa server hosting exposes,
