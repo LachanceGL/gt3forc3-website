@@ -9,20 +9,21 @@
 # READ THIS BEFORE THE FIRST DEPLOY
 # ------------------------------------------------------------------
 #
-# 1. `name` MUST match the existing Worker exactly. It's derived from the
-#    live URL -- raspy-salad-d894.contact-eb9.workers.dev -- where
+# 1. `name` MUST match the existing Worker exactly. Confirmed correct
+#    2026-08-26. It's derived from the live URL --
+#    raspy-salad-d894.contact-eb9.workers.dev -- where
 #    "raspy-salad-d894" is the Worker and "contact-eb9" is the account's
 #    workers.dev subdomain. Get this wrong and wrangler does NOT error: it
 #    happily creates a SECOND Worker under the new name, leaves the real
 #    one running untouched, and every deploy after that goes to the wrong
 #    place while the site keeps serving the old code.
 #
-# 2. `compatibility_date` below is a guess and should be checked against
-#    the dashboard (Workers > raspy-salad-d894 > Settings) before the
-#    first deploy. Deploying a date far newer than the Worker was written
-#    against can change runtime behaviour. This Worker only uses fetch,
-#    Request/Response and the Cache API, so the risk is low -- but "low"
-#    is not "none", and it costs one look to remove the guess.
+# 2. `compatibility_date` is the value the live Worker already runs on,
+#    read off the dashboard and confirmed 2026-08-26 -- not a guess. Keep
+#    it that way: deploying a date newer than the Worker was written
+#    against can change runtime behaviour, and matching the live value
+#    means this config deploys identical behaviour rather than quietly
+#    upgrading the runtime as a side effect.
 #
 # 3. Secrets are NOT in this file and must never be. `wrangler deploy`
 #    leaves existing secrets alone, so the seven already set in the
@@ -60,8 +61,8 @@
 name = "raspy-salad-d894"
 main = "workers.js"
 
-# Verify against the dashboard before the first deploy -- see note 2.
-compatibility_date = "2026-08-01"
+# Matches the live Worker's own setting -- see note 2.
+compatibility_date = "2026-07-12"
 
 # The site calls this Worker at its workers.dev URL, so that route has to
 # stay enabled. Setting this to false would silently take the whole site's
