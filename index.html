@@ -521,6 +521,25 @@
       align-items: flex-end;
       gap: 8px;
     }
+    /* Holds the row count at a fixed width so the title, its underline and
+       the badge beside it don't shift when the number changes digits —
+       switching filters moves between counts like 57, 200 and 839.
+       min-width reserves three digits; tabular-nums matters just as much,
+       because in this proportional font "1" is narrower than "8", so even
+       two counts with the same digit count would otherwise differ in
+       width. min-width rather than width, so a four-digit count still
+       fits rather than being clipped. */
+    .leaderboard-title-count {
+      display: inline-block;
+      /* 3ch alone is too narrow. `ch` is the width of the "0" GLYPH, but
+         .leaderboard-title also applies letter-spacing: 0.05em, which adds
+         a gap after each character — so three rendered digits occupy
+         3ch + 3x0.05em. Measured: 3ch reserved 22.42px while "333" needed
+         24.39px, so 1- and 2-digit counts still sat narrower than 3-digit
+         ones and the badge shifted anyway. */
+      min-width: calc(3ch + 0.15em);
+      font-variant-numeric: tabular-nums;
+    }
     .leaderboard-track-badge {
       background: var(--surface-1);
       color: #3a3a3a;
@@ -599,9 +618,14 @@
     /* Take the colour of the button it hangs from, so the tag reads as
        part of that button rather than as a separate chip that happens to
        sit nearby. Inactive buttons are already grey (#999/#333), which the
-       base rule above matches; this handles the active state, where the
-       button turns red. */
-    .rank-toggle-btn.active .filter-version-note {
+       base rule above matches; these handle the two states where the
+       button turns red.
+
+       Hover and active share one declaration because the button itself
+       barely separates them (#eee vs #fff on an 8px tag would be
+       invisible) — what reads is the red, and both states have it. */
+    .rank-toggle-btn.active .filter-version-note,
+    .rank-toggle-btn:hover .filter-version-note {
       border-color: #ff2727;
       color: #ff6b6b;
     }
@@ -3023,7 +3047,11 @@
       const label = (config.isRace && raceRankMode === "best_lap")
         ? `${config.title || "Race"} - Best Lap`
         : (config.title || "Hot Lap");
-      titleEl.innerHTML = `${label} Top ${entryCount}<span class="leaderboard-track-badge">${badgeText}</span>`;
+      // The label is wrapped in its own span rather than left as a bare
+      // text node: .leaderboard-title is inline-flex with gap: 8px, so a
+      // loose text node and the count span would become two separate flex
+      // items and gain 8px between "Top" and the number.
+      titleEl.innerHTML = `<span class="leaderboard-title-text">${label} Top <span class="leaderboard-title-count">${entryCount}</span></span><span class="leaderboard-track-badge">${badgeText}</span>`;
     }
 
     const LEADERBOARD_MAX_ENTRIES = 200;
