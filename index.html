@@ -2662,8 +2662,21 @@
         // A separate, 0.9-only leaderboard on the same server. Any row on
         // the main board whose driver+lap time also appears here was set on
         // 0.9; everything else falls back to GAME_VERSION_DEFAULT.
+        // Two boards for the same version. The second is a corrected
+        // board: where a driver appears on both, the loader keeps whichever
+        // lap is actually plausible rather than the faster one, so a broken
+        // logged time on one board no longer hides that driver. Arkadiusz
+        // Lenkiewicz is the case that prompted it — 5:12.936 on the first
+        // board, which the sub-6:00 impossible-lap floor hides, against a
+        // real 6:51.603 on the second.
         versionOverrides: [
-          { version: "0.9", shareKey: "9733e693-3e7f-4bbe-be23-e215c2e98c4a" }
+          {
+            version: "0.9",
+            shareKeys: [
+              "9733e693-3e7f-4bbe-be23-e215c2e98c4a",
+              "97aa929e-7eea-4629-a245-52edd70ca7e4"
+            ]
+          }
         ],
         title: "Hot Lap",
         updateNote: "Ranks updated every new session",
@@ -3323,34 +3336,95 @@
       if (versionOverrideData[trackId]) return;
       if (pendingVersionFetch[trackId]) return pendingVersionFetch[trackId];
 
+      // Is this lap inside the track's plausible range? Deliberately only
+      // the MIN/MAX bounds, not isFlagged(): those bounds catch a broken
+      // logged time, which is the thing a second board can legitimately
+      // correct. FLAGGED_DRIVERS is a manual cheater list and must NOT be
+      // rescued by finding the same person on another board.
+      const withinBounds = (row) => {
+        const t = parseLapTimeToMs(row.BestLap);
+        if (t == null) return true;
+        const min = MIN_VALID_LAP_MS[trackId];
+        const max = MAX_VALID_LAP_MS[trackId];
+        if (min != null && t < min) return false;
+        if (max != null && t > max) return false;
+        return true;
+      };
+
       const fetchPromise = (async () => {
         const result = {};
         for (const override of config.versionOverrides) {
-          try {
-            const res = await fetch(
-              WORKER_URL + `${config.workerPrefix}/leaderboards/embed/${override.shareKey}/rows`
-            );
-            // A 401 here means that board simply isn't published on
-            // AssettoHosting yet (see docs/DECISIONS.md) — not a bug, and
-            // not worth failing the page over. Those rows just stay on the
-            // default version until it's published.
-            if (!res.ok) continue;
-            const rows = await res.json();
-            if (!Array.isArray(rows)) continue;
-            const keys = new Set();
-            rows.forEach(r => {
-              if (!r.FullName) return;
-              keys.add(r.FullName.trim().toLowerCase() + "|" + (r.BestLap || ""));
+          // One version can be spread over several boards — see the
+          // shareKeys comment in LEADERBOARDS.
+          const shareKeys = override.shareKeys || [override.shareKey];
+          const keys = new Set();
+          const byDriver = new Map();
+
+          for (const shareKey of shareKeys) {
+            try {
+              const res = await fetch(
+                WORKER_URL + `${config.workerPrefix}/leaderboards/embed/${shareKey}/rows`
+              );
+              // A 401 here means that board simply isn't published on
+              // AssettoHosting yet (see docs/DECISIONS.md) — not a bug, and
+              // not worth failing the page over. Those rows just stay on the
+              // default version until it's published.
+              if (!res.ok) continue;
+              const rows = await res.json();
+              if (!Array.isArray(rows)) continue;
+
+              rows.forEach(r => {
+                if (!r.FullName) return;
+                // Every row from every board tags the main leaderboard,
+                // even one that loses the merge below — the lap still
+                // belongs to this version.
+                keys.add(r.FullName.trim().toLowerCase() + "|" + (r.BestLap || ""));
+
+                const nameKey = r.FullName.trim().toLowerCase();
+                const prev = byDriver.get(nameKey);
+                if (!prev) { byDriver.set(nameKey, r); return; }
+
+                // A driver listed on more than one board: prefer the lap
+                // that's actually plausible. This is what lets a corrected
+                // board rescue someone whose time on another board is
+                // broken — a 5:12 Nordschleife lap that the impossible-lap
+                // floor hides, where the same driver has a real 6:51
+                // elsewhere. Only when both are equally (in)valid does the
+                // faster one win, so a clean board still ranks normally.
+                const rOk = withinBounds(r), prevOk = withinBounds(prev);
+                if (rOk !== prevOk) {
+                  if (rOk) byDriver.set(nameKey, r);
+                  return;
+                }
+                const rt = parseLapTimeToMs(r.BestLap);
+                const pt = parseLapTimeToMs(prev.BestLap);
+                if (rt != null && (pt == null || rt < pt)) byDriver.set(nameKey, r);
+              });
+            } catch (err) {
+              // Same reasoning — a failed override fetch degrades to the
+              // default version rather than breaking the leaderboard.
+            }
+          }
+
+          // Rows are kept alongside the keys so a version filter can show
+          // this board on its own terms, rather than showing the main
+          // board intersected with it. Those differ: a driver whose 0.9
+          // lap is slower than their old 0.8 one appears here with their
+          // 0.9 time, but on the main board with the 0.8 time.
+          //
+          // Re-sorted because the merge can replace a driver's row with one
+          // from another board, and the source boards each arrive already
+          // ranked — leaving it unsorted would put a rescued lap wherever
+          // its original board happened to list it.
+          if (keys.size) {
+            const merged = [...byDriver.values()].sort((a, b) => {
+              const at = parseLapTimeToMs(a.BestLap), bt = parseLapTimeToMs(b.BestLap);
+              if (at == null && bt == null) return 0;
+              if (at == null) return 1;
+              if (bt == null) return -1;
+              return at - bt;
             });
-            // Rows are kept alongside the keys so a version filter can show
-            // this board on its own terms, rather than showing the main
-            // board intersected with it. Those differ: a driver whose 0.9
-            // lap is slower than their old 0.8 one appears here with their
-            // 0.9 time, but on the main board with the 0.8 time.
-            if (keys.size) result[override.version] = { keys, rows };
-          } catch (err) {
-            // Same reasoning — a failed override fetch degrades to the
-            // default version rather than breaking the leaderboard.
+            result[override.version] = { keys, rows: merged };
           }
         }
         versionOverrideData[trackId] = result;
