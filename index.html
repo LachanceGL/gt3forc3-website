@@ -2907,6 +2907,14 @@
       "Dude Brown": "Dude"
     };
 
+    // Same idea for the Car column: overrides how a car is DISPLAYED,
+    // keyed by the exact CarName the game reports. The raw value is still
+    // what gets matched on everywhere else (search included), so this only
+    // changes what's rendered.
+    const CAR_NAME_OVERRIDES = {
+      "Porsche 911 GT3 R Rennsport (992)": "Porsche 911 GT3 R Rennsport"
+    };
+
     const FLAGGED_DRIVERS = {
       "Nathan VAN DE HEL": "Cheater, will be removed",
       "Jakub Qrwc": "Cheater, will be removed",
@@ -3046,7 +3054,7 @@
         tr.innerHTML = `
           <td class="lb-pos">${posChip}</td>
           <td><div class="lb-driver-name">${flagHtml}${(row.FullName && DISPLAY_NAME_OVERRIDES[row.FullName]) || row.FullName || "—"}${verifiedHtml}</div></td>
-          <td class="lb-car">${row.CarName || "—"}</td>
+          <td class="lb-car">${(row.CarName && CAR_NAME_OVERRIDES[row.CarName]) || row.CarName || "—"}</td>
           <td class="lb-best">${row.BestLap || "-"}</td>
           ${totalTimeCell}
           <td class="lb-session">${formatSessionDate(row.SessionDate)}</td>
