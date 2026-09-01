@@ -3668,6 +3668,13 @@
       lbStatusEl.className = "loading";
       lbFrameEl.innerHTML = "";
       if (lbBarEl) lbBarEl.classList.add("visible");
+      // Hide the version notice while loading. It annotates the board's
+      // contents, so it has nothing to refer to yet — and left up it sits
+      // beside "Loading leaderboard..." looking like part of the loading
+      // state. Restored in the finally below, on whatever the load
+      // produced.
+      const noticeElForLoad = document.getElementById("update-notice");
+      if (noticeElForLoad) noticeElForLoad.classList.remove("visible");
       updateLeaderboardTitle(track, 0);
 
       try {
@@ -3723,6 +3730,12 @@
         // exit (success, empty board, error, and that stale return).
         if (lbBarEl && requestId === leaderboardRequestId) {
           lbBarEl.classList.remove("visible");
+        }
+        // Same ownership rule as the bar: a superseded request must not
+        // restore the notice, because the newer one is still loading and
+        // has deliberately hidden it.
+        if (requestId === leaderboardRequestId) {
+          renderUpdateNotice(track);
         }
       }
     }
