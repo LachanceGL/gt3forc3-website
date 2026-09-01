@@ -585,58 +585,22 @@
     .rank-toggle-row.visible {
       display: flex;
     }
-    /* Small version tag hung under a filter button, same idea as
-       .leaderboard-tab-corner-note under a track tab. Deliberately neutral
-       rather than themed: this is metadata about which build a view's laps
-       come from, the same role the Ver column plays, so it uses that
-       column's muted treatment instead of competing with the red/purple
-       track theming. */
-    .filter-version-note {
-      position: absolute;
-      bottom: -10px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--surface-dim);
-      border: 1px solid #3a3a3a;
-      color: #999;
-      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-      font-size: 8px;
-      font-weight: 700;
-      letter-spacing: 0.02em;
-      padding: 0 4px;
-      border-radius: 4px;
-      white-space: nowrap;
-      /* Same reasoning as the tab corner note: this box hugs its content,
-         so vertical centring comes from a fixed height/line-height pair,
-         not padding or flex. */
-      height: 12px;
-      line-height: 12px;
-      display: inline-flex;
-      align-items: center;
-      pointer-events: none;
+    /* Views a build doesn't offer are hidden rather than disabled — a
+       greyed-out button still invites a click and then explains nothing.
+       0.9 has no Sub 7 Club yet, so that button simply isn't there while
+       0.9 is selected. */
+    /* Scoped through the row's id deliberately. SUB 7 CLUB is shown by
+       `#sub7-filter-btn.nordschleife-only-visible`, which at one id plus
+       one class outranks a two-class selector — so a plain
+       `.rank-toggle-btn.view-unavailable` lost, and the button stayed
+       visible under 0.9. One id plus two classes wins. */
+    #verified-filter-row .rank-toggle-btn.view-unavailable {
+      display: none;
     }
-    /* Take the colour of the button it hangs from, so the tag reads as
-       part of that button rather than as a separate chip that happens to
-       sit nearby. Inactive buttons are already grey (#999/#333), which the
-       base rule above matches; these handle the two states where the
-       button turns red.
-
-       Hover and active share one declaration because the button itself
-       barely separates them (#eee vs #fff on an 8px tag would be
-       invisible) — what reads is the red, and both states have it. */
-    .rank-toggle-btn.active .filter-version-note,
-    .rank-toggle-btn:hover .filter-version-note {
-      border-color: #ff2727;
-      color: #ff6b6b;
-    }
-    /* The note hangs outside the button, so the button has to be the
-       positioning context and the row has to leave room for it — without
-       the extra margin it would overlap the table below. */
-    #verified-filter-row .rank-toggle-btn {
-      position: relative;
-    }
-    #verified-filter-row.has-version-notes {
-      margin-bottom: 18px;
+    /* The version row is only shown on boards whose laps span more than one
+       build; .visible is toggled from renderVersionFilterButtons(). */
+    #version-filter-row {
+      margin-bottom: 8px;
     }
     .rank-toggle-label {
       color: #999;
@@ -2036,19 +2000,23 @@
       <button type="button" class="rank-toggle-btn" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
       <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
     </div>
+    <!-- Row 1: which game build. Buttons are rendered from the board's
+         versionOverrides by renderVersionFilterButtons(), newest first, so
+         adding 1.0 later is a config entry rather than an edit to markup,
+         CSS and JS. The whole row hides on boards that have no version
+         split, where the question doesn't arise. -->
+    <div class="rank-toggle-row" id="version-filter-row">
+      <span class="rank-toggle-label">Version</span>
+      <span id="version-filter-buttons"></span>
+    </div>
+    <!-- Row 2: which view of that build. -->
     <div class="rank-toggle-row" id="verified-filter-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Filter by</span>
-      <!-- Version buttons come FIRST: the newest build is the one people
-           are racing, so it leads. One button per entry in the active
-           board's versionOverrides, rendered by
-           renderVersionFilterButtons() rather than written out here, so
-           adding 1.0 (or any later build) is a config entry rather than an
-           edit to markup, CSS and JS. -->
-      <span id="version-filter-buttons"></span>
-      <!-- No `active` class here any more. The default depends on the
-           track — see defaultFilterModeFor() — so hardcoding it would put
-           the highlight on the wrong button before the first reset ran. -->
+      <!-- No `active` class here any more. The default depends on which
+           build is selected — see defaultFilterModeFor() — so hardcoding it
+           would put the highlight on the wrong button before the first
+           reset ran. -->
       <button type="button" class="rank-toggle-btn" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
       <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
     </div>
@@ -2657,7 +2625,7 @@
           label: "0.9 UPDATE",
           body: [
             "The EVO 0.9 update brought considerable changes to the tyre model and to overall lap times.",
-            "TOP 200 and SUB 7 CLUB now show 0.8 laps only, and 0.9 ONLY shows 0.9 laps.",
+            "Use the Version row to switch between 0.9 and 0.8 — laps from each build are ranked separately.",
             // Phrased as a standing policy rather than about 0.9 specifically:
             // the same thing happens again at 1.0, 1.1 and so on, so this
             // line shouldn't need rewriting every release.
@@ -2677,6 +2645,10 @@
         versionOverrides: [
           {
             version: "0.9",
+            // Which views this build offers. 0.9 has no Sub 7 Club yet, so
+            // that button hides while 0.9 is selected — omit this and a
+            // build gets VERSION_VIEWS_DEFAULT (all of them).
+            views: ["top200"],
             shareKeys: [
               "9733e693-3e7f-4bbe-be23-e215c2e98c4a",
               "97aa929e-7eea-4629-a245-52edd70ca7e4"
@@ -3133,21 +3105,56 @@
     // leaderboard) or "sub7" (only drivers with a Best Lap under 7 minutes
     // — "Sub 7 Club", a real Nürburgring enthusiast term). Resets to
     // "top200" on track change.
-    // Which filter a board opens on. A board with version overrides opens
-    // on its newest version, since that's the build people are actually
-    // racing; everything else opens on TOP 200 as before. Computed rather
-    // than hardcoded because only some boards have version filters at all,
-    // and defaulting the others to a mode with no button would leave the
-    // whole row looking unselected.
-    function defaultFilterModeFor(trackId) {
-      const overrides = (LEADERBOARDS[trackId] || {}).versionOverrides;
-      if (overrides && overrides.length) {
-        return "v" + overrides[overrides.length - 1].version;
-      }
-      return "top200";
+    // Filtering is two independent axes, shown as two rows:
+    //
+    //   row 1  WHICH BUILD  -> selectedVersion ("0.9" / "0.8")
+    //   row 2  WHICH VIEW   -> nordschleifeFilterMode ("top200" / "sub7")
+    //
+    // They were one control until the second row was added, which meant
+    // "0.9" and "TOP 200" were mutually exclusive and you couldn't ask for
+    // the top 200 OF 0.9. Splitting them makes every combination
+    // expressible, and each row keeps its own selection when the other
+    // changes.
+    //
+    // Not every build supports every view — see versionViewsFor(). 0.9 has
+    // no Sub 7 Club yet, so that button hides while 0.9 is selected rather
+    // than offering a view with nothing behind it.
+    const VERSION_VIEWS_DEFAULT = ["top200", "sub7"];
+
+    function versionsFor(trackId) {
+      const overrides = (LEADERBOARDS[trackId] || {}).versionOverrides || [];
+      // Newest first: the build people are racing leads the row.
+      return [...overrides].reverse().map(o => ({
+        version: o.version,
+        views: o.views || VERSION_VIEWS_DEFAULT
+      })).concat([{ version: GAME_VERSION_DEFAULT, views: VERSION_VIEWS_DEFAULT }]);
     }
 
-    let nordschleifeFilterMode = defaultFilterModeFor("nordschleife");
+    function versionViewsFor(trackId, version) {
+      const entry = versionsFor(trackId).find(v => v.version === version);
+      return (entry && entry.views) || VERSION_VIEWS_DEFAULT;
+    }
+
+    function defaultVersionFor(trackId) {
+      return versionsFor(trackId)[0].version;
+    }
+
+    // The view a board opens on. Falls back to the first view the selected
+    // build actually supports, so a build without Sub 7 Club can't open on
+    // a button that isn't there.
+    function defaultFilterModeFor(trackId, version) {
+      const views = versionViewsFor(trackId, version || defaultVersionFor(trackId));
+      return views.includes("top200") ? "top200" : views[0];
+    }
+
+    // Initialised with literals, NOT by calling defaultVersionFor() here:
+    // that reads GAME_VERSION_DEFAULT, which is declared further down, and
+    // a const in its temporal dead zone throws rather than reading as
+    // undefined — it took the whole script out. The real per-track values
+    // are set by the first-load block and by switchToTrack(), both of which
+    // run after every declaration exists.
+    let selectedVersion = null;
+    let nordschleifeFilterMode = "top200";
     const SUB_7_CLUB_MS = 6 * 60 * 1000 + 59999; // 6:59.999
 
     // When true, the current ranking order (whatever it is — Best Lap,
@@ -3170,10 +3177,14 @@
     // after the version they show ("v0.9"), so the version is read straight
     // back out of the mode rather than kept in a second lookup that could
     // drift out of step with it.
+    // The selected build, but only when it's one with its OWN board.
+    // Selecting the default build returns null, meaning "use the main
+    // leaderboard, filtered down to that build" rather than a separate
+    // source — which is what computeFilteredEntries branches on.
     function activeVersionFilter() {
-      if (activeTrack !== "nordschleife") return null;
-      const m = /^v(.+)$/.exec(nordschleifeFilterMode);
-      return m ? m[1] : null;
+      const overrides = (LEADERBOARDS[activeTrack] || {}).versionOverrides;
+      if (!overrides || !overrides.length) return null;
+      return overrides.some(o => o.version === selectedVersion) ? selectedVersion : null;
     }
 
     function computeFilteredEntries(rows) {
@@ -3267,10 +3278,9 @@
       const count = computeFilteredEntries(rawRows).length;
       nordschleifeFilterMode = savedMode;
       // Write into the label's own text node rather than setting
-      // btn.textContent, which replaces ALL children — that silently
-      // deleted the .filter-version-note badge hanging under this button
-      // every time the count was recalculated, leaving TOP 200 as the only
-      // filter without its version tag.
+      // btn.textContent, which replaces ALL children. That matters for any
+      // element hung inside the button (it previously deleted a version
+      // badge that lived there), and costs nothing to keep.
       const label = `TOP ${count}`;
       const firstText = [...btn.childNodes].find(n => n.nodeType === Node.TEXT_NODE);
       if (firstText) {
@@ -3474,47 +3484,42 @@
     // needs a versionOverrides entry and nothing else.
     function renderVersionFilterButtons(trackId) {
       const host = document.getElementById("version-filter-buttons");
-      if (!host) return;
+      const versionRow = document.getElementById("version-filter-row");
+      const viewRow = document.getElementById("verified-filter-row");
+      if (!host || !versionRow) return;
+
+      const config = LEADERBOARDS[trackId] || {};
+      const hasVersions = Boolean(config.versionOverrides && config.versionOverrides.length);
+
+      // The version row only means something on a board whose laps are
+      // actually split across builds. Elsewhere it's a one-option question.
+      versionRow.classList.toggle("visible", hasVersions && !config.isRace);
+
       host.innerHTML = "";
-
-      const overrides = (LEADERBOARDS[trackId] || {}).versionOverrides || [];
-
-      // Tag the non-version filters with the build their laps come from,
-      // so "TOP 200" and "SUB 7 CLUB" say which version you're looking at.
-      // Read from GAME_VERSION_DEFAULT rather than written out, so when the
-      // default eventually moves to 0.9 (and later 1.0) these labels follow
-      // on their own instead of becoming quietly wrong.
-      //
-      // Only on boards that actually have version overrides: elsewhere the
-      // distinction doesn't exist and a version tag would raise a question
-      // the page can't answer. The version buttons get no tag — their own
-      // label already names the build.
-      const row = document.getElementById("verified-filter-row");
-      if (row) {
-        row.querySelectorAll(".filter-version-note").forEach(n => n.remove());
-        row.classList.toggle("has-version-notes", overrides.length > 0);
-        if (overrides.length) {
-          row.querySelectorAll(".rank-toggle-btn[data-filter-mode]").forEach(btn => {
-            if ((btn.dataset.filterMode || "").startsWith("v")) return;
-            const note = document.createElement("span");
-            note.className = "filter-version-note";
-            note.textContent = GAME_VERSION_DEFAULT;
-            btn.appendChild(note);
-          });
-        }
+      if (hasVersions) {
+        versionsFor(trackId).forEach(entry => {
+          const btn = document.createElement("button");
+          btn.type = "button";
+          btn.className = "rank-toggle-btn";
+          btn.dataset.versionFilter = entry.version;
+          btn.title = `Laps set on Assetto Corsa EVO ${entry.version}`;
+          btn.textContent = entry.version;
+          btn.classList.toggle("active", entry.version === selectedVersion);
+          host.appendChild(btn);
+        });
       }
 
-      overrides.forEach(override => {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "rank-toggle-btn";
-        // Mode is "v" + the version, which is the same convention
-        // activeVersionFilter() parses back out — so the two can't drift.
-        btn.dataset.filterMode = "v" + override.version;
-        btn.title = `Only laps set on Assetto Corsa EVO ${override.version}`;
-        btn.textContent = `${override.version} ONLY`;
-        host.appendChild(btn);
-      });
+      // Hide any view the selected build doesn't have. 0.9 has no Sub 7
+      // Club yet, and offering a button that resolves to an empty board is
+      // worse than not offering it.
+      const views = hasVersions
+        ? versionViewsFor(trackId, selectedVersion)
+        : VERSION_VIEWS_DEFAULT;
+      if (viewRow) {
+        viewRow.querySelectorAll(".rank-toggle-btn[data-filter-mode]").forEach(btn => {
+          btn.classList.toggle("view-unavailable", !views.includes(btn.dataset.filterMode));
+        });
+      }
 
       // Re-apply the active highlight. This function REPLACES the version
       // buttons, so any .active a caller set beforehand is destroyed by the
@@ -3525,6 +3530,11 @@
       document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
       });
+
+      // The 0.8 tag under TOP 200 / SUB 7 CLUB is gone: the version row now
+      // states which build you're looking at, so repeating it under every
+      // view button was saying the same thing twice — and it would have
+      // been wrong the moment 0.9 was selected.
     }
 
     // Fills in and shows/hides the toolbar notice badge for a track. Board
@@ -4037,8 +4047,10 @@
       // nothing.
       renderVersionFilterButtons(track);
 
-      // Reset to the default filter mode whenever the active track changes.
-      nordschleifeFilterMode = defaultFilterModeFor(track);
+      // Reset BOTH axes whenever the active track changes — version first,
+      // since the default view depends on which build is selected.
+      selectedVersion = defaultVersionFor(track);
+      nordschleifeFilterMode = defaultFilterModeFor(track, selectedVersion);
       document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
       });
@@ -4094,11 +4106,9 @@
       // land on, and the mode is recomputed for activeTrack rather than
       // trusting the declaration's default, since the URL hash can open a
       // different board.
+      selectedVersion = defaultVersionFor(activeTrack);
+      nordschleifeFilterMode = defaultFilterModeFor(activeTrack, selectedVersion);
       renderVersionFilterButtons(activeTrack);
-      nordschleifeFilterMode = defaultFilterModeFor(activeTrack);
-      document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
-      });
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
@@ -4216,7 +4226,36 @@
       });
     });
 
-    // ---- Filter mode: TOP 200 / SUB 7 CLUB / <version> ONLY (radio-style) ----
+    // ---- Version row: 0.9 / 0.8 (radio-style) ----
+    // Delegated, because these buttons are rebuilt per track.
+    const versionFilterRowForClicks = document.getElementById("version-filter-row");
+    if (versionFilterRowForClicks) {
+      versionFilterRowForClicks.addEventListener("click", (e) => {
+        const btn = e.target.closest(".rank-toggle-btn[data-version-filter]");
+        if (!btn) return;
+        const version = btn.dataset.versionFilter;
+        if (version === selectedVersion) return;
+        selectedVersion = version;
+
+        // Changing build can invalidate the current view — 0.9 has no Sub 7
+        // Club. Keep the view if the new build supports it, otherwise fall
+        // back to that build's default rather than leaving a selection
+        // pointing at a button that just disappeared.
+        const views = versionViewsFor(activeTrack, selectedVersion);
+        if (!views.includes(nordschleifeFilterMode)) {
+          nordschleifeFilterMode = defaultFilterModeFor(activeTrack, selectedVersion);
+        }
+
+        renderVersionFilterButtons(activeTrack);
+        const rawRows = leaderboardCache[activeTrack] || [];
+        currentLeaderboardEntries = computeFilteredEntries(rawRows);
+        updateLeaderboardTitle(activeTrack, currentLeaderboardEntries.length);
+        updateTop200ButtonLabel();
+        applyLeaderboardSearch();
+      });
+    }
+
+    // ---- View row: TOP 200 / SUB 7 CLUB (radio-style) ----
     // Delegated from the row rather than bound per button: the version
     // buttons are rendered per track by renderVersionFilterButtons(), so
     // they don't exist when this runs and a direct binding would silently
