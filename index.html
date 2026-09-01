@@ -1357,9 +1357,13 @@
       transform: rotate(180deg);
     }
     .car-class-dropdown-panel {
+      /* Absolute against the page column (no positioned ancestor between
+         here and body's centred block), so it spans the content width
+         regardless of where along the server-name line its button sits. */
       position: absolute;
-      top: calc(100% + 8px);
       left: 0;
+      right: 0;
+      margin-inline: auto;
       z-index: 10;
       /* Matches the site's own content width (body { max-width: 900px }
          near the top of this stylesheet), so the popup lines up with the
@@ -1381,7 +1385,7 @@
          it, especially small bold white text. Opacity-only avoids that. */
       transition: opacity 0.15s ease;
     }
-    .car-class-dropdown.open .car-class-dropdown-panel {
+    .car-class-dropdown-panel.open {
       opacity: 1;
       visibility: visible;
     }
@@ -1968,7 +1972,21 @@
         <span id="car-class-dropdown-btn-label">Road Cars List</span>
         <span class="car-class-dropdown-arrow">▾</span>
       </button>
-      <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
+      </div>
+    </div>
+    <div class="car-class-backdrop" id="car-class-backdrop"></div>
+    <!-- The panel lives OUT here, not inside .leaderboard-server-name with
+         its button. That row carries a drop-shadow filter, and a filter
+         rasterises its whole subtree — the exact hazard this panel already
+         documents below (and CLAUDE.md warns about for filters on a parent
+         wrapping unrelated elements). Nesting it there rendered it visibly
+         wrong on a real GPU. Kept out here, its rendering context is
+         unchanged from before the button moved.
+
+         It's therefore no longer a descendant of .car-class-dropdown, so
+         its open state is its own .open class rather than an inherited
+         one — see the toggles in JS, which set both together. -->
+    <div class="car-class-dropdown-panel" id="car-class-dropdown-panel">
         <div class="car-class-panel-header">
           <div>
             <div class="car-class-panel-title" id="car-class-panel-title">Road Cars List</div>
@@ -1981,9 +1999,7 @@
         </div>
         <div class="car-class-grid" id="car-class-grid"></div>
       </div>
-    </div>
-    <div class="car-class-backdrop" id="car-class-backdrop"></div>
-    </div>
+
     <div class="leaderboard-toolbar">
       <h3 class="leaderboard-title" id="leaderboard-title"></h3>
       <span class="update-notice" id="update-notice">
@@ -3890,6 +3906,8 @@
       // switching tracks, so the panel doesn't stay open showing another
       // track's cars (or an empty grid on a track with none).
       dropdownEl.classList.remove("open");
+      const panelForReset = document.getElementById("car-class-dropdown-panel");
+      if (panelForReset) panelForReset.classList.remove("open");
       const backdropEl = document.getElementById("car-class-backdrop");
       if (backdropEl) backdropEl.classList.remove("visible");
 
@@ -3990,6 +4008,7 @@
     // kept in sync with .open on every toggle path (button, close button,
     // outside click, backdrop click itself).
     const carClassDropdownEl = document.getElementById("car-class-dropdown");
+    const carClassPanelEl = document.getElementById("car-class-dropdown-panel");
     const carClassDropdownBtnEl = document.getElementById("car-class-dropdown-btn");
     const carClassPanelCloseEl = document.getElementById("car-class-panel-close");
     const carClassBackdropEl = document.getElementById("car-class-backdrop");
@@ -3997,10 +4016,16 @@
       carClassDropdownBtnEl.addEventListener("click", (e) => {
         e.stopPropagation();
         carClassDropdownEl.classList.toggle("open");
-        if (carClassBackdropEl) carClassBackdropEl.classList.toggle("visible", carClassDropdownEl.classList.contains("open"));
+        const isOpen = carClassDropdownEl.classList.contains("open");
+        // The panel is no longer nested inside the dropdown (it sits outside
+        // the drop-shadow-filtered server-name row), so it carries its own
+        // open state rather than inheriting one.
+        if (carClassPanelEl) carClassPanelEl.classList.toggle("open", isOpen);
+        if (carClassBackdropEl) carClassBackdropEl.classList.toggle("visible", isOpen);
       });
       document.addEventListener("click", () => {
         carClassDropdownEl.classList.remove("open");
+        if (carClassPanelEl) carClassPanelEl.classList.remove("open");
         if (carClassBackdropEl) carClassBackdropEl.classList.remove("visible");
       });
     }
@@ -4008,12 +4033,14 @@
       carClassPanelCloseEl.addEventListener("click", (e) => {
         e.stopPropagation();
         carClassDropdownEl.classList.remove("open");
+        if (carClassPanelEl) carClassPanelEl.classList.remove("open");
         if (carClassBackdropEl) carClassBackdropEl.classList.remove("visible");
       });
     }
     if (carClassBackdropEl && carClassDropdownEl) {
       carClassBackdropEl.addEventListener("click", () => {
         carClassDropdownEl.classList.remove("open");
+        if (carClassPanelEl) carClassPanelEl.classList.remove("open");
         carClassBackdropEl.classList.remove("visible");
       });
     }
