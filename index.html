@@ -1304,9 +1304,18 @@
     }
     .car-class-dropdown {
       display: none;
-      position: relative;
-      z-index: 11;
-      margin-bottom: 12px;
+      /* Deliberately NOT position: relative. The panel is absolutely
+         positioned at left: 0 and is a full 900px wide, so anchoring it to
+         this button would shoot it off the right edge now that the button
+         sits at the end of the server-name line. Leaving this static means
+         the panel resolves against .leaderboard-server-name instead, which
+         spans the content column — so it lines up with the page however far
+         along the line the button happens to land.
+
+         z-index moved to the button for the same reason: it only applies to
+         positioned elements, and it exists to keep the button clickable
+         above the backdrop while the panel is open. */
+      margin-bottom: 0;
       /* Theme colors — overridden per-track via inline style from JS
          (renderCarClassSection) so the same dropdown can be dark purple for
          Nürburgring Touring or red for the GT3 tracks, without duplicating
@@ -1319,6 +1328,8 @@
       display: block;
     }
     .car-class-dropdown-btn {
+      position: relative;
+      z-index: 11;
       display: inline-flex;
       align-items: center;
       gap: 6px;
@@ -1952,8 +1963,6 @@
       <span class="live-badge" id="server-live-badge"><span class="live-dot"></span>Online</span>
       <span class="live-player-count" id="live-player-count"></span>
       <span id="leaderboard-server-name-text"></span>
-    </div>
-    <div class="car-class-backdrop" id="car-class-backdrop"></div>
     <div class="car-class-dropdown" id="car-class-dropdown">
       <button type="button" class="car-class-dropdown-btn" id="car-class-dropdown-btn">
         <span id="car-class-dropdown-btn-label">Road Cars List</span>
@@ -1972,6 +1981,8 @@
         </div>
         <div class="car-class-grid" id="car-class-grid"></div>
       </div>
+    </div>
+    <div class="car-class-backdrop" id="car-class-backdrop"></div>
     </div>
     <div class="leaderboard-toolbar">
       <h3 class="leaderboard-title" id="leaderboard-title"></h3>
