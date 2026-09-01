@@ -602,6 +602,15 @@
     #version-filter-row {
       margin-bottom: 8px;
     }
+    /* The version buttons live inside a wrapper span, so the row's own
+       `gap: 8px` applies to the WRAPPER, not to the buttons within it —
+       they rendered flush against each other. Making the wrapper a flex
+       container of its own restores the spacing, matching the row's gap. */
+    #version-filter-buttons {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
     .rank-toggle-label {
       color: #999;
       font-size: 11px;
@@ -3236,8 +3245,14 @@
       // intentionally shows every qualifying entry across the whole
       // leaderboard (isFlagged() already filtered `rows` down to just
       // sub-7 drivers before we ever got here).
+      // Only Sub 7 Club is uncapped — it deliberately shows every
+      // qualifying entry. A version view is capped like any other now that
+      // "which build" and "which view" are separate choices: picking 0.9
+      // and TOP 200 has to mean the top 200 OF 0.9, not all of it. (It was
+      // uncapped while selecting a version WAS the view, when there was no
+      // TOP 200 to combine it with.)
       const isSub7Mode = nordschleifeFilterMode === "sub7" && activeTrack === "nordschleife";
-      const visibleRows = (isSub7Mode || version)
+      const visibleRows = isSub7Mode
         ? orderedRows
         : orderedRows.slice(0, (raceConfig && raceConfig.maxEntries) || LEADERBOARD_MAX_ENTRIES);
 
