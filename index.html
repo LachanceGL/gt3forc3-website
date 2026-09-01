@@ -500,10 +500,29 @@
       cursor: not-allowed;
     }
 
+    /* Puts the filter row and the search bar on one line, search pushed
+       right by its own margin-left: auto. They're siblings rather than the
+       search living inside the row, so the row's drop-shadow filter
+       doesn't reach the input or its hint popup. */
+    .leaderboard-filter-line {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+    /* The row supplies the line's spacing now, so drop its own. */
+    .leaderboard-filter-line .rank-toggle-row {
+      margin-bottom: 0;
+    }
     .leaderboard-toolbar {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      /* flex-start, not space-between: with the search moved out, only the
+         title and the version notice are left, and space-between would
+         fling the notice to the far right instead of keeping it beside the
+         title it annotates. */
+      justify-content: flex-start;
       gap: 16px;
       flex-wrap: wrap;
       margin-bottom: 6px;
@@ -2006,24 +2025,6 @@
         <span id="update-notice-label"></span>
         <span class="update-notice-tooltip" id="update-notice-tooltip"></span>
       </span>
-      <div class="leaderboard-search-wrap">
-        <input
-          type="text"
-          id="leaderboard-search"
-          class="leaderboard-search-input"
-          placeholder="Search"
-          autocomplete="off">
-        <button type="button" class="leaderboard-search-clear" id="leaderboard-search-clear" aria-label="Clear search">✕</button>
-        <div class="leaderboard-search-hint">
-          <div class="leaderboard-search-hint-title">You can search by</div>
-          <div class="leaderboard-search-hint-tags">
-            <span class="leaderboard-search-hint-tag">Driver</span>
-            <span class="leaderboard-search-hint-tag">Car</span>
-            <span class="leaderboard-search-hint-tag">Country</span>
-            <span class="leaderboard-search-hint-tag">Session</span>
-          </div>
-        </div>
-      </div>
     </div>
     <div id="leaderboard-status"></div>
     <div class="loading-bar-track indeterminate" id="leaderboard-loading-bar">
@@ -2046,6 +2047,12 @@
       <span id="version-filter-buttons"></span>
     </div>
     <!-- Row 2: which view of that build. -->
+    <!-- The search sits BESIDE the filter row, not inside it. That row
+         carries a drop-shadow filter, and the search bar is deliberately
+         excluded from that treatment (it has its own inset styling — see
+         the per-element filter list). Nesting it would apply the filter to
+         the input and rasterise its hint popup along with it. -->
+    <div class="leaderboard-filter-line">
     <div class="rank-toggle-row" id="verified-filter-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Filter by</span>
@@ -2055,6 +2062,25 @@
            reset ran. -->
       <button type="button" class="rank-toggle-btn" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
       <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
+    </div>
+      <div class="leaderboard-search-wrap">
+        <input
+          type="text"
+          id="leaderboard-search"
+          class="leaderboard-search-input"
+          placeholder="Search"
+          autocomplete="off">
+        <button type="button" class="leaderboard-search-clear" id="leaderboard-search-clear" aria-label="Clear search">✕</button>
+        <div class="leaderboard-search-hint">
+          <div class="leaderboard-search-hint-title">You can search by</div>
+          <div class="leaderboard-search-hint-tags">
+            <span class="leaderboard-search-hint-tag">Driver</span>
+            <span class="leaderboard-search-hint-tag">Car</span>
+            <span class="leaderboard-search-hint-tag">Country</span>
+            <span class="leaderboard-search-hint-tag">Session</span>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
   <div class="leaderboard-frame-border">
