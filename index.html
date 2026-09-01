@@ -2039,13 +2039,18 @@
     <div class="rank-toggle-row" id="verified-filter-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Filter by</span>
-      <button type="button" class="rank-toggle-btn active" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
-      <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
-      <!-- One button per entry in the active board's versionOverrides —
-           rendered by renderVersionFilterButtons(), not written out here,
-           so adding 1.0 (or 1.1, or any later build) is a config entry
-           rather than an edit to markup, CSS and JS. -->
+      <!-- Version buttons come FIRST: the newest build is the one people
+           are racing, so it leads. One button per entry in the active
+           board's versionOverrides, rendered by
+           renderVersionFilterButtons() rather than written out here, so
+           adding 1.0 (or any later build) is a config entry rather than an
+           edit to markup, CSS and JS. -->
       <span id="version-filter-buttons"></span>
+      <!-- No `active` class here any more. The default depends on the
+           track — see defaultFilterModeFor() — so hardcoding it would put
+           the highlight on the wrong button before the first reset ran. -->
+      <button type="button" class="rank-toggle-btn" id="filter-top200-btn" data-filter-mode="top200">TOP 200</button>
+      <button type="button" class="rank-toggle-btn" id="sub7-filter-btn" data-filter-mode="sub7">SUB 7 CLUB</button>
     </div>
   </div>
   <div class="leaderboard-frame-border">
@@ -3128,7 +3133,21 @@
     // leaderboard) or "sub7" (only drivers with a Best Lap under 7 minutes
     // — "Sub 7 Club", a real Nürburgring enthusiast term). Resets to
     // "top200" on track change.
-    let nordschleifeFilterMode = "top200";
+    // Which filter a board opens on. A board with version overrides opens
+    // on its newest version, since that's the build people are actually
+    // racing; everything else opens on TOP 200 as before. Computed rather
+    // than hardcoded because only some boards have version filters at all,
+    // and defaulting the others to a mode with no button would leave the
+    // whole row looking unselected.
+    function defaultFilterModeFor(trackId) {
+      const overrides = (LEADERBOARDS[trackId] || {}).versionOverrides;
+      if (overrides && overrides.length) {
+        return "v" + overrides[overrides.length - 1].version;
+      }
+      return "top200";
+    }
+
+    let nordschleifeFilterMode = defaultFilterModeFor("nordschleife");
     const SUB_7_CLUB_MS = 6 * 60 * 1000 + 59999; // 6:59.999
 
     // When true, the current ranking order (whatever it is — Best Lap,
@@ -3496,6 +3515,16 @@
         btn.textContent = `${override.version} ONLY`;
         host.appendChild(btn);
       });
+
+      // Re-apply the active highlight. This function REPLACES the version
+      // buttons, so any .active a caller set beforehand is destroyed by the
+      // rebuild — which is exactly what happened when the first-load block
+      // set the state and a later call recreated the buttons, leaving the
+      // whole row unhighlighted. Doing it here makes the function safe to
+      // call at any point, in any order.
+      document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
+      });
     }
 
     // Fills in and shows/hides the toolbar notice badge for a track. Board
@@ -3599,7 +3628,14 @@
         // don't have this filter.
         const rowsPromise = fetch(WORKER_URL + `${config.workerPrefix}/leaderboards/embed/${config.shareKey}/rows`);
         const racePromise = config.isRace ? ensureRaceTotalTimesLoaded(track) : Promise.resolve();
-        const [res] = await Promise.all([rowsPromise, racePromise]);
+        // Same reasoning as racePromise above, and it matters more now that
+        // a board can OPEN on a version filter: that view is built from the
+        // override board, and computeFilteredEntries deliberately shows
+        // nothing rather than falling back to the main rows. Without
+        // awaiting this, the first paint would be an empty board that fills
+        // in a moment later.
+        const versionPromise = config.versionOverrides ? ensureVersionDataLoaded(track) : Promise.resolve();
+        const [res] = await Promise.all([rowsPromise, racePromise, versionPromise]);
         if (!res.ok) throw new Error("Server returned " + res.status);
         const rows = await res.json();
 
@@ -4002,7 +4038,7 @@
       renderVersionFilterButtons(track);
 
       // Reset to the default filter mode whenever the active track changes.
-      nordschleifeFilterMode = "top200";
+      nordschleifeFilterMode = defaultFilterModeFor(track);
       document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
         btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
       });
@@ -4051,6 +4087,18 @@
       const sub7BtnForVisibility = document.getElementById("sub7-filter-btn");
       if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", activeTrack === "nordschleife");
 
+      // Mirrors switchToTrack's reset. This block previously set no filter
+      // mode at all, relying on an `active` class hardcoded in the markup —
+      // which stopped working the moment the default became per-track.
+      // Buttons are rendered first so the active state has something to
+      // land on, and the mode is recomputed for activeTrack rather than
+      // trusting the declaration's default, since the URL hash can open a
+      // different board.
+      renderVersionFilterButtons(activeTrack);
+      nordschleifeFilterMode = defaultFilterModeFor(activeTrack);
+      document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
+        btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
+      });
     }
 
     // Give legacy (deactivated) tracks' tabs a darker, muted look so they
