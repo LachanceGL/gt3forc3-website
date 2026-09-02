@@ -1640,11 +1640,13 @@
       /* Tighter tabs so more than one fits per row before wrapping. Only
          padding and type size change — the hard-shadow lift keeps its own
          offsets, since those are tuned to the effect rather than the size. */
+      /* No flex-grow here. Letting tabs grow to fill their row stretched
+         whichever tab wrapped onto the last line to the full width, which
+         looked broken rather than responsive. Content-sized and
+         left-aligned wraps far more naturally. */
       .leaderboard-tab {
         padding: 6px 10px;
         font-size: 12px;
-        flex: 1 1 auto;
-        min-width: 0;
       }
       .leaderboard-tab-type {
         font-size: 9px;
