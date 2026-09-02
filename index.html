@@ -863,7 +863,11 @@
          reader the list continues, and landing exactly on a row boundary
          makes a scrollable table look like it ends there. */
       max-height: 690px;
-      overflow-y: auto;
+      /* Both axes. overflow-y alone meant the table was CLIPPED sideways on
+         a narrow screen — Ver and Session simply couldn't be reached. This
+         makes the table scrollable rather than truncated, so nothing is
+         lost on a phone. */
+      overflow: auto;
       border-radius: 6px;
       background: var(--surface-1);
       /* No scrollbar-width or scrollbar-color here — see the @supports
@@ -1148,7 +1152,19 @@
 
     .leaderboard-tabs {
       display: flex;
-      gap: 8px;
+      /* Wrap rather than overflow. Five tabs need ~630px and there's no
+         width at which they all fit on a phone, so without this they simply
+         ran off the edge — the last track was unreachable rather than just
+         cramped. Wrapping keeps every track visible and tappable, which a
+         horizontal scroll wouldn't: tabs pushed off-screen are easy to miss
+         entirely.
+
+         The row gap is bigger than the column gap on purpose. The
+         "ROAD & TRACK CARS" corner note hangs 12px below its tab
+         (bottom: -12px), so an 8px row gap would let it collide with the
+         tab on the next line. */
+      flex-wrap: wrap;
+      gap: 20px 8px;
       margin-bottom: 24px;
     }
     .leaderboard-tab {
@@ -1619,6 +1635,66 @@
       .country-grid {
         grid-template-columns: repeat(3, 1fr);
         gap: 5px;
+      }
+
+      /* Tighter tabs so more than one fits per row before wrapping. Only
+         padding and type size change — the hard-shadow lift keeps its own
+         offsets, since those are tuned to the effect rather than the size. */
+      .leaderboard-tab {
+        padding: 6px 10px;
+        font-size: 12px;
+        flex: 1 1 auto;
+        min-width: 0;
+      }
+      .leaderboard-tab-type {
+        font-size: 9px;
+      }
+      .leaderboard-tab-corner-note {
+        font-size: 7px;
+        padding: 1px 4px 0 4px;
+      }
+
+      /* The filter line stacks instead of squeezing the search into a
+         sliver beside the buttons. */
+      .leaderboard-filter-line {
+        align-items: stretch;
+        gap: 10px;
+      }
+      .leaderboard-search-wrap {
+        max-width: none;
+        margin-left: 0;
+      }
+
+      /* Tighter cells so the whole table has a chance of fitting before
+         the horizontal scroll is needed at all. */
+      th, td {
+        padding: 8px 4px;
+        font-size: 12px;
+      }
+      .lb-pos {
+        width: 34px;
+      }
+      /* The position chip's own min-width sets the column's floor, so the
+         width above does nothing without shrinking it too. */
+      .lb-pos-chip {
+        min-width: 18px;
+        height: 18px;
+        font-size: 10px;
+      }
+      .lb-driver-flag {
+        width: 16px;
+      }
+      /* The car name is the widest column by far and the least load-bearing
+         of the six — clamping it is what buys the timing columns room,
+         rather than dropping a column entirely. */
+      .lb-car {
+        max-width: 62px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .lb-session, .lb-version {
+        font-size: 11px;
       }
     }
 
