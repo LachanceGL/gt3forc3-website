@@ -2363,8 +2363,10 @@
       throw lastError;
     }
 
-    // Nation codes to exclude entirely from the country grid.
-    const EXCLUDED_NATIONS = new Set(["REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN", "BES", "ATF", "GGY", "GIB", "BLM", "NCL", "VGB", "XKX"]);
+    // The country grid's exclusion list is NOT here. It lives in
+    // scripts/build_driver_index.py, which computes nationCounts in CI —
+    // a Set here would look authoritative and do nothing, which is exactly
+    // what happened while a stale copy of it survived this file.
 
     // Fetches and tallies driver/nation data for ONE track's session pool.
     // Holds each source's driver/nation data once the index has loaded,

@@ -70,10 +70,20 @@ SOURCES = {
     "nurburgringtour": "/server5",
 }
 
-# Must stay in step with EXCLUDED_NATIONS in index.html.
+# Nation codes kept out of the country grid entirely.
+#
+# This is the ONLY copy that does anything. index.html used to hold one too,
+# back when the browser built these counts itself, but that walk moved here
+# and the client list became dead code -- editing it had no effect at all,
+# which is easy to miss because the name still looked authoritative. It has
+# been removed, so this is the single place to change.
+#
+# A change here only reaches the site once data/driver-index.json is
+# regenerated (hourly in CI, or by running this script).
 EXCLUDED_NATIONS = {
     "REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN",
     "BES", "ATF", "GGY", "GIB", "BLM", "NCL", "VGB", "XKX",
+    "TKL", "CXR", "JEY",
 }
 
 TIMEOUT = 30
