@@ -1698,6 +1698,28 @@
       .lb-session, .lb-version {
         font-size: 11px;
       }
+
+      /* Tap-to-highlight a row. Desktop has :hover for this; touch has
+         nothing, and it matters more here than on a big screen — the table
+         scrolls sideways at this width, so you tap a row, then scroll to
+         reach Ver and Session, and without a marker it's easy to lose
+         which row you were reading.
+
+         Persistent rather than :active, for exactly that reason: a
+         highlight that vanishes when you lift your finger is gone before
+         you start scrolling. */
+      .leaderboard-frame tbody tr {
+        /* The browser's own grey tap flash fires on every touch and would
+           compete with the highlight below. */
+        -webkit-tap-highlight-color: transparent;
+      }
+      .leaderboard-frame tbody tr.row-focus,
+      .leaderboard-frame tbody tr.lb-podium-row.row-focus {
+        background: #2a1012;
+        outline: 1px solid rgba(255, 39, 39, 0.55);
+        /* Inset, so the outline doesn't overlap the rows either side. */
+        outline-offset: -1px;
+      }
     }
 
     #status {
@@ -4395,6 +4417,27 @@
         applyLeaderboardSearch();
       });
     });
+
+    // Tap a leaderboard row to mark it. Only styled on small screens (see
+    // the media query), where there's no hover and the table scrolls
+    // sideways — the class is harmless anywhere else.
+    //
+    // Delegated from the frame because the rows themselves are replaced on
+    // every filter change, track switch and search keystroke; binding per
+    // row would silently stop working after the first re-render.
+    const leaderboardFrameForTaps = document.getElementById("leaderboard-frame");
+    if (leaderboardFrameForTaps) {
+      leaderboardFrameForTaps.addEventListener("click", (e) => {
+        const tr = e.target.closest("tbody tr");
+        if (!tr || !leaderboardFrameForTaps.contains(tr)) return;
+        const alreadyOn = tr.classList.contains("row-focus");
+        leaderboardFrameForTaps.querySelectorAll("tbody tr.row-focus")
+          .forEach(r => r.classList.remove("row-focus"));
+        // Tapping the marked row again clears it, so there's a way back to
+        // no selection without hunting for somewhere neutral to tap.
+        if (!alreadyOn) tr.classList.add("row-focus");
+      });
+    }
 
     // ---- Version row: 0.9 / 0.8 (radio-style) ----
     // Delegated, because these buttons are rebuilt per track.
