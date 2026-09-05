@@ -4236,18 +4236,26 @@
       if (sub7BtnForVisibility) sub7BtnForVisibility.classList.toggle("nordschleife-only-visible", track === "nordschleife");
 
 
-      // Rendered before the reset below, which sets .active by querying
-      // these buttons — if they don't exist yet, the active state lands on
-      // nothing.
-      renderVersionFilterButtons(track);
-
-      // Reset BOTH axes whenever the active track changes — version first,
-      // since the default view depends on which build is selected.
+      // Reset BOTH axes BEFORE rendering the buttons. Version first, since
+      // the default view depends on which build is selected.
+      //
+      // Order matters and used to be the other way round, which is what
+      // made a switched-away-and-back board show 0.9 rows under a
+      // highlighted 0.8 button: renderVersionFilterButtons() marks the
+      // active version from selectedVersion, so running it first marked the
+      // OUTGOING board's choice, and the reset that followed only
+      // refreshed the view buttons — never the version ones. The data was
+      // right the whole time; only the highlight lied.
+      //
+      // The first-load block below already did it in this order, which is
+      // why the bug never showed on a fresh load.
       selectedVersion = defaultVersionFor(track);
       nordschleifeFilterMode = defaultFilterModeFor(track, selectedVersion);
-      document.querySelectorAll("#verified-filter-row .rank-toggle-btn[data-filter-mode]").forEach(btn => {
-        btn.classList.toggle("active", btn.dataset.filterMode === nordschleifeFilterMode);
-      });
+
+      // Renders both rows and applies .active to each from the state just
+      // set above, so there's one place that syncs buttons to state rather
+      // than two that can disagree.
+      renderVersionFilterButtons(track);
 
       // Same reset for the sort-direction toggle.
       sortReversed = false;
