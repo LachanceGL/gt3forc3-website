@@ -142,6 +142,18 @@ a product decision needing care: `SessionDate` is also a join key for race
 total times and lap counts, so it has to keep matching the raw data rather
 than what's displayed.
 
+**Don't cross-check dates against the HTML embed page — it localises and
+`/rows` does not.** The human-facing
+`/leaderboards/embed/<shareKey>` page and the `/rows` JSON behind it
+disagree by a day around midnight UTC: on 2026-09-06 the page showed
+`Nikita Marshakov` under `2026-09-05` while `/rows` returned
+`"SessionDate": "2026-09-06"` for the same row — and the lap really is in
+`results_20260906_000858_practice`, so `/rows` is the correct one. The page
+is server-rendered (no `toLocaleDateString` anywhere in it), so this is the
+panel's configured zone, not the viewer's, and it will look the same for
+everybody. It only matters when eyeballing that page against result files;
+the site reads `/rows` and is unaffected.
+
 ## Where per-lap times and sector splits live
 
 Checked against the live API on 2026-08-26, prompted by a standing
@@ -180,9 +192,43 @@ therefore very likely to return nothing but empty arrays and give the
 impression the field is never populated. Across the ~815 sessions on
 server1 that extrapolates to roughly 260 sessions carrying real lap data.
 
-**Not established:** what `flags` means. Values `1` and `2` were both
-observed on laps that otherwise look normal, and the guess that it's a
-valid/invalidated marker is only a guess — confirm before filtering on it.
+**`flags` is a bitfield, and bit 1 (value `2`) means the lap counts
+toward the session standings.** Established 2026-09-06 against
+`results_20260905_232108_practice` on server1, and the test was symmetric
+in both directions rather than a spot check:
+
+- 28 drivers had at least one `flags & 2` lap; 28 drivers had a non-zero
+  `time_standings` entry; the difference each way was **0**.
+- `time_standings` equalled the fastest `flags & 2` lap for **28 of 28**
+  drivers, no exceptions.
+
+Values seen in that session: `1` (118 laps), `2` (38), `129` (2). `129` is
+`128|1` and does **not** count. What bit 7 (`128`) marks is still unknown —
+only two laps carried it, which is too few to infer anything from.
+
+**What "doesn't count" actually covers.** AssettoHosting's own HTML results
+page renders a per-lap Status column of `SB` / `PB` / `Invalid`, and its
+`Invalid` badge lines up with the missing bit — 155 laps were badged that
+way in this session. It is a mixed bucket, not just track limits: laps of
+`18:26.772` (S1 alone `13:29`) and `93:03.754` (S1 `88:09`) are in it, which
+are out-laps and idle/AFK stints. So don't present a filtered-out lap to
+anyone as "cut" — the data doesn't say that.
+
+⚠️ **The leaderboard endpoint ignores this field, and so therefore does the
+site.** `/leaderboards/embed/<shareKey>/rows` ranks a driver's fastest lap
+regardless of validity: across 59 rows matched back to the session file,
+59 equalled the fastest lap of *any* flag and only 23 equalled the fastest
+*valid* one. Concretely, `Paul Richardson VR GUY` is `6:46.689` on the
+results page and `6:45.339` on the leaderboard — the faster one is
+`flags: 1`. Every board on gt3forc3.com inherits this.
+
+This is upstream behaviour in AssettoHosting's Server Manager, not
+something this repo introduced: the same software's results page reads the
+flag correctly and its leaderboard doesn't. Reported as an open item in
+`docs/TODO.md`. Filtering it out client-side is possible but is a product
+decision, not a cleanup — in this one session 60 drivers set a lap and only
+28 set a valid one, so applying it would move or delete a large share of
+the community's existing PBs.
 
 `time_standings` is a parallel array of raw millisecond integers (not
 objects), positionally aligned with `drivers`/`driver_standings` — that's

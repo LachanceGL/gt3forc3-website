@@ -23,6 +23,27 @@ product decisions.
       key in the future, expect a `401` from `/leaderboards/embed/.../rows`
       until the person publishes it on AssettoHosting's side — not a bug,
       see `docs/DECISIONS.md`.
+- [ ] **The leaderboard ranks laps the same panel marks `Invalid`.**
+      To raise with AssettoHosting; investigated 2026-09-06. Their
+      results page reads the per-lap validity flag and badges bad laps
+      `Invalid`; their
+      `/leaderboards/embed/.../rows` endpoint ignores it and ranks a
+      driver's outright fastest lap. Every board on gt3forc3.com inherits
+      that. Repro to quote them: session
+      `results_20260905_232108_practice` on server1, driver
+      `Paul Richardson VR GUY` — `6:46.689` on the results page,
+      `6:45.339` on the leaderboard, and the faster lap is flagged
+      invalid. Full evidence in `docs/ARCHITECTURE.md`.
+
+      Ask whether it's intended before calling it a bug — it may be a
+      deliberate "raw fastest lap" choice, possibly toggleable. **Do not
+      work around it locally without a decision from the person:** in that
+      one session 60 drivers set a lap and 28 set a valid one, so filtering
+      would move or erase a large share of existing PBs, including near the
+      top of the boards. That's a community call, not a cleanup.
+- [ ] The `128` bit on lap `flags` is still unidentified (seen as `129`,
+      on 2 laps of 158). It does not affect whether a lap counts, so
+      nothing depends on it — note it if a larger sample ever explains it.
 
 ## Infrastructure
 
