@@ -1040,84 +1040,6 @@
     /* Deliberately understated: the version qualifies a lap time, it isn't
        a result in its own right, so it should be readable without
        competing with the driver name or the time itself. */
-    /* Notice badge in the leaderboard toolbar, with a tooltip. Rebuilt on
-       the same pattern as the "Anomalies will be flagged" badge that used
-       to live here — orange is this file's established "read this" colour,
-       and inventing a new one for a second notice would be worse than
-       reusing it. Driven by an `updateNotice` field on a LEADERBOARDS
-       entry, so a board without one simply never shows it. */
-    .update-notice {
-      display: none;
-      position: relative;
-      /* Needed on the BADGE, not just the tooltip. This element carries a
-         drop-shadow filter (see the per-element filter list further down),
-         and a filter creates a stacking context — which traps the
-         tooltip's own z-index inside it, leaving the whole badge to paint
-         in plain DOM order. That put the tooltip behind the sticky table
-         header and the filter-row buttons, both of which come later in the
-         document.
-
-         6 places it above the table header (1) and the search hint (5),
-         while deliberately staying below the car-class dropdown (9-11) and
-         the verify modal (100): a panel the reader actively opened should
-         cover a tooltip they're only hovering. */
-      z-index: 6;
-      align-items: center;
-      font-size: 11px;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-      color: #ff9900;
-      background: rgba(255, 153, 0, 0.12);
-      padding: 6px 10px;
-      border-radius: 6px;
-      white-space: nowrap;
-      cursor: help;
-    }
-    .update-notice.visible {
-      display: inline-flex;
-    }
-    .update-notice-tooltip {
-      position: absolute;
-      top: calc(100% + 8px);
-      left: 0;
-      z-index: 5;
-      width: 280px;
-      max-width: 80vw;
-      background: #2a1a05;
-      border: 1px solid rgba(255, 153, 0, 0.35);
-      border-radius: 8px;
-      padding: 10px 12px;
-      color: #ff9900;
-      font-size: 12px;
-      font-weight: 400;
-      text-transform: none;
-      letter-spacing: normal;
-      white-space: normal;
-      line-height: 1.45;
-      opacity: 0;
-      visibility: hidden;
-      transition: opacity 0.15s ease;
-      pointer-events: none;
-    }
-    /* Desktop reveals on hover; mobile has no hover state, so a tap
-       toggles .tooltip-open from JS instead. */
-    .update-notice:hover .update-notice-tooltip,
-    .update-notice.tooltip-open .update-notice-tooltip {
-      opacity: 1;
-      visibility: visible;
-    }
-    .update-notice-tooltip p {
-      margin: 0 0 7px;
-    }
-    .update-notice-tooltip p:last-child {
-      margin-bottom: 0;
-    }
-    .update-notice-tooltip-divider {
-      height: 1px;
-      background: rgba(255, 153, 0, 0.25);
-      margin: 8px 0;
-    }
     .lb-version {
       text-align: right;
       color: rgba(238, 238, 238, 0.4);
@@ -1927,7 +1849,6 @@
     .leaderboard-tabs,
     .leaderboard-server-name,
     .leaderboard-title,
-    .update-notice,
     .rank-toggle-row {
       filter: drop-shadow(0 2px 6px rgba(0,0,0,0.5));
     }
@@ -2122,10 +2043,6 @@
 
     <div class="leaderboard-toolbar">
       <h3 class="leaderboard-title" id="leaderboard-title"></h3>
-      <span class="update-notice" id="update-notice">
-        <span id="update-notice-label"></span>
-        <span class="update-notice-tooltip" id="update-notice-tooltip"></span>
-      </span>
     </div>
     <div id="leaderboard-status"></div>
     <div class="loading-bar-track indeterminate" id="leaderboard-loading-bar">
@@ -2783,20 +2700,6 @@
         workerPrefix: "/server1",
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
-        // Notice badge shown in this board's toolbar. `body` is rendered as
-        // paragraphs, so keep each entry a sentence rather than embedding
-        // markup; it's inserted as text, not HTML.
-        updateNotice: {
-          label: "0.9 UPDATE",
-          body: [
-            "The EVO 0.9 update brought considerable changes to the tyre model and to overall lap times.",
-            "Use the Version row to switch between 0.9 and 0.8 — laps from each build are ranked separately.",
-            // Phrased as a standing policy rather than about 0.9 specifically:
-            // the same thing happens again at 1.0, 1.1 and so on, so this
-            // line shouldn't need rewriting every release.
-            "This will evolve over time, so that the current game version always becomes the main leaderboard."
-          ]
-        },
         // A separate, 0.9-only leaderboard on the same server. Any row on
         // the main board whose driver+lap time also appears here was set on
         // 0.9; everything else falls back to GAME_VERSION_DEFAULT.
@@ -3713,40 +3616,6 @@
       // been wrong the moment 0.9 was selected.
     }
 
-    // Fills in and shows/hides the toolbar notice badge for a track. Board
-    // with no `updateNotice` gets nothing.
-    function renderUpdateNotice(trackId) {
-      const el = document.getElementById("update-notice");
-      const labelEl = document.getElementById("update-notice-label");
-      const tipEl = document.getElementById("update-notice-tooltip");
-      if (!el || !labelEl || !tipEl) return;
-
-      const notice = (LEADERBOARDS[trackId] || {}).updateNotice;
-      // Always clear the open state as well as the visibility: a tooltip
-      // left open while switching tracks would otherwise reappear over the
-      // next board that happens to have a notice.
-      el.classList.remove("tooltip-open");
-      el.classList.toggle("visible", Boolean(notice));
-      if (!notice) return;
-
-      labelEl.textContent = notice.label;
-      tipEl.innerHTML = "";
-      (notice.body || []).forEach((line, i) => {
-        // Last line is the forward-looking one — set it off with the same
-        // divider the old anomalies tooltip used.
-        if (i === (notice.body.length - 1) && notice.body.length > 1) {
-          const hr = document.createElement("div");
-          hr.className = "update-notice-tooltip-divider";
-          tipEl.appendChild(hr);
-        }
-        const para = document.createElement("p");
-        // textContent, not innerHTML — this is config copy, and it should
-        // stay copy rather than quietly becoming a markup surface.
-        para.textContent = line;
-        tipEl.appendChild(para);
-      });
-    }
-
     function refreshLeaderboardFlags() {
       const rawRows = leaderboardCache[activeTrack];
       if (rawRows) {
@@ -3802,13 +3671,6 @@
       lbStatusEl.className = "loading";
       lbFrameEl.innerHTML = "";
       if (lbBarEl) lbBarEl.classList.add("visible");
-      // Hide the version notice while loading. It annotates the board's
-      // contents, so it has nothing to refer to yet — and left up it sits
-      // beside "Loading leaderboard..." looking like part of the loading
-      // state. Restored in the finally below, on whatever the load
-      // produced.
-      const noticeElForLoad = document.getElementById("update-notice");
-      if (noticeElForLoad) noticeElForLoad.classList.remove("visible");
       updateLeaderboardTitle(track, 0);
 
       try {
@@ -3864,12 +3726,6 @@
         // exit (success, empty board, error, and that stale return).
         if (lbBarEl && requestId === leaderboardRequestId) {
           lbBarEl.classList.remove("visible");
-        }
-        // Same ownership rule as the bar: a superseded request must not
-        // restore the notice, because the newer one is still loading and
-        // has deliberately hidden it.
-        if (requestId === leaderboardRequestId) {
-          renderUpdateNotice(track);
         }
       }
     }
@@ -4267,7 +4123,6 @@
       sortReversed = false;
       document.querySelectorAll(".sort-direction-btn").forEach(btn => btn.classList.remove("active"));
 
-      renderUpdateNotice(track);
       loadLeaderboard(track);
       loadServerName(track);
       ensureVersionDataLoaded(track);
@@ -4352,7 +4207,6 @@
     })();
 
     renderVersionFilterButtons(activeTrack);
-    renderUpdateNotice(activeTrack);
     ensureRaceTotalTimesLoaded(activeTrack);
     ensureVersionDataLoaded(activeTrack);
     loadLeaderboard(activeTrack);
@@ -4396,22 +4250,13 @@
     // refresh rate) absorbs the actual Discord API load, so this is cheap.
     setInterval(loadDiscordStats, 90 * 1000);
 
-    // The anomalies-notice tooltip previously here has been removed
-    // entirely, along with its mobile tap-toggle handler.
-
-    // The notice tooltip opens on :hover on desktop, but mobile has no
-    // hover state — a tap fires a click, so toggle a class there and close
-    // it again on a tap anywhere else.
-    const updateNoticeToggleEl = document.getElementById("update-notice");
-    if (updateNoticeToggleEl) {
-      updateNoticeToggleEl.addEventListener("click", (e) => {
-        e.stopPropagation();
-        updateNoticeToggleEl.classList.toggle("tooltip-open");
-      });
-      document.addEventListener("click", () => {
-        updateNoticeToggleEl.classList.remove("tooltip-open");
-      });
-    }
+    // Two toolbar notice badges have lived here and both are gone: the
+    // "Anomalies will be flagged" one, and the "0.9 UPDATE" one removed
+    // 2026-09-07 once 0.9 and 0.8 both offered both views, which left it
+    // with nothing to explain. Each came with a hover tooltip plus a
+    // mobile tap-toggle handler, and the whole `updateNotice` mechanism
+    // went with the second — config field, renderUpdateNotice(), CSS and
+    // markup. Restore from git if a future build needs one again.
 
     // ---- Race Time / Best Lap rank toggle (Race-type leaderboards only) ----
     document.querySelectorAll(".rank-toggle-btn[data-rank-mode]").forEach(btn => {
