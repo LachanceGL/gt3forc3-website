@@ -2757,6 +2757,14 @@
         workerPrefix: "/server3",
         shareKey: "1bf0f45b-2bef-469a-a89e-e78a96aaa0bc",
         displayName: "Nürburgring GP",
+        // Rows come from the rebuilt, validity-filtered board rather than
+        // the live endpoint, which ranks laps the game flagged invalid.
+        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // this server's history down to the track this board actually shows
+        // — these servers keep the sessions of every track they have ever
+        // hosted. Falls back to shareKey above only if the file is missing.
+        validLapsUrl: "data/valid-laps.json",
+        validLapsBuild: "all",
         title: "Race",
         updateNote: "Ranks updated every race",
         // Race-type leaderboards get an extra Total Time column, sourced
@@ -2784,6 +2792,14 @@
         workerPrefix: "/server4",
         shareKey: "ffd7b659-fefd-4c32-bbca-9de24c6e1a13",
         displayName: "Spa Francorchamps",
+        // Rows come from the rebuilt, validity-filtered board rather than
+        // the live endpoint, which ranks laps the game flagged invalid.
+        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // this server's history down to the track this board actually shows
+        // — these servers keep the sessions of every track they have ever
+        // hosted. Falls back to shareKey above only if the file is missing.
+        validLapsUrl: "data/valid-laps.json",
+        validLapsBuild: "all",
         title: "Hot Lap",
         updateNote: "Ranks updated every new session",
         carClassList: GT3_CAR_CLASS_LIST,
@@ -2799,6 +2815,14 @@
         workerPrefix: "/server5",
         shareKey: "3027ac22-5a4a-4948-a375-40beed0a2bf6",
         displayName: "Nürburgring",
+        // Rows come from the rebuilt, validity-filtered board rather than
+        // the live endpoint, which ranks laps the game flagged invalid.
+        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // this server's history down to the track this board actually shows
+        // — these servers keep the sessions of every track they have ever
+        // hosted. Falls back to shareKey above only if the file is missing.
+        validLapsUrl: "data/valid-laps.json",
+        validLapsBuild: "all",
         title: "Touring",
         updateNote: "Ranks updated every new session",
         themeClass: "leaderboard-tab-tour",
@@ -2885,6 +2909,14 @@
         workerPrefix: "/server2",
         shareKey: "31cf25ce-9cbc-4b0c-a074-380d38ce0500",
         displayName: "Nürburgring",
+        // Rows come from the rebuilt, validity-filtered board rather than
+        // the live endpoint, which ranks laps the game flagged invalid.
+        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // this server's history down to the track this board actually shows
+        // — these servers keep the sessions of every track they have ever
+        // hosted. Falls back to shareKey above only if the file is missing.
+        validLapsUrl: "data/valid-laps.json",
+        validLapsBuild: "all",
         title: "Touring",
         updateNote: "Ranks updated every new session",
         themeClass: "leaderboard-tab-tour",
@@ -3035,7 +3067,8 @@
       "Ron Rico",
       "FOR DunkMonkey",
       "Fede Zec",
-      "L GAUDIO"
+      "L GAUDIO",
+      "Sone Angel"
     ]);
     const VERIFIED_BADGE_URL = "https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/refs/heads/main/GT3FORC3_VerifiedBadge01.png";
 
@@ -3480,6 +3513,54 @@
     // that didn't have a faster main-board lap from July/early August —
     // correctly staying 0.8. The name+BestLap pair is unique across the
     // main board, so there's no ambiguity to resolve.
+    // One shared fetch of the precomputed file, however many boards read
+    // it. Cached by URL as a PROMISE rather than a result, so boards that
+    // start loading before the first fetch resolves await that same request
+    // instead of each firing their own.
+    const validLapsFilePromises = {};
+    function fetchValidLapsFile(url) {
+      if (!validLapsFilePromises[url]) {
+        validLapsFilePromises[url] = (async () => {
+          const res = await fetch(url);
+          if (!res.ok) throw new Error("Server returned " + res.status);
+          return res.json();
+        })().catch(err => {
+          // Don't cache a failure forever — a later track switch should be
+          // able to retry rather than inheriting one bad request.
+          delete validLapsFilePromises[url];
+          throw err;
+        });
+      }
+      return validLapsFilePromises[url];
+    }
+
+    // Rows for a board that has no version split, preferring the rebuilt
+    // valid-lap board when its config declares one.
+    //
+    // Unlike the 0.9 path below, an EMPTY rebuilt board is honoured rather
+    // than treated as a failure. These boards are small — server5 has 11
+    // sessions on its track in total — so nobody having set a clean lap is
+    // a real outcome, and showing "No Leaderboard active yet" is the honest
+    // answer. Falling back would quietly put invalid laps back on screen,
+    // which is the whole thing this is meant to stop. The fallback is for a
+    // MISSING file or a missing entry, not an empty one.
+    async function fetchBoardRows(config, trackId) {
+      if (config.validLapsUrl && config.validLapsBuild) {
+        try {
+          const file = await fetchValidLapsFile(config.validLapsUrl);
+          const build = ((file.boards || {})[trackId] || {})[config.validLapsBuild];
+          if (build && Array.isArray(build.rows)) return build.rows;
+        } catch (err) {
+          // Fall through to the live endpoint.
+        }
+      }
+      const res = await fetch(
+        WORKER_URL + `${config.workerPrefix}/leaderboards/embed/${config.shareKey}/rows`
+      );
+      if (!res.ok) throw new Error("Server returned " + res.status);
+      return res.json();
+    }
+
     // Fetches the precomputed valid-lap board for one build.
     //
     // Returns the same { keys, rows } shape the live-board path builds, so
@@ -3496,9 +3577,7 @@
     // live boards instead of leaving the board with no data at all.
     async function loadValidLapBoard(override, trackId) {
       try {
-        const res = await fetch(override.validLapsUrl);
-        if (!res.ok) return null;
-        const data = await res.json();
+        const data = await fetchValidLapsFile(override.validLapsUrl);
         const build = ((data.boards || {})[trackId] || {})[override.version];
         if (!build || !Array.isArray(build.rows) || !Array.isArray(build.keys)) return null;
         // An empty board is treated as a failure, not as "nobody qualified":
@@ -3760,7 +3839,7 @@
         // showing everyone before incomplete runs get filtered out a
         // moment later. Non-race tracks skip this entirely since they
         // don't have this filter.
-        const rowsPromise = fetch(WORKER_URL + `${config.workerPrefix}/leaderboards/embed/${config.shareKey}/rows`);
+        const rowsPromise = fetchBoardRows(config, track);
         const racePromise = config.isRace ? ensureRaceTotalTimesLoaded(track) : Promise.resolve();
         // Same reasoning as racePromise above, and it matters more now that
         // a board can OPEN on a version filter: that view is built from the
@@ -3769,9 +3848,7 @@
         // awaiting this, the first paint would be an empty board that fills
         // in a moment later.
         const versionPromise = config.versionOverrides ? ensureVersionDataLoaded(track) : Promise.resolve();
-        const [res] = await Promise.all([rowsPromise, racePromise, versionPromise]);
-        if (!res.ok) throw new Error("Server returned " + res.status);
-        const rows = await res.json();
+        const [rows] = await Promise.all([rowsPromise, racePromise, versionPromise]);
 
         // A newer request (for this track or another) has started since —
         // discard this one rather than rendering stale/duplicate content.

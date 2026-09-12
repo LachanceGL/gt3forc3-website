@@ -57,20 +57,70 @@ from concurrent.futures import ThreadPoolExecutor
 
 WORKER_URL = "https://raspy-salad-d894.contact-eb9.workers.dev"
 
-# Which board/build combinations get a rebuilt, validity-filtered board.
+# Which boards get rebuilt, and from which sessions.
 #
-# `cutover` is the first session timestamp belonging to the build. Session
-# data carries NO version field anywhere -- that was checked, not assumed --
-# so the build has to be derived from when the lap was set. This value is
-# not a guess either: it is the earliest session containing a lap that the
-# published 0.9 leaderboard also lists, with every valid lap before it
-# belonging to 0.8. Add an entry here when the next build lands.
+# `track` is (track_name, track_layout_name) and is NOT optional padding --
+# it is what stops a board being filled with laps from a different circuit.
+# These servers get repointed at new tracks and keep their whole history:
+# server4 alone has hosted Spa, Laguna Seca, Road Atlanta, Touristenfahrten
+# and Red Bull Ring. Without this filter a Laguna Seca 1:23 lands at the top
+# of the Spa board, which is exactly what the first run produced.
+#
+# Every value here was derived from the data, not from the server list in
+# CLAUDE.md: for each board, each track in that server's history was scored
+# on how many rows of the LIVE leaderboard it explains. In all four cases
+# one track explained 100% and every other explained 0%, so there is no
+# judgement call buried in these pairs. Re-run that check if a board is
+# repointed -- and note the leaderboard itself does NOT follow a repoint,
+# so the newest sessions on a server can be a different track from the one
+# its board still shows (true of server2 right now).
+#
+# `builds` entries:
+#   version  -- the label; "all" means the board has no version split and
+#               these rows ARE the board.
+#   cutover  -- optional. First session timestamp belonging to the build.
+#               Session data carries no version field anywhere (checked,
+#               not assumed), so a build has to be derived from when the
+#               lap was set. The 0.9 value is the earliest session holding
+#               a lap the published 0.9 leaderboard also lists, with every
+#               valid lap before it belonging to 0.8.
+#   keys     -- optional. Emit the tagging key set (see module docstring).
+#               Only needed where a version split has to be enforced
+#               against the main board, i.e. Nordschleife.
 BOARDS = {
     "nordschleife": {
         "prefix": "/server1",
+        "track": ("Nurburgring", "Nordschleife"),
         "builds": [
-            {"version": "0.9", "cutover": "2026-08-26T05:17:19Z"},
+            {"version": "0.9", "cutover": "2026-08-26T05:17:19Z", "keys": True},
         ],
+    },
+    # Displays as "Nürburgring" (Road & Track Cars).
+    "spa": {
+        "prefix": "/server2",
+        "track": ("Nurburgring", "Touristenfahrten"),
+        "builds": [{"version": "all"}],
+    },
+    # Displays as "Nürburgring GP". Race format -- the Total Time column is
+    # joined on separately from time_standings and is untouched by this.
+    "redbullring": {
+        "prefix": "/server3",
+        "track": ("Nurburgring", "Gp Strecke"),
+        "builds": [{"version": "all"}],
+    },
+    # Displays as "Spa Francorchamps".
+    "lagunaseca": {
+        "prefix": "/server4",
+        "track": ("Circuit de Spa Francorchamps", "GP"),
+        "builds": [{"version": "all"}],
+    },
+    # Displays as "Nürburgring" (H Shifter Road Cars). Same physical track
+    # as `spa` above but a different server, so the two session pools are
+    # separate and must not be merged.
+    "nurburgringtour": {
+        "prefix": "/server5",
+        "track": ("Nurburgring", "Touristenfahrten"),
+        "builds": [{"version": "all"}],
     },
 }
 
@@ -130,14 +180,29 @@ def build_board(cfg):
 
     failures = sum(1 for _, d in details if d is None)
 
+    # Keep only sessions actually run on this board's track. See the BOARDS
+    # comment: these servers keep the history of every track they have ever
+    # hosted, and the leaderboard only ever showed one of them.
+    want_track = cfg["track"]
+    on_track = []
+    other_tracks = 0
+    for s, detail in details:
+        if detail is None:
+            continue
+        got = (detail.get("track_name"), detail.get("track_layout_name") or "")
+        if got == want_track:
+            on_track.append((s, detail))
+        else:
+            other_tracks += 1
+
     out = {}
     for build in cfg["builds"]:
-        cutover = build["cutover"]
+        cutover = build.get("cutover")
         best_valid = {}   # driver guid -> row dict
         best_any = {}     # driver name (lower) -> ms, for the tagging keys
 
-        for s, detail in details:
-            if not detail or s["timestamp"] < cutover:
+        for s, detail in on_track:
+            if cutover and s["timestamp"] < cutover:
                 continue
             drivers = {key_of(d["guid"]): d for d in (detail.get("drivers") or [])}
             cars = {key_of(c["car_id"]): c.get("model_displayname")
@@ -180,13 +245,18 @@ def build_board(cfg):
             r["Position"] = i + 1
             del r["_ms"]
 
-        out[build["version"]] = {
-            "cutover": cutover,
-            "rows": rows,
-            "keys": sorted("%s|%s" % (n, fmt_lap(t)) for n, t in best_any.items()),
-        }
+        entry = {"rows": rows}
+        if cutover:
+            entry["cutover"] = cutover
+        # Tagging keys only where a version split has to be enforced against
+        # the main board. Emitting them everywhere would just be dead weight
+        # in the file -- a board with no versions has nothing to exclude.
+        if build.get("keys"):
+            entry["keys"] = sorted("%s|%s" % (n, fmt_lap(t))
+                                   for n, t in best_any.items())
+        out[build["version"]] = entry
 
-    return out, len(sessions), failures
+    return out, len(sessions), len(on_track), other_tracks, failures
 
 
 def main():
@@ -203,14 +273,24 @@ def main():
     total_failures = 0
 
     for board_id, cfg in BOARDS.items():
-        print("building %s (%s)..." % (board_id, cfg["prefix"]))
-        builds, session_count, failures = build_board(cfg)
+        print("building %s (%s, %s / %s)..."
+              % (board_id, cfg["prefix"], cfg["track"][0], cfg["track"][1]))
+        builds, session_count, on_track, other_tracks, failures = build_board(cfg)
         out["boards"][board_id] = builds
         total_failures += failures
+        print("  %d sessions, %d on this track, %d on other tracks (ignored), %d failed"
+              % (session_count, on_track, other_tracks, failures))
         for version, data in builds.items():
-            print("  %s: %d valid-lap rows, %d tagging keys (from %d sessions, %d failed)"
-                  % (version, len(data["rows"]), len(data["keys"]),
-                     session_count, failures))
+            print("  %s: %d valid-lap rows%s"
+                  % (version, len(data["rows"]),
+                     ", %d tagging keys" % len(data["keys"]) if "keys" in data else ""))
+        # A board that filters down to nothing would render as "No
+        # Leaderboard active yet", which reads as a broken page rather than
+        # as "nobody set a clean lap here". Worth seeing in the log.
+        for version, data in builds.items():
+            if not data["rows"]:
+                print("  WARNING: %s/%s has no valid laps at all"
+                      % (board_id, version), file=sys.stderr)
 
     # Refuse to emit a partial board. A dropped session silently removes
     # somebody's lap -- or worse, leaves it untagged so it resurfaces on the

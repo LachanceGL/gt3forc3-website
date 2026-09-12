@@ -227,20 +227,48 @@ something this repo introduced: the same software's results page reads the
 flag correctly and its leaderboard doesn't. Still open with them — see
 `docs/TODO.md`.
 
-**As of 2026-09-11 the 0.9 board no longer inherits it.** 0.9 is rebuilt
-from the session files by `scripts/build_valid_laps.py`, hourly in CI, and
-served from `data/valid-laps.json`; `index.html` prefers that file and
-falls back to the live boards if it can't be loaded. **0.8 is deliberately
-left on the live endpoint** — rebuilding it the same way drops roughly half
-its rows, which is a decision about historical results rather than a data
-fix. The effect on 0.9: 623 rows to 278, Sub 7 Club 211 to 168, and the
+**Every board except 0.8 is now rebuilt from the session files** by
+`scripts/build_valid_laps.py`, hourly in CI, served from
+`data/valid-laps.json`; `index.html` prefers that file and falls back to
+the live endpoint if it can't be loaded. 0.9 went first (2026-09-11), the
+other four followed. **0.8 alone is deliberately left on the live
+endpoint** — it is the superseded build and rebuilding it drops roughly
+half its rows, which is a decision about historical results rather than a
+data fix. The effect on 0.9: 623 rows to 278, Sub 7 Club 211 to 168, and the
 three impossible sub-6:00 times at the top disappear on their own, since
 they were invalid all along. **Sub 7 Club was then switched off for 0.9**
 (`views: ["top200"]`) — 168 was judged too thin a field to stand as a
 club. That is a product call about the real number, not a sign the
 rebuild is wrong; drop the key again when the field recovers.
 
-Two things about that rebuild are load-bearing and easy to get wrong:
+⚠️ **A server's session history spans every track it has ever hosted, so
+the rebuild MUST filter by track.** server4 alone has run Spa, Laguna
+Seca, Road Atlanta, Touristenfahrten and Red Bull Ring. The first
+unfiltered run put a Laguna Seca 1:23 at the top of the Spa board. The
+`track` pairs in `BOARDS` were derived, not assumed: each track in a
+server's history was scored on how many rows of that board's LIVE
+leaderboard it explains, and in all four cases one track explained 100%
+and every other explained 0%.
+
+| board | server | track filter | live → valid |
+|---|---|---|---|
+| nordschleife | 1 | Nurburgring / Nordschleife | 623 → 278 (0.9) |
+| spa | 2 | Nurburgring / Touristenfahrten | 3 → 1 |
+| redbullring | 3 | Nurburgring / Gp Strecke | 11 → 9 |
+| lagunaseca | 4 | Circuit de Spa Francorchamps / GP | 9 → 5 |
+| nurburgringtour | 5 | Nurburgring / Touristenfahrten | 5 → 1 |
+
+Two of those end up with a single row. That is the honest count, not a
+bug — almost nobody set a clean lap on those servers. The script logs a
+warning if one ever reaches zero, since an empty board renders as "No
+Leaderboard active yet" and reads like a broken page.
+
+Note the leaderboard does NOT follow a repoint: server2's newest sessions
+are Spa while its board still shows Touristenfahrten, so that board is
+already stale upstream regardless of this rebuild.
+
+Two things about the 0.9 rebuild specifically are load-bearing and easy to
+get wrong:
 
 - The precomputed file carries **`rows` (valid laps only) and `keys`
   (best lap of ANY validity)**. `keys` is what tags MAIN-board rows as 0.9
