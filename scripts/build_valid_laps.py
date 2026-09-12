@@ -221,6 +221,36 @@ def main():
               % total_failures, file=sys.stderr)
         return 1
 
+    # Leave the file alone when nothing but the clock moved.
+    #
+    # `generated` changes on every run by definition, and this file is one
+    # line of JSON, so rewriting it always produces a one-line diff. That
+    # silently defeated the workflow's "commit only when the content
+    # changed" guard: the first CI run committed a file whose payload was
+    # byte-identical to the previous one, and left unfixed it would have
+    # done that every hour forever -- exactly what the guard exists to
+    # prevent.
+    #
+    # Comparing the payload here rather than filtering the field out in the
+    # workflow keeps the fix next to the field that causes it, and gives
+    # `generated` a more useful meaning as a side effect: when the board
+    # last actually CHANGED, not when the script last ran.
+    if os.path.exists(args.out):
+        try:
+            with open(args.out, encoding="utf-8") as f:
+                existing = json.load(f)
+            a = dict(existing)
+            b = dict(out)
+            a.pop("generated", None)
+            b.pop("generated", None)
+            if a == b:
+                print("unchanged since %s; leaving %s as-is"
+                      % (existing.get("generated", "?"), args.out))
+                return 0
+        except Exception as e:      # noqa: BLE001 - unreadable/corrupt file
+            print("  note: could not read existing %s (%s); rewriting"
+                  % (args.out, e), file=sys.stderr)
+
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
