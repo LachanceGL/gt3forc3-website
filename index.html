@@ -1976,20 +1976,20 @@
         Nordschleife
         <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
-      <a class="leaderboard-tab" href="#lagunaseca" data-track="lagunaseca">
+      <a class="leaderboard-tab" href="#spa" data-track="lagunaseca">
         Spa
         <span class="leaderboard-tab-type">Hot Lap</span>
       </a>
       <!-- Was Red Bull Ring — now repointed to a new server3 leaderboard,
            rebranded as "Nürburgring GP". Stays red/GT3, same as before. -->
-      <a class="leaderboard-tab" href="#redbullring" data-track="redbullring">
+      <a class="leaderboard-tab" href="#nurburgring-gp" data-track="redbullring">
         Nürburgring GP
         <span class="leaderboard-tab-type">Race</span>
       </a>
       <!-- Was Spa Francorchamps — now repointed to a new server2
            leaderboard, rebranded as a second Nürburgring board (Touring
            template, same blue theme as the server5 one below). -->
-      <a class="leaderboard-tab leaderboard-tab-tour" href="#spa" data-track="spa">
+      <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgring-road-track" data-track="spa">
         <span class="leaderboard-tab-corner-note">Road &amp; Track Cars</span>
         Nürburgring
         <span class="leaderboard-tab-type">Touring</span>
@@ -1998,7 +1998,7 @@
            / ASSETTO_API_KEY_5 in the Worker). The old server4 slot this
            used to occupy went to Laguna Seca next, and is now Spa
            Francorchamps (the "lagunaseca" track id, above). -->
-      <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgringtour" data-track="nurburgringtour">
+      <a class="leaderboard-tab leaderboard-tab-tour" href="#nurburgring-h-shifter" data-track="nurburgringtour">
         <span class="leaderboard-tab-corner-note">H Shifter Road Cars</span>
         Nürburgring
         <span class="leaderboard-tab-type">Touring</span>
@@ -2700,6 +2700,12 @@
         workerPrefix: "/server1",
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
+        // What goes in the URL hash — see trackIdFromHash(). Named after
+        // the track the tab SHOWS, which for three entries is not the id:
+        // those ids were kept through a rebrand, and linking by id sent
+        // people to #lagunaseca for Spa. The id stays the key everything
+        // else uses (the Worker, the CI scripts, caches); only links change.
+        slug: "nordschleife",
         // A separate, 0.9-only leaderboard on the same server. Any row on
         // the main board whose driver+lap time also appears here was set on
         // 0.9; everything else falls back to GAME_VERSION_DEFAULT.
@@ -2757,6 +2763,7 @@
         workerPrefix: "/server3",
         shareKey: "1bf0f45b-2bef-469a-a89e-e78a96aaa0bc",
         displayName: "Nürburgring GP",
+        slug: "nurburgring-gp",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
         // Built hourly by scripts/build_valid_laps.py, which also filters
@@ -2792,6 +2799,7 @@
         workerPrefix: "/server4",
         shareKey: "ffd7b659-fefd-4c32-bbca-9de24c6e1a13",
         displayName: "Spa Francorchamps",
+        slug: "spa",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
         // Built hourly by scripts/build_valid_laps.py, which also filters
@@ -2815,6 +2823,7 @@
         workerPrefix: "/server5",
         shareKey: "3027ac22-5a4a-4948-a375-40beed0a2bf6",
         displayName: "Nürburgring",
+        slug: "nurburgring-h-shifter",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
         // Built hourly by scripts/build_valid_laps.py, which also filters
@@ -2885,6 +2894,7 @@
         workerPrefix: "/server2",
         shareKey: "a6aea2bb-9846-446d-9987-7d64cbdd90e6",
         displayName: "Kyalami",
+        slug: "kyalami",
         title: "Hot Lap",
         // Server 2 ran Spa Francorchamps for a while and now runs the
         // "spa"-keyed Nürburgring board (see spa below) — Kyalami hasn't
@@ -2909,6 +2919,7 @@
         workerPrefix: "/server2",
         shareKey: "31cf25ce-9cbc-4b0c-a074-380d38ce0500",
         displayName: "Nürburgring",
+        slug: "nurburgring-road-track",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
         // Built hourly by scripts/build_valid_laps.py, which also filters
@@ -4286,17 +4297,63 @@
       ensureRaceTotalTimesLoaded(track);
     }
 
+    // ---- URL hash <-> track id ----
+    //
+    // The hash names the track a tab SHOWS, via each entry's `slug`, and is
+    // resolved back to the LEADERBOARDS id here. Links used to carry the id
+    // itself, and three ids were kept through a rebrand, so the address bar
+    // read #lagunaseca on Spa and #spa on a Nürburgring board.
+    //
+    // Old id links still resolve, since those have been shared around —
+    // except where an old id is now somebody else's slug. `spa` is that
+    // case: it was the id of the Nürburgring Road & Track board and is now
+    // the slug of Spa Francorchamps. Slugs are checked first so the name
+    // people read wins; an old #spa bookmark now opens Spa, which is what
+    // the link says.
+    function trackIdFromHash(hash) {
+      const value = (hash || "").replace(/^#/, "").trim().toLowerCase();
+      if (!value) return null;
+      for (const [id, cfg] of Object.entries(LEADERBOARDS)) {
+        if (cfg.slug === value) return id;
+      }
+      return LEADERBOARDS[value] ? value : null;
+    }
+
+    // Rewrites an old-style link to the track's slug, so the address bar
+    // says where you are and re-sharing spreads the right name.
+    //
+    // replaceState, deliberately not `location.hash = ...`: assigning the
+    // hash would fire hashchange and run switchToTrack a second time, and
+    // push a history entry the back button would then step through.
+    function canonicaliseTrackHash(trackId) {
+      const slug = (LEADERBOARDS[trackId] || {}).slug;
+      if (!slug || window.location.hash === "#" + slug) return;
+      history.replaceState(null, "", "#" + slug);
+    }
+
+    // Tab links are set from config so a slug is defined in one place.
+    // The hrefs in the markup already match; this keeps them from drifting.
+    document.querySelectorAll(".leaderboard-tab[data-track]").forEach(tab => {
+      const slug = (LEADERBOARDS[tab.dataset.track] || {}).slug;
+      if (slug) tab.setAttribute("href", "#" + slug);
+    });
+
     // Clicking a tab just changes the URL hash (native <a> behavior);
     // this listener does the actual switching, so back/forward and
-    // direct links (e.g. gt3forc3.com/#spa) all work the same way.
+    // direct links (e.g. gt3forc3.com/#nurburgring-gp) all work the same
+    // way. A hash that isn't a track — #admin, for one — resolves to null
+    // and is left alone.
     window.addEventListener("hashchange", () => {
-      const track = window.location.hash.replace("#", "");
+      const track = trackIdFromHash(window.location.hash);
+      if (!track) return;
+      canonicaliseTrackHash(track);
       switchToTrack(track);
     });
 
     // On first load, respect a track named in the URL hash if present
-    const initialTrack = window.location.hash.replace("#", "");
-    if (LEADERBOARDS[initialTrack]) {
+    const initialTrack = trackIdFromHash(window.location.hash);
+    if (initialTrack) {
+      canonicaliseTrackHash(initialTrack);
       activeTrack = initialTrack;
       document.querySelectorAll(".leaderboard-tab").forEach(t => {
         t.classList.toggle("active", t.dataset.track === initialTrack);

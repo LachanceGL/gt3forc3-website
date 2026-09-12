@@ -135,6 +135,25 @@ budget time to also update `kyalami.driverDataSource`, the Worker's
 `TRACK_KEYWORDS` keys, and anywhere else that greps for the old id
 strings (URL hashes in old links would also silently stop matching a tab).
 
+**Update 2026-09-12 — the URL half of the mismatch is fixed, the ids are
+still not renamed.** Links used to carry the id, so the address bar read
+`#lagunaseca` on the Spa tab and `#spa` on a Nürburgring board. Each entry
+now has a `slug` named after what the tab shows, and `trackIdFromHash()`
+resolves slug → id; the ids themselves are untouched. Renaming them has
+only got more expensive since this entry was written: on top of the
+Worker's `TRACK_KEYWORDS` and `kyalami.driverDataSource`, both CI scripts
+now key on them too (`SOURCES` in `build_driver_index.py`, `BOARDS` in
+`build_valid_laps.py`), as does `data/valid-laps.json`'s structure.
+
+Old id links still resolve and get rewritten to the slug in place, via
+`history.replaceState` so it doesn't fire `hashchange` or add a history
+entry. The one exception is `#spa`, which was the id of the Nürburgring
+Road & Track board and is now the slug of Spa Francorchamps. Slugs are
+checked first, so the name a person reads wins — meaning an old `#spa`
+bookmark now opens Spa rather than that Nürburgring board. That was a
+deliberate call: the link says Spa. Verified on fresh page loads, not only
+on in-page hash changes, since those run different code paths.
+
 ## A `401` on a freshly-repointed leaderboard usually isn't a bug here
 
 When a `LEADERBOARDS` entry gets pointed at a new AssettoHosting share

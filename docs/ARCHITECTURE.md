@@ -288,7 +288,9 @@ the one `ensureRaceTotalTimesLoaded()` already reads for Race boards.
 
 ## Data flow for a leaderboard tab load
 
-1. Person clicks a track tab (or loads a URL with `#track` hash).
+1. Person clicks a track tab (or loads a URL with a track hash). The hash
+   is the entry's `slug` (`#spa`, `#nurburgring-gp`, ...), resolved to the
+   `LEADERBOARDS` id by `trackIdFromHash()`; old id links still work.
 2. `switchToTrack(track)` resets per-track UI state, then calls
    `loadLeaderboard(track)`, `loadServerName(track)`,
    `ensureTrackDataLoaded(track)`, `ensureRaceTotalTimesLoaded(track)` (Race
