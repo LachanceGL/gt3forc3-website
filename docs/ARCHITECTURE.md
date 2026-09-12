@@ -235,7 +235,10 @@ left on the live endpoint** — rebuilding it the same way drops roughly half
 its rows, which is a decision about historical results rather than a data
 fix. The effect on 0.9: 623 rows to 278, Sub 7 Club 211 to 168, and the
 three impossible sub-6:00 times at the top disappear on their own, since
-they were invalid all along.
+they were invalid all along. **Sub 7 Club was then switched off for 0.9**
+(`views: ["top200"]`) — 168 was judged too thin a field to stand as a
+club. That is a product call about the real number, not a sign the
+rebuild is wrong; drop the key again when the field recovers.
 
 Two things about that rebuild are load-bearing and easy to get wrong:
 
