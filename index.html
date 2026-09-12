@@ -2713,6 +2713,18 @@
         versionOverrides: [
           {
             version: "0.9",
+            // Rows come from a precomputed, validity-filtered board rather
+            // than the live endpoint, because that endpoint ranks laps the
+            // game flagged invalid -- an invalid 6:35.421 was sitting at P2,
+            // above three impossible sub-6:00 times. Built hourly in CI by
+            // scripts/build_valid_laps.py; see its docstring for why 0.8 is
+            // deliberately left on the live endpoint.
+            //
+            // shareKeys below are kept as a FALLBACK, not dead config: if
+            // the file fails to load, falling back to the live boards shows
+            // an imperfect 0.9 board, while having nothing would silently
+            // push 0.9 laps onto the 0.8 views untagged.
+            validLapsUrl: "data/valid-laps.json",
             // No `views` key, so this build offers all of
             // VERSION_VIEWS_DEFAULT. It was `["top200"]` until 2026-09-07,
             // while 0.9 was too new to have a Sub 7 Club worth showing;
@@ -3425,6 +3437,22 @@
     // whose override board hasn't loaded yet) simply reads as the default
     // rather than blank.
     function gameVersionForRow(trackId, row) {
+      // A row being SHOWN under a version filter came from that build's own
+      // board, so its build is already known and there is nothing to match.
+      //
+      // This is not just a shortcut, it's required since the 0.9 board
+      // became validity-filtered: its rows carry each driver's best VALID
+      // lap, while the keys below hold their best lap of ANY validity —
+      // the time the MAIN board shows. For anyone whose fastest lap was
+      // invalid those two differ, so the lookup missed and the row rendered
+      // as 0.8 while sitting on the 0.9 board. Sone Angel was the visible
+      // case: 6:38.022 shown, keyed under his invalid 6:35.421.
+      //
+      // Safe for the filtering use below, which only runs when no version
+      // filter is active — see computeFilteredEntries().
+      const activeVersion = activeVersionFilter();
+      if (activeVersion) return activeVersion;
+
       const overrides = versionOverrideData[trackId];
       if (!overrides || !row.FullName) return GAME_VERSION_DEFAULT;
       const key = row.FullName.trim().toLowerCase() + "|" + (row.BestLap || "");
@@ -3447,6 +3475,37 @@
     // that didn't have a faster main-board lap from July/early August —
     // correctly staying 0.8. The name+BestLap pair is unique across the
     // main board, so there's no ambiguity to resolve.
+    // Fetches the precomputed valid-lap board for one build.
+    //
+    // Returns the same { keys, rows } shape the live-board path builds, so
+    // everything downstream — the version column, the 0.8 exclusion, Sub 7
+    // Club, the search — is unchanged by where the rows came from.
+    //
+    // `keys` covers each driver's fastest lap of ANY validity, while `rows`
+    // holds only valid ones. That asymmetry is deliberate and load-bearing:
+    // keys decide which MAIN-board rows get excluded from the 0.8 views, and
+    // an invalid 0.9 lap still has to be excluded there or it just moves to
+    // the other board wearing the wrong label.
+    //
+    // Returns null rather than throwing, so a failure falls back to the
+    // live boards instead of leaving the board with no data at all.
+    async function loadValidLapBoard(override, trackId) {
+      try {
+        const res = await fetch(override.validLapsUrl);
+        if (!res.ok) return null;
+        const data = await res.json();
+        const build = ((data.boards || {})[trackId] || {})[override.version];
+        if (!build || !Array.isArray(build.rows) || !Array.isArray(build.keys)) return null;
+        // An empty board is treated as a failure, not as "nobody qualified":
+        // a half-written or stale-empty file should fall back rather than
+        // silently blanking a build people are actively racing.
+        if (!build.rows.length) return null;
+        return { keys: new Set(build.keys), rows: build.rows };
+      } catch (err) {
+        return null;
+      }
+    }
+
     async function ensureVersionDataLoaded(trackId) {
       const config = LEADERBOARDS[trackId];
       if (!config || !config.versionOverrides || !config.versionOverrides.length) return;
@@ -3471,6 +3530,21 @@
       const fetchPromise = (async () => {
         const result = {};
         for (const override of config.versionOverrides) {
+          // Prefer the precomputed valid-lap board when the build declares
+          // one. It arrives already merged, ranked and filtered, so none of
+          // the multi-board reconciliation below applies to it.
+          if (override.validLapsUrl) {
+            const prebuilt = await loadValidLapBoard(override, trackId);
+            if (prebuilt) {
+              result[override.version] = prebuilt;
+              continue;
+            }
+            // Fell through: the file is missing or malformed. Rebuilding
+            // from the live boards is worse data, but it keeps the version
+            // TAGGING alive — without it, 0.9 laps stop being recognised
+            // and reappear on the 0.8 board labelled 0.8.
+          }
+
           // One version can be spread over several boards — see the
           // shareKeys comment in LEADERBOARDS.
           const shareKeys = override.shareKeys || [override.shareKey];

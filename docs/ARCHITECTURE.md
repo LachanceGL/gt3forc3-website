@@ -224,11 +224,32 @@ results page and `6:45.339` on the leaderboard — the faster one is
 
 This is upstream behaviour in AssettoHosting's Server Manager, not
 something this repo introduced: the same software's results page reads the
-flag correctly and its leaderboard doesn't. Reported as an open item in
-`docs/TODO.md`. Filtering it out client-side is possible but is a product
-decision, not a cleanup — in this one session 60 drivers set a lap and only
-28 set a valid one, so applying it would move or delete a large share of
-the community's existing PBs.
+flag correctly and its leaderboard doesn't. Still open with them — see
+`docs/TODO.md`.
+
+**As of 2026-09-11 the 0.9 board no longer inherits it.** 0.9 is rebuilt
+from the session files by `scripts/build_valid_laps.py`, hourly in CI, and
+served from `data/valid-laps.json`; `index.html` prefers that file and
+falls back to the live boards if it can't be loaded. **0.8 is deliberately
+left on the live endpoint** — rebuilding it the same way drops roughly half
+its rows, which is a decision about historical results rather than a data
+fix. The effect on 0.9: 623 rows to 278, Sub 7 Club 211 to 168, and the
+three impossible sub-6:00 times at the top disappear on their own, since
+they were invalid all along.
+
+Two things about that rebuild are load-bearing and easy to get wrong:
+
+- The precomputed file carries **`rows` (valid laps only) and `keys`
+  (best lap of ANY validity)**. `keys` is what tags MAIN-board rows as 0.9
+  so they're kept off the 0.8 views; building it from valid laps only would
+  leave an invalid 0.9 lap untagged and it would resurface on the 0.8 board
+  labelled 0.8. Verified identical to the old share-key tagging: the same
+  554 of 2209 main-board rows, zero differences either way.
+- `gameVersionForRow()` short-circuits to the active version filter. The
+  key lookup can't serve the VER column on the rebuilt board, because a row
+  now shows a driver's best VALID lap while their key holds their best lap
+  of any validity — for anyone whose fastest lap was invalid those differ,
+  and the lookup missed, rendering 0.8 on a 0.9 row.
 
 `time_standings` is a parallel array of raw millisecond integers (not
 objects), positionally aligned with `drivers`/`driver_standings` — that's

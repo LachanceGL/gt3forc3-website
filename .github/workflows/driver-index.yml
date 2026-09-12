@@ -1,11 +1,18 @@
-name: Rebuild driver index
+name: Rebuild derived data
 
 # Hourly, which is not arbitrary: it matches COUNTRY_CACHE_TTL_MS in
 # index.html, the interval the browser used to re-derive this data for
 # itself. So nothing on the site gets staler than it already was.
 #
-# workflow_dispatch is here so the index can be rebuilt on demand after a
+# workflow_dispatch is here so the data can be rebuilt on demand after a
 # server is added or rebranded, without waiting for the hour.
+#
+# Two files come out of this job, both derived from the same session
+# results and both committed together:
+#   data/driver-index.json  -- driver/nation lookup for flags + country grid
+#   data/valid-laps.json    -- the validity-filtered 0.9 leaderboard
+# They stay in one job because they read the same upstream data and there
+# is no point racing two jobs against the same branch.
 on:
   schedule:
     - cron: "17 * * * *"
@@ -37,20 +44,33 @@ jobs:
       - name: Rebuild the index
         run: python scripts/build_driver_index.py --out data/driver-index.json
 
-      # Commit ONLY when the content actually changed. Most hours nothing
-      # will have: a new session appears constantly, but a new *driver*
-      # doesn't, and only drivers affect this file. Without this guard the
-      # repo would take an empty 1.1MB commit every hour forever.
+      # Separate walk of the same sessions rather than one combined pass:
+      # the index covers all five servers while this covers only server1,
+      # and it costs ~12s, which is not worth coupling two scripts over.
+      # Each refuses to write a partial file, so a failure here leaves the
+      # previous good board in place instead of blanking the 0.9 board.
+      - name: Rebuild the valid-lap board
+        run: python scripts/build_valid_laps.py --out data/valid-laps.json
+
+      # Commit ONLY when the content actually changed, so the repo doesn't
+      # take an empty 1.1MB commit every hour forever.
+      #
+      # The two files change at very different rates. driver-index.json
+      # moves only when a new DRIVER appears, which is rare; valid-laps.json
+      # moves whenever anyone sets a new personal best, which on a busy
+      # evening is most hours. So expect this job to commit far more often
+      # than it used to -- that is the valid-lap board doing its job, not a
+      # guard that stopped working.
       - name: Commit if changed
         run: |
-          if git diff --quiet -- data/driver-index.json; then
-            echo "No change to the driver index; nothing to commit."
+          if git diff --quiet -- data/driver-index.json data/valid-laps.json; then
+            echo "No change to the derived data; nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/driver-index.json
-          git commit -m "Rebuild driver index
+          git add data/driver-index.json data/valid-laps.json
+          git commit -m "Rebuild derived data
 
           Automated hourly rebuild via .github/workflows/driver-index.yml.
           Committed only because the content actually changed."

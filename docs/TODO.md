@@ -36,11 +36,17 @@ product decisions.
       invalid. Full evidence in `docs/ARCHITECTURE.md`.
 
       Ask whether it's intended before calling it a bug — it may be a
-      deliberate "raw fastest lap" choice, possibly toggleable. **Do not
-      work around it locally without a decision from the person:** in that
-      one session 60 drivers set a lap and 28 set a valid one, so filtering
-      would move or erase a large share of existing PBs, including near the
-      top of the boards. That's a community call, not a cleanup.
+      deliberate "raw fastest lap" choice, possibly toggleable. Still worth
+      raising even though 0.9 no longer depends on the answer: every other
+      board does, and a fix upstream would let the local rebuild go away.
+
+      **Worked around for 0.9 only, on 2026-09-11**, by the person's
+      decision: `scripts/build_valid_laps.py` rebuilds that board from the
+      session files hourly. 623 rows became 278 and Sub 7 Club 211 became
+      168, so the cut is real — 0.8 was left on the live endpoint on
+      purpose, since rebuilding it drops about half its rows and that is a
+      call about historical results, not a data fix. Revisit 0.8 only if
+      the person asks.
 - [ ] The `128` bit on lap `flags` is still unidentified (seen as `129`,
       on 2 laps of 158). It does not affect whether a lap counts, so
       nothing depends on it — note it if a larger sample ever explains it.
