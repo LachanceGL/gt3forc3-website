@@ -79,7 +79,7 @@ SOURCES = {
 # been removed, so this is the single place to change.
 #
 # A change here only reaches the site once data/driver-index.json is
-# regenerated (hourly in CI, or by running this script).
+# regenerated (every 15 minutes in CI, or by running this script).
 EXCLUDED_NATIONS = {
     "REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN",
     "BES", "ATF", "GGY", "GIB", "BLM", "NCL", "VGB", "XKX",

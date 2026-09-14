@@ -2398,7 +2398,7 @@
     // and ~4.7 minutes on a cold visit, re-done hourly by every visitor,
     // all to rebuild a nation histogram and a name->nation lookup that are
     // identical for everyone. That aggregation now happens once in CI
-    // (scripts/build_driver_index.py, rebuilt hourly by
+    // (scripts/build_driver_index.py, rebuilt every 15 minutes by
     // .github/workflows/driver-index.yml) and ships as a single ~379KB
     // gzipped file.
     //
@@ -2722,7 +2722,8 @@
             // Rows come from a precomputed, validity-filtered board rather
             // than the live endpoint, because that endpoint ranks laps the
             // game flagged invalid -- an invalid 6:35.421 was sitting at P2,
-            // above three impossible sub-6:00 times. Built hourly in CI by
+            // above three impossible sub-6:00 times. Rebuilt in CI every 15
+            // minutes by
             // scripts/build_valid_laps.py; see its docstring for why 0.8 is
             // deliberately left on the live endpoint.
             //
@@ -2766,7 +2767,8 @@
         slug: "nurburgring-gp",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
-        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // Rebuilt every 15 minutes by scripts/build_valid_laps.py, which
+        // also filters
         // this server's history down to the track this board actually shows
         // — these servers keep the sessions of every track they have ever
         // hosted. Falls back to shareKey above only if the file is missing.
@@ -2802,7 +2804,8 @@
         slug: "spa",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
-        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // Rebuilt every 15 minutes by scripts/build_valid_laps.py, which
+        // also filters
         // this server's history down to the track this board actually shows
         // — these servers keep the sessions of every track they have ever
         // hosted. Falls back to shareKey above only if the file is missing.
@@ -2826,7 +2829,8 @@
         slug: "nurburgring-h-shifter",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
-        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // Rebuilt every 15 minutes by scripts/build_valid_laps.py, which
+        // also filters
         // this server's history down to the track this board actually shows
         // — these servers keep the sessions of every track they have ever
         // hosted. Falls back to shareKey above only if the file is missing.
@@ -2922,7 +2926,8 @@
         slug: "nurburgring-road-track",
         // Rows come from the rebuilt, validity-filtered board rather than
         // the live endpoint, which ranks laps the game flagged invalid.
-        // Built hourly by scripts/build_valid_laps.py, which also filters
+        // Rebuilt every 15 minutes by scripts/build_valid_laps.py, which
+        // also filters
         // this server's history down to the track this board actually shows
         // — these servers keep the sessions of every track they have ever
         // hosted. Falls back to shareKey above only if the file is missing.

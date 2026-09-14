@@ -18,13 +18,13 @@ instead: `laps[].flags & 2` means the lap counted toward the session
 standings. That test was established symmetrically against real data (see
 ARCHITECTURE.md), not guessed.
 
-Scope: 0.9 ONLY, deliberately
------------------------------
-0.8 keeps using the live leaderboard endpoint untouched. Rebuilding it the
-same way would drop roughly half its entries -- laps set by people who
-never recorded a clean one -- and that is a community decision about
-historical results, not a data-quality fix. 0.9 is the build people are
-actively racing, so it is the one where showing a real ranking matters.
+Scope: every board EXCEPT 0.8, deliberately
+-------------------------------------------
+This began as 0.9-only and was extended to the other four boards (see
+BOARDS). 0.8 alone keeps using the live leaderboard endpoint untouched: it
+is the superseded build, and rebuilding it the same way would drop roughly
+half its entries -- laps set by people who never recorded a clean one --
+which is a decision about historical results, not a data-quality fix.
 
 What it emits, and why BOTH parts matter
 ----------------------------------------
@@ -308,7 +308,7 @@ def main():
     # silently defeated the workflow's "commit only when the content
     # changed" guard: the first CI run committed a file whose payload was
     # byte-identical to the previous one, and left unfixed it would have
-    # done that every hour forever -- exactly what the guard exists to
+    # done that on every run forever -- exactly what the guard exists to
     # prevent.
     #
     # Comparing the payload here rather than filtering the field out in the

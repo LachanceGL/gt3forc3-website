@@ -228,7 +228,8 @@ flag correctly and its leaderboard doesn't. Still open with them — see
 `docs/TODO.md`.
 
 **Every board except 0.8 is now rebuilt from the session files** by
-`scripts/build_valid_laps.py`, hourly in CI, served from
+`scripts/build_valid_laps.py` in CI every 15 minutes (best-effort — see
+the workflow's header for why GitHub can't promise that), served from
 `data/valid-laps.json`; `index.html` prefers that file and falls back to
 the live endpoint if it can't be loaded. 0.9 went first (2026-09-11), the
 other four followed. **0.8 alone is deliberately left on the live

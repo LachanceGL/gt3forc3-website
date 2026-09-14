@@ -42,7 +42,7 @@ product decisions.
 
       **Worked around for 0.9 only, on 2026-09-11**, by the person's
       decision: `scripts/build_valid_laps.py` rebuilds that board from the
-      session files hourly. 623 rows became 278 and Sub 7 Club 211 became
+      session files every 15 minutes. 623 rows became 278 and Sub 7 Club 211 became
       168, so the cut is real — 0.8 was left on the live endpoint on
       purpose, since rebuilding it drops about half its rows and that is a
       call about historical results, not a data fix. Revisit 0.8 only if
@@ -78,11 +78,11 @@ product decisions.
       urgent than when it was written. The thing it was meant to rescue
       — the browser walking every session file to build the country grid
       and driver flags — no longer happens: that aggregation moved to
-      `scripts/build_driver_index.py`, run hourly in CI, and the site
+      `scripts/build_driver_index.py`, run in CI, and the site
       fetches one precomputed file instead. Measured after the switch:
       **954 session requests per visit became 12.**
 
-      What the cache would still help: the hourly CI rebuild (currently
+      What the cache would still help: the CI rebuild (currently
       ~2m28s of mostly-repeated fetches of immutable files), and the one
       small walk still done in the browser, `fetchRaceTotalTimes()`.
       (`fetchCrashReport()` was the other, removed with the crash-report
