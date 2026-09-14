@@ -2048,13 +2048,6 @@
     <div class="loading-bar-track indeterminate" id="leaderboard-loading-bar">
       <div class="loading-bar-fill"></div>
     </div>
-    <div class="rank-toggle-row" id="rank-toggle-row">
-      <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
-      <span class="rank-toggle-label">Ranked by</span>
-      <button type="button" class="rank-toggle-btn active" id="rank-toggle-best-lap" data-rank-mode="best_lap">BEST LAP</button>
-      <button type="button" class="rank-toggle-btn" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
-      <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
-    </div>
     <!-- Row 1: which game build. Buttons are rendered from the board's
          versionOverrides by renderVersionFilterButtons(), newest first, so
          adding 1.0 later is a config entry rather than an edit to markup,
@@ -2070,7 +2063,23 @@
          excluded from that treatment (it has its own inset styling — see
          the per-element filter list). Nesting it would apply the filter to
          the input and rasterise its hint popup along with it. -->
+    <!-- BOTH control rows live on this line: "Ranked by" (Race boards) and
+         "Filter by" (Hot Lap boards). They are never visible together —
+         each toggles .visible on config.isRace, in opposite directions — so
+         every board gets exactly one row beside the search.
+
+         "Ranked by" used to sit above this line on its own. When the search
+         moved down here it only accounted for "Filter by", so on a Race
+         board, where that row is hidden, the search was left alone on the
+         line with an empty band to its left. -->
     <div class="leaderboard-filter-line">
+    <div class="rank-toggle-row" id="rank-toggle-row">
+      <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
+      <span class="rank-toggle-label">Ranked by</span>
+      <button type="button" class="rank-toggle-btn active" id="rank-toggle-best-lap" data-rank-mode="best_lap">BEST LAP</button>
+      <button type="button" class="rank-toggle-btn" id="rank-toggle-total-time" data-rank-mode="total_time">RACE TIME</button>
+      <span class="rank-toggle-note" id="rank-toggle-note">Race Time only shows Completed Races</span>
+    </div>
     <div class="rank-toggle-row" id="verified-filter-row">
       <button type="button" class="rank-toggle-btn sort-direction-btn" title="Reverse ranking order">⇅</button>
       <span class="rank-toggle-label">Filter by</span>
