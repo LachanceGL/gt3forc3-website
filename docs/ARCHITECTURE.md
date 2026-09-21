@@ -239,8 +239,9 @@ data fix. The effect on 0.9: 623 rows to 278, Sub 7 Club 211 to 168, and the
 three impossible sub-6:00 times at the top disappear on their own, since
 they were invalid all along. **Sub 7 Club was then switched off for 0.9**
 (`views: ["top200"]`) — 168 was judged too thin a field to stand as a
-club. That is a product call about the real number, not a sign the
-rebuild is wrong; drop the key again when the field recovers.
+club. That was a product call about the real number, not a sign the
+rebuild was wrong. **Switched back on 2026-09-21** once the valid-lap field
+had grown to 212, by dropping the key again.
 
 ⚠️ **A server's session history spans every track it has ever hosted, so
 the rebuild MUST filter by track.** server4 alone has run Spa, Laguna

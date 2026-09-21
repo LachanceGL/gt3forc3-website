@@ -616,9 +616,9 @@
     }
     /* Views a build doesn't offer are hidden rather than disabled — a
        greyed-out button still invites a click and then explains nothing.
-       0.9 currently offers TOP 200 only, so SUB 7 CLUB isn't there while
-       0.9 is selected — see the versionOverrides comment in LEADERBOARDS
-       for why. */
+       No build restricts its views today; 0.9 has done so twice, and a
+       freshly released build will again — see the versionOverrides
+       comment in LEADERBOARDS. */
     /* Scoped through the row's id deliberately. SUB 7 CLUB is shown by
        `#sub7-filter-btn.nordschleife-only-visible`, which at one id plus
        one class outranks a two-class selector — so a plain
@@ -2751,18 +2751,17 @@
             // an imperfect 0.9 board, while having nothing would silently
             // push 0.9 laps onto the 0.8 views untagged.
             validLapsUrl: "data/valid-laps.json",
-            // Which views this build offers. TOP 200 only: Sub 7 Club is
-            // off for 0.9 again as of 2026-09-11.
+            // No `views` key, so this build offers all of
+            // VERSION_VIEWS_DEFAULT — Sub 7 Club included, back on as of
+            // 2026-09-21.
             //
-            // It ran briefly, between 2026-09-07 and the validity rebuild
-            // above. Showing only laps the game actually counted took the
-            // sub-7 field from 211 to 168, and the person's call is that
-            // that is too thin to stand as a club right now. Not a bug and
-            // not a data problem — the 168 are simply the real ones.
+            // It has been switched off twice before, both times for having
+            // too few laps behind it: while 0.9 was brand new, and again
+            // after the validity rebuild cut the field from 211 to 168.
+            // By 2026-09-21 the valid-lap field had grown back to 212.
             //
-            // Drop this key again when the field recovers, and expect to
-            // add it once more the day 1.0 lands with no laps behind it.
-            views: ["top200"],
+            // To switch it off again, add `views: ["top200"]` here. Expect
+            // to do exactly that the day 1.0 lands with no laps behind it.
             shareKeys: [
               "9733e693-3e7f-4bbe-be23-e215c2e98c4a",
               "97aa929e-7eea-4629-a245-52edd70ca7e4"
@@ -3278,9 +3277,8 @@
     //
     // Not every build supports every view — see versionViewsFor(). A build
     // with too few laps behind a view hides that button rather than
-    // offering a view with nothing behind it. 0.9 is that case today: it
-    // offers TOP 200 only, since filtering to valid laps left too small a
-    // sub-7 field to stand as a club.
+    // offering a view with nothing behind it. No build does today; 0.9 was
+    // the case twice, and 1.0 will likely be the next.
     const VERSION_VIEWS_DEFAULT = ["top200", "sub7"];
 
     function versionsFor(trackId) {
@@ -3787,7 +3785,7 @@
 
       // Hide any view the selected build doesn't have — offering a button
       // that resolves to a near-empty board is worse than not offering it.
-      // 0.9 is TOP 200 only today.
+      // Nothing restricts itself today.
       const views = hasVersions
         ? versionViewsFor(trackId, selectedVersion)
         : VERSION_VIEWS_DEFAULT;

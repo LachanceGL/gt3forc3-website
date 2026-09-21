@@ -47,6 +47,14 @@ product decisions.
       purpose, since rebuilding it drops about half its rows and that is a
       call about historical results, not a data fix. Revisit 0.8 only if
       the person asks.
+- [ ] **The live Nordschleife main board lost ~40% of its rows upstream**,
+      between 2026-09-11 and 2026-09-21: 2211 rows down to 1341. Confirmed
+      against AssettoHosting directly, bypassing the Worker, so it is their
+      side, not ours. It is what feeds the 0.8 views, so 0.8 Sub 7 Club fell
+      from 836 to 581 with nothing changed here. Not age-based pruning —
+      July still holds 710 rows — and not a round-number cap. Cause
+      unknown; worth asking them if 0.8 history matters. Snapshot the row
+      count before assuming a later drop is ours.
 - [ ] The `128` bit on lap `flags` is still unidentified (seen as `129`,
       on 2 laps of 158). It does not affect whether a lap counts, so
       nothing depends on it — note it if a larger sample ever explains it.
