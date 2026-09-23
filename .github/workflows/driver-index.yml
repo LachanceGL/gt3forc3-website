@@ -1,40 +1,22 @@
-name: Rebuild derived data
+name: Rebuild driver index
 
-# Every 15 minutes, on purpose, and on odd minutes, on purpose.
+# Hourly. This file only builds the driver/nation index now, which moves
+# only when a new DRIVER appears -- rare enough that a tighter schedule
+# would buy nothing.
 #
-# This was hourly ("17 * * * *") while it only built the driver index,
-# which barely changes. Once it started building the leaderboards
-# themselves, staleness became visible: a finished session with 13 new
-# drivers -- one of them ~P3 on 0.9 -- sat unpublished because the last run
-# had gone out 15 minutes before that session's file existed.
+# It ran every 15 minutes between 2026-09-12 and 2026-09-23, while it also
+# rebuilt the leaderboards and staleness was visible on the site. Worth
+# knowing if that ever comes back: GitHub does NOT honour a schedule like
+# that. It treats `schedule` as best-effort and drops runs under load, and
+# measured over 36 hours a 15-minute cron produced runs 2.4 to 5.5 hours
+# apart. The fix would be an external trigger calling workflow_dispatch,
+# not a tighter cron here.
 #
-# The bigger problem was that "hourly" was never what actually happened.
-# GitHub treats schedules as best-effort and DROPS runs under load rather
-# than queueing them. Measured over 36 hours: 12 runs, 2 to 5.5 hours
-# apart, and not one of them at :17. Asking more often is the lever that
-# exists -- more triggers means more of them survive -- and avoiding :00,
-# :15, :30 and :45 matters because the top of the hour is exactly when
-# GitHub's load peaks and schedules get dropped.
-#
-# Still no guarantee. If this ever needs to be reliable to the minute, the
-# fix is an external trigger calling workflow_dispatch (a Cloudflare cron
-# is the obvious one), not a tighter schedule here.
-#
-# Cost is small: public repo, ~30s a run, and it only commits when the
-# data actually changed (see the last step).
-#
-# workflow_dispatch is here so the data can be rebuilt on demand after a
-# server is added or rebranded, or a session needs to show up right away.
-#
-# Two files come out of this job, both derived from the same session
-# results and both committed together:
-#   data/driver-index.json  -- driver/nation lookup for flags + country grid
-#   data/valid-laps.json    -- the validity-filtered leaderboards
-# They stay in one job because they read the same upstream data and there
-# is no point racing two jobs against the same branch.
+# workflow_dispatch is here so the index can be rebuilt on demand after a
+# server is added or rebranded, without waiting for the hour.
 on:
   schedule:
-    - cron: "7,22,37,52 * * * *"
+    - cron: "17 * * * *"
   workflow_dispatch:
 
 # Least privilege: the job only needs to push the regenerated file.
@@ -63,33 +45,20 @@ jobs:
       - name: Rebuild the index
         run: python scripts/build_driver_index.py --out data/driver-index.json
 
-      # Separate walk of the same sessions rather than one combined pass:
-      # the index covers all five servers while this covers only server1,
-      # and it costs ~12s, which is not worth coupling two scripts over.
-      # Each refuses to write a partial file, so a failure here leaves the
-      # previous good board in place instead of blanking the 0.9 board.
-      - name: Rebuild the valid-lap board
-        run: python scripts/build_valid_laps.py --out data/valid-laps.json
-
       # Commit ONLY when the content actually changed, so the repo doesn't
-      # take an empty 1.1MB commit on every run forever.
-      #
-      # The two files change at very different rates. driver-index.json
-      # moves only when a new DRIVER appears, which is rare; valid-laps.json
-      # moves whenever anyone sets a new personal best, which on a busy
-      # evening is most hours. So expect this job to commit far more often
-      # than it used to -- that is the valid-lap board doing its job, not a
-      # guard that stopped working.
+      # take an empty 1.1MB commit every hour forever. Most hours nothing
+      # will have: a new session appears constantly, but a new *driver*
+      # does not, and only drivers affect this file.
       - name: Commit if changed
         run: |
-          if git diff --quiet -- data/driver-index.json data/valid-laps.json; then
-            echo "No change to the derived data; nothing to commit."
+          if git diff --quiet -- data/driver-index.json; then
+            echo "No change to the driver index; nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/driver-index.json data/valid-laps.json
-          git commit -m "Rebuild derived data
+          git add data/driver-index.json
+          git commit -m "Rebuild driver index
 
           Automated rebuild via .github/workflows/driver-index.yml.
           Committed only because the content actually changed."

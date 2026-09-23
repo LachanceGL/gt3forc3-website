@@ -53,10 +53,27 @@ try/catch, relaunch if it's gone) to not silently lose that self-healing.
   known issue) — if that command family gets fixed or removed, decide
   whether the browser-reuse change still applies to it.
 
-## Request: have the bot trigger the website's data rebuild
+## ~~Request: have the bot trigger the website's data rebuild~~ WITHDRAWN
 
-Added 2026-09-23. This one is a **request for a small addition to the
-bot**, not a review finding — the website side cannot fix it alone.
+**WITHDRAWN the same day it was written, 2026-09-23. Do not implement
+this.** Everything below is kept only as a record of what was asked and
+why, and because the GitHub-schedule finding in it is worth knowing.
+
+The rebuild it was meant to keep fresh no longer exists. AssettoHosting
+fixed the upstream bug that made the rebuild necessary — invalid laps no
+longer outrank valid ones — so the site went back to reading their
+leaderboard endpoint live, and `scripts/build_valid_laps.py` was deleted.
+There is now nothing time-sensitive for the bot to trigger: the only
+remaining workflow builds the driver/nation index, which changes rarely
+and is fine on its hourly schedule.
+
+If the bot ever does get this timer, it would be firing a job that does
+not need it. **No bot-side change is required.**
+
+---
+
+Added 2026-09-23. This was a **request for a small addition to the bot**,
+not a review finding — the website side could not fix it alone.
 
 ### The problem
 

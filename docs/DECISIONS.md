@@ -141,9 +141,10 @@ still not renamed.** Links used to carry the id, so the address bar read
 now has a `slug` named after what the tab shows, and `trackIdFromHash()`
 resolves slug → id; the ids themselves are untouched. Renaming them has
 only got more expensive since this entry was written: on top of the
-Worker's `TRACK_KEYWORDS` and `kyalami.driverDataSource`, both CI scripts
-now key on them too (`SOURCES` in `build_driver_index.py`, `BOARDS` in
-`build_valid_laps.py`), as does `data/valid-laps.json`'s structure.
+Worker's `TRACK_KEYWORDS` and `kyalami.driverDataSource`, the driver-index
+CI script keys on them too (`SOURCES` in `build_driver_index.py`). A
+second script did as well until the valid-lap rebuild was removed on
+2026-09-23.
 
 Old id links still resolve and get rewritten to the slug in place, via
 `history.replaceState` so it doesn't fire `hashchange` or add a history

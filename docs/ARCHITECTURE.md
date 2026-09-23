@@ -226,76 +226,52 @@ This is upstream behaviour in AssettoHosting's Server Manager, not
 something this repo introduced: the same software's results page reads the
 flag correctly and its leaderboard doesn't.
 
-⚠️ **FIXED UPSTREAM some time between 2026-09-12 and 2026-09-21** — the
-paragraphs above describe how it used to behave, and are kept because the
-rebuilt boards still exist because of it. Measured 2026-09-23 against the
-session files: not one row on the live 0.9 board (0 of 458) or the live
-main board (0 of 1355) now shows an invalid lap ahead of that driver's
-valid one. They still list drivers whose laps are ALL invalid, showing an
-invalid time — 254 of 1355 on the main board — which is now the only thing
-the rebuild changes. See `docs/TODO.md` for what that means for keeping
-it.
+⚠️ **FIXED UPSTREAM some time between 2026-09-12 and 2026-09-21**, so the
+paragraphs above are history. Measured 2026-09-23 against the session
+files: not one row on the live 0.9 board (0 of 458) or the live main board
+(0 of 1355) shows an invalid lap ahead of that driver's valid one.
 
-**Every board except 0.8 is now rebuilt from the session files** by
-`scripts/build_valid_laps.py` in CI every 15 minutes (best-effort — see
-the workflow's header for why GitHub can't promise that), served from
-`data/valid-laps.json`; `index.html` prefers that file and falls back to
-the live endpoint if it can't be loaded. 0.9 went first (2026-09-11), the
-other four followed. **0.8 alone is deliberately left on the live
-endpoint** — it is the superseded build and rebuilding it drops roughly
-half its rows, which is a decision about historical results rather than a
-data fix. The effect on 0.9: 623 rows to 278, Sub 7 Club 211 to 168, and the
-three impossible sub-6:00 times at the top disappear on their own, since
-they were invalid all along. **Sub 7 Club was then switched off for 0.9**
-(`views: ["top200"]`) — 168 was judged too thin a field to stand as a
-club. That was a product call about the real number, not a sign the
-rebuild was wrong. **Switched back on 2026-09-21** once the valid-lap field
-had grown to 212, by dropping the key again.
+They still list drivers whose laps are ALL invalid, with an invalid time —
+254 of 1355 on the main board. That is the only way the live boards now
+differ from a validity-filtered rebuild.
 
-⚠️ **A server's session history spans every track it has ever hosted, so
-the rebuild MUST filter by track.** server4 alone has run Spa, Laguna
-Seca, Road Atlanta, Touristenfahrten and Red Bull Ring. The first
-unfiltered run put a Laguna Seca 1:23 at the top of the Spa board. The
-`track` pairs in `BOARDS` were derived, not assumed: each track in a
-server's history was scored on how many rows of that board's LIVE
-leaderboard it explains, and in all four cases one track explained 100%
-and every other explained 0%.
+### The valid-lap rebuild, removed 2026-09-23
 
-| board | server | track filter | live → valid |
-|---|---|---|---|
-| nordschleife | 1 | Nurburgring / Nordschleife | 623 → 278 (0.9) |
-| spa | 2 | Nurburgring / Touristenfahrten | 3 → 1 |
-| redbullring | 3 | Nurburgring / Gp Strecke | 11 → 9 |
-| lagunaseca | 4 | Circuit de Spa Francorchamps / GP | 9 → 5 |
-| nurburgringtour | 5 | Nurburgring / Touristenfahrten | 5 → 1 |
+Between 2026-09-11 and 2026-09-23 the site did not read the leaderboard
+endpoint directly. `scripts/build_valid_laps.py` walked the session files
+in CI and emitted `data/valid-laps.json`, which `index.html` served
+instead — first for Nordschleife 0.9, then for the other four boards, with
+0.8 deliberately left live. **All of it is gone**; git history has it if
+it is ever needed again (`git log -- scripts/build_valid_laps.py`).
 
-Two of those end up with a single row. That is the honest count, not a
-bug — almost nobody set a clean lap on those servers. The script logs a
-warning if one ever reaches zero, since an empty board renders as "No
-Leaderboard active yet" and reads like a broken page.
+Removed because its entire reason was the upstream bug above, and that is
+fixed. What it cost while it existed:
 
-Note the leaderboard does NOT follow a repoint: server2's newest sessions
-are Spa while its board still shows Touristenfahrten, so that board is
-already stale upstream regardless of this rebuild.
+- **Staleness.** Boards were only as fresh as the last CI run, and GitHub
+  drops scheduled runs — a 15-minute cron produced runs 2.4 to 5.5 hours
+  apart. Two drivers once sat missing from the Spa board for ~18 hours
+  while AssettoHosting's own embed showed them.
+- What it still bought at the end was only the exclusion of drivers with
+  no valid lap at all. Going back to live re-admits them.
 
-Two things about the 0.9 rebuild specifically are load-bearing and easy to
-get wrong:
+Three things it established are worth keeping in mind if anything like it
+comes back:
 
-- The precomputed file carries **`rows` (valid laps only) and `keys`
-  (best lap of ANY validity)**. `keys` is what tags MAIN-board rows as 0.9
-  so they're kept off the 0.8 views; building it from valid laps only would
-  leave an invalid 0.9 lap untagged and it would resurface on the 0.8 board
-  labelled 0.8. Verified identical to the old share-key tagging: the same
-  554 of 2209 main-board rows, zero differences either way.
-- `gameVersionForRow()` short-circuits to the active version filter. The
-  key lookup can't serve the VER column on the rebuilt board, because a row
-  now shows a driver's best VALID lap while their key holds their best lap
-  of any validity — for anyone whose fastest lap was invalid those differ,
-  and the lookup missed, rendering 0.8 on a 0.9 row.
-
-`time_standings` is a parallel array of raw millisecond integers (not
-objects), positionally aligned with `drivers`/`driver_standings` — that's
-the one `ensureRaceTotalTimesLoaded()` already reads for Race boards.
+- **A server's session history spans every track it has ever hosted**, so
+  any rebuild MUST filter by track. server4 alone has run Spa, Laguna
+  Seca, Road Atlanta, Touristenfahrten and Red Bull Ring, and the first
+  unfiltered run put a Laguna Seca 1:23 at the top of the Spa board. The
+  track for each board was derived by scoring every track in that server's
+  history on how many rows of the live board it explains; one explained
+  100% and the rest 0%, every time.
+- **Version tagging needs best-lap-of-ANY-validity**, not just valid laps:
+  those keys decide which main-board rows are excluded from the 0.8 views,
+  and an invalid 0.9 lap left untagged just reappears on the 0.8 board
+  wearing the wrong label.
+- **Session data carries no version field**, so a build can only be
+  identified by when the lap was set. The 0.9 cutover was
+  `2026-08-26T05:17:19Z`, the earliest session holding a lap the published
+  0.9 board also lists.
 
 ## Data flow for a leaderboard tab load
 

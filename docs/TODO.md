@@ -41,9 +41,9 @@ product decisions.
       board does, and a fix upstream would let the local rebuild go away.
 
       **Worked around for 0.9 only, on 2026-09-11**, by the person's
-      decision: `scripts/build_valid_laps.py` rebuilds that board from the
-      session files every 15 minutes. 623 rows became 278 and Sub 7 Club 211 became
-      168, so the cut is real — 0.8 was left on the live endpoint on
+      decision: `scripts/build_valid_laps.py` rebuilt that board from the
+      session files in CI. 623 rows became 278 and Sub 7 Club 211 became
+      168, so the cut was real — 0.8 was left on the live endpoint on
       purpose, since rebuilding it drops about half its rows and that is a
       call about historical results, not a data fix. Revisit 0.8 only if
       the person asks.
@@ -62,12 +62,13 @@ product decisions.
       changes, and it is why our boards are smaller than theirs rather
       than different.
 
-      **So the rebuild's original reason is gone.** Keeping it costs the
-      staleness the whole pipeline suffers from (GitHub drops scheduled
-      runs — see `docs/BOT-HANDOFF.md`); dropping it would make every
-      board live again and re-admit those no-valid-lap drivers. That is a
-      product decision, not a cleanup — do not switch it off without
-      asking.
+      **The rebuild was removed on 2026-09-23** by the person's decision,
+      its reason having gone: every board reads the live endpoint again,
+      `scripts/build_valid_laps.py` and `data/valid-laps.json` are deleted,
+      and the staleness that came with them is gone too. The one
+      behavioural change is that drivers with no valid lap at all are back
+      on the boards. See `docs/ARCHITECTURE.md` for what the rebuild
+      established, should anything like it ever be needed again.
 - [x] ~~**The live Nordschleife main board lost ~40% of its rows upstream**~~,
       between 2026-09-11 and 2026-09-21: 2211 rows down to 1341. Confirmed
       against AssettoHosting directly, bypassing the Worker, so it is their
