@@ -23,8 +23,8 @@ product decisions.
       key in the future, expect a `401` from `/leaderboards/embed/.../rows`
       until the person publishes it on AssettoHosting's side — not a bug,
       see `docs/DECISIONS.md`.
-- [ ] **The leaderboard ranks laps the same panel marks `Invalid`.**
-      To raise with AssettoHosting; investigated 2026-09-06. Their
+- [x] ~~**The leaderboard ranks laps the same panel marks `Invalid`.**~~
+      **FIXED UPSTREAM, verified 2026-09-23.** Investigated 2026-09-06. Their
       results page reads the per-lap validity flag and badges bad laps
       `Invalid`; their
       `/leaderboards/embed/.../rows` endpoint ignores it and ranks a
@@ -47,14 +47,36 @@ product decisions.
       purpose, since rebuilding it drops about half its rows and that is a
       call about historical results, not a data fix. Revisit 0.8 only if
       the person asks.
-- [ ] **The live Nordschleife main board lost ~40% of its rows upstream**,
+
+      **What changed upstream.** Some time between 2026-09-12 and
+      2026-09-21, AssettoHosting stopped letting an invalid lap outrank a
+      driver's valid one. Measured 2026-09-23 against the session files:
+      on the live 0.9 board, 0 of 458 rows; on the live main board, 0 of
+      1355. Before, the 0.9 board had one at P2 and three impossible
+      sub-6:00 times above it. Sone Angel now reads 6:38.022 live, his
+      valid lap, where he read the invalid 6:35.421 on 2026-09-12.
+
+      They did NOT drop drivers whose laps are all invalid: those still
+      appear with an invalid time (254 of 1355 on the main board, 80 of
+      458 on the 0.9 board). That is the only thing our rebuild still
+      changes, and it is why our boards are smaller than theirs rather
+      than different.
+
+      **So the rebuild's original reason is gone.** Keeping it costs the
+      staleness the whole pipeline suffers from (GitHub drops scheduled
+      runs — see `docs/BOT-HANDOFF.md`); dropping it would make every
+      board live again and re-admit those no-valid-lap drivers. That is a
+      product decision, not a cleanup — do not switch it off without
+      asking.
+- [x] ~~**The live Nordschleife main board lost ~40% of its rows upstream**~~,
       between 2026-09-11 and 2026-09-21: 2211 rows down to 1341. Confirmed
       against AssettoHosting directly, bypassing the Worker, so it is their
       side, not ours. It is what feeds the 0.8 views, so 0.8 Sub 7 Club fell
       from 836 to 581 with nothing changed here. Not age-based pruning —
-      July still holds 710 rows — and not a round-number cap. Cause
-      unknown; worth asking them if 0.8 history matters. Snapshot the row
-      count before assuming a later drop is ours.
+      July still holds 710 rows — and not a round-number cap.
+      **Explained 2026-09-23:** it is the validity fix above. Rows that
+      existed only because an invalid lap was ranked were corrected or
+      removed, so the board shrank. Not data loss, and not ours. Closed.
 - [ ] The `128` bit on lap `flags` is still unidentified (seen as `129`,
       on 2 laps of 158). It does not affect whether a lap counts, so
       nothing depends on it — note it if a larger sample ever explains it.

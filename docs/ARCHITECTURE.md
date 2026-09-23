@@ -224,8 +224,17 @@ results page and `6:45.339` on the leaderboard — the faster one is
 
 This is upstream behaviour in AssettoHosting's Server Manager, not
 something this repo introduced: the same software's results page reads the
-flag correctly and its leaderboard doesn't. Still open with them — see
-`docs/TODO.md`.
+flag correctly and its leaderboard doesn't.
+
+⚠️ **FIXED UPSTREAM some time between 2026-09-12 and 2026-09-21** — the
+paragraphs above describe how it used to behave, and are kept because the
+rebuilt boards still exist because of it. Measured 2026-09-23 against the
+session files: not one row on the live 0.9 board (0 of 458) or the live
+main board (0 of 1355) now shows an invalid lap ahead of that driver's
+valid one. They still list drivers whose laps are ALL invalid, showing an
+invalid time — 254 of 1355 on the main board — which is now the only thing
+the rebuild changes. See `docs/TODO.md` for what that means for keeping
+it.
 
 **Every board except 0.8 is now rebuilt from the session files** by
 `scripts/build_valid_laps.py` in CI every 15 minutes (best-effort — see
