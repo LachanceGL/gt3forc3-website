@@ -45,8 +45,11 @@ product decisions.
       session files in CI. 623 rows became 278 and Sub 7 Club 211 became
       168, so the cut was real — 0.8 was left on the live endpoint on
       purpose, since rebuilding it drops about half its rows and that is a
-      call about historical results, not a data fix. Revisit 0.8 only if
-      the person asks.
+      call about historical results, not a data fix.
+
+      **Moot since 2026-09-24: 0.8 is retired.** Its laps are not shown at
+      all now (`defaultVersionRetired: true` on the Nordschleife entry), so
+      there is no 0.8 view left to revisit.
 
       **What changed upstream.** Some time between 2026-09-12 and
       2026-09-21, AssettoHosting stopped letting an invalid lap outrank a

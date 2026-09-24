@@ -2717,8 +2717,23 @@
     const LEADERBOARDS = {
       nordschleife: {
         workerPrefix: "/server1",
+        // The main, all-builds board. Every row this board would show is
+        // now filtered out by the 0.9 override below, so what it still
+        // does is answer "is this leaderboard alive at all" — an empty
+        // response is what renders "No Leaderboard active yet".
         shareKey: "ef64a8e5-f0cc-4fda-9242-33086d827694",
         displayName: "Nordschleife",
+        // 0.8 retired 2026-09-24: its laps are no longer shown at all, and
+        // the Version row disappears with them, since 0.9 alone is not a
+        // choice. EVO 0.9 changed the tyre model enough that 0.8 times
+        // stopped being comparable, and by now they are simply old.
+        //
+        // To bring it back, delete this line — versionsFor() appends the
+        // default build again and the row returns with both buttons. When
+        // 1.0 lands, add it to versionOverrides and this stays as it is:
+        // the retired build is 0.8 either way, since GAME_VERSION_DEFAULT
+        // is what "no override matched" means.
+        defaultVersionRetired: true,
         // What goes in the URL hash — see trackIdFromHash(). Named after
         // the track the tab SHOWS, which for three entries is not the id:
         // those ids were kept through a rebrand, and linking by id sent
@@ -3237,12 +3252,26 @@
     const VERSION_VIEWS_DEFAULT = ["top200", "sub7"];
 
     function versionsFor(trackId) {
-      const overrides = (LEADERBOARDS[trackId] || {}).versionOverrides || [];
+      const config = LEADERBOARDS[trackId] || {};
+      const overrides = config.versionOverrides || [];
       // Newest first: the build people are racing leads the row.
-      return [...overrides].reverse().map(o => ({
+      const list = [...overrides].reverse().map(o => ({
         version: o.version,
         views: o.views || VERSION_VIEWS_DEFAULT
-      })).concat([{ version: GAME_VERSION_DEFAULT, views: VERSION_VIEWS_DEFAULT }]);
+      }));
+      // The default build is offered as its own view unless the board has
+      // retired it. Retiring is what happens when a build gets old enough
+      // that its times are no longer worth showing beside the current one —
+      // its laps then simply aren't on the site, rather than sitting behind
+      // a button nobody presses.
+      //
+      // Guarded on there being an override to fall back to: a board with no
+      // overrides that retired the default would have no versions at all,
+      // and defaultVersionFor() would read off the end of an empty list.
+      if (!config.defaultVersionRetired || !list.length) {
+        list.push({ version: GAME_VERSION_DEFAULT, views: VERSION_VIEWS_DEFAULT });
+      }
+      return list;
     }
 
     function versionViewsFor(trackId, version) {
@@ -3251,7 +3280,7 @@
     }
 
     function defaultVersionFor(trackId) {
-      return versionsFor(trackId)[0].version;
+      return (versionsFor(trackId)[0] || { version: GAME_VERSION_DEFAULT }).version;
     }
 
     // The view a board opens on. Falls back to the first view the selected
@@ -3631,7 +3660,13 @@
 
       // The version row only means something on a board whose laps are
       // actually split across builds. Elsewhere it's a one-option question.
-      versionRow.classList.toggle("visible", hasVersions && !config.isRace);
+      //
+      // `> 1` rather than just hasVersions: retiring the default build
+      // leaves Nordschleife with a single version, and a row offering one
+      // choice is furniture. The buttons are still rendered below so the
+      // active-version state has somewhere to live either way.
+      const hasVersionChoice = hasVersions && versionsFor(trackId).length > 1;
+      versionRow.classList.toggle("visible", hasVersionChoice && !config.isRace);
 
       host.innerHTML = "";
       if (hasVersions) {

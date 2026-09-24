@@ -273,6 +273,31 @@ comes back:
   `2026-08-26T05:17:19Z`, the earliest session holding a lap the published
   0.9 board also lists.
 
+## Game builds on the Nordschleife board
+
+Laps are labelled by which Assetto Corsa EVO build they were set on.
+`versionOverrides` lists builds that have their own leaderboard; anything
+not matched by one reads as `GAME_VERSION_DEFAULT` (`0.8`).
+
+**0.8 was retired on 2026-09-24** via `defaultVersionRetired: true`. EVO
+0.9 changed the tyre model enough that the two builds' times stopped being
+comparable, and by then the 0.8 laps were simply old. `versionsFor()` no
+longer appends the default build, so the board shows 0.9 laps only and the
+Version row hides itself — it is rendered only when there is more than one
+build to pick, and one option is not a choice.
+
+Undoing it is deleting that one line. When 1.0 arrives, add it to
+`versionOverrides` and leave the flag alone: the retired build stays 0.8,
+because `GAME_VERSION_DEFAULT` is what "no override matched" means.
+
+⚠️ **The VER column still reads `0.8` on the four non-Nordschleife
+boards.** Those boards have no `versionOverrides`, so every row falls back
+to the default label — and their laps actually span both builds, so the
+column is guessing there and always was. It only ever carried real
+information on Nordschleife, which now has a single build and therefore a
+column of identical values. Worth removing or scoping to boards with a
+real split; left alone pending a decision.
+
 ## Data flow for a leaderboard tab load
 
 1. Person clicks a track tab (or loads a URL with a track hash). The hash
