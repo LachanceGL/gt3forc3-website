@@ -83,7 +83,7 @@ SOURCES = {
 EXCLUDED_NATIONS = {
     "REU", "RUS", "ATA", "GLP", "CUW", "UMI", "MTQ", "IRN",
     "BES", "ATF", "GGY", "GIB", "BLM", "NCL", "VGB", "XKX",
-    "TKL", "CXR", "JEY", "VIR",
+    "TKL", "CXR", "JEY", "VIR", "IMN",
 }
 
 TIMEOUT = 30
