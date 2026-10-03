@@ -2315,6 +2315,14 @@
     // name on the leaderboard.
     let driverNationMap = {};
 
+    // name(lowercase) -> account id, and account id -> every name that
+    // account has raced under. Both merged across sources, both filled by
+    // recomputeAndRenderTrackData() once the driver index resolves. Empty
+    // until then, which is what makes collapseDuplicateDrivers() a no-op
+    // on a cold page rather than a source of wrong merges.
+    let driverAccountMap = {};
+    let driverAccountNames = {};
+
     // Lowercase driver-name sets, expanded from FLAGGED_DRIVERS/VERIFIED_DRIVERS
     // to also include every other name the same underlying account (by
     // `guid`) has raced under — so a rename doesn't let a flagged driver
@@ -2384,6 +2392,8 @@
         finalNameToNation[name.trim().toLowerCase()] = nation;
       });
       driverNationMap = finalNameToNation;
+      driverAccountMap = combinedNameToAccount;
+      driverAccountNames = combinedAccountToNames;
 
       // For each name in a source list, resolve its account (if known) and
       // add every other name seen under that same account — so the
@@ -3007,75 +3017,73 @@
     // real FullName (from the game) is still what's used for flagging,
     // verification, nationality lookup, and search. Useful for names that
     // are just visually awkward (e.g. a repeated word).
-    // Names the game reports for ONE person. Their rows collapse to the
-    // single fastest, instead of each name holding its own place on the
-    // board. DunkMonkey held P62, P84 and P116 of the 0.9 top 200 under
-    // three spellings, pushing three other drivers out of it.
+    // One row per PERSON, not per name. A driver who renames keeps racing
+    // under the new name while their old rows stay on the board, so each
+    // spelling holds its own place: DunkMonkey held P62, P84 and P116 of
+    // the 0.9 top 200 at once, pushing three other drivers out of it.
     //
-    // An explicit list, written before the driver index keyed on `guid`.
-    // It no longer HAS to be explicit: as of 2026-10-04 the index resolves
-    // a name to the game's own account key, which is reliable, so these
-    // rows could be grouped automatically by account instead — collapsing
-    // every renamed driver's duplicates, not just the ones listed here.
+    // Grouped by the account the driver index resolves each name to — the
+    // game's own `guid`, not `player_id`. That distinction is the whole
+    // reason this is safe to do automatically: keyed on player_id it would
+    // have merged unrelated people, because one placeholder id is shared by
+    // 128 names. See docs/DECISIONS.md.
     //
-    // Left as a list on purpose: doing it automatically would quietly
-    // change the contents of every board (127 accounts have raced under
-    // more than one name), which is a decision about the leaderboards
-    // rather than a cleanup. See docs/DECISIONS.md.
+    // Measured before switching it on, 2026-10-05: across all five boards
+    // this drops 7 rows from 6 drivers, every one a genuine rename, and
+    // ZERO merges where two rows shared a name. Only Nordschleife is
+    // affected at all.
+    //
+    // What it cannot fix: 213 names have been used by more than one account
+    // ("max verstappen" by six). Those resolve to whichever account was
+    // seen first, so two such drivers on one board would wrongly merge. No
+    // key choice avoids that — a leaderboard row carries only a name.
+    //
+    // No-op until the driver index resolves, since the map is empty until
+    // then; ensureTrackDataLoaded() re-renders when it lands, exactly as it
+    // already does for flags and badges.
     //
     // The surviving row keeps whichever NAME set the fastest lap. Use
     // DISPLAY_NAME_OVERRIDES if a particular spelling should be shown.
-    const DRIVER_ALIASES = [
-      ["FOR DunkMonkey", "FOR DrunkenMonkey", "FOR DunkenMonkey"]
-    ];
-
-    // name(lowercase) -> index of its DRIVER_ALIASES group.
-    const ALIAS_GROUP_BY_NAME = (() => {
-      const map = new Map();
-      DRIVER_ALIASES.forEach((group, i) => {
-        group.forEach(name => map.set(name.trim().toLowerCase(), i));
-      });
-      return map;
-    })();
-
-    // Every name in this row's alias group, as one space-joined string, or
-    // "" when the driver has no aliases. Feeds the search haystack.
-    function aliasNamesFor(row) {
-      if (!row.FullName) return "";
-      const g = ALIAS_GROUP_BY_NAME.get(row.FullName.trim().toLowerCase());
-      return g === undefined ? "" : DRIVER_ALIASES[g].join(" ");
+    function driverAccountOf(row) {
+      if (!row.FullName) return undefined;
+      return driverAccountMap[row.FullName.trim().toLowerCase()];
     }
 
-    // Keeps one row per alias group: the fastest. Everything not in a group
-    // passes through untouched, so this is a no-op on boards nobody in
-    // DRIVER_ALIASES appears on.
-    //
-    // Ranked on BestLap even on Race boards sorted by Race Time. Both rows
-    // belong to the same person either way, so which one survives only
-    // changes the time shown, and no alias currently appears on a Race
-    // board. Revisit if that stops being true.
-    function collapseAliasRows(rows) {
-      if (!ALIAS_GROUP_BY_NAME.size) return rows;
-      const groupOf = row =>
-        row.FullName ? ALIAS_GROUP_BY_NAME.get(row.FullName.trim().toLowerCase()) : undefined;
+    // Every OTHER name this person has raced under, space-joined, or "".
+    // Feeds the search haystack so a retired spelling still finds them —
+    // without it, searching the name someone remembers returns nothing and
+    // reads as "this driver is gone".
+    function otherNamesFor(row) {
+      const account = driverAccountOf(row);
+      if (account === undefined) return "";
+      const names = driverAccountNames[account];
+      return names ? [...names].join(" ") : "";
+    }
 
-      const bestByGroup = new Map();
+    // Keeps the fastest row per account. Rows whose driver can't be
+    // resolved pass through untouched.
+    //
+    // Ranked on BestLap even on Race boards sorted by Race Time: both rows
+    // belong to the same person either way, so which survives only changes
+    // the time shown, and no Race board currently has a duplicate at all.
+    function collapseDuplicateDrivers(rows) {
+      const bestByAccount = new Map();
       rows.forEach(row => {
-        const g = groupOf(row);
-        if (g === undefined) return;
+        const account = driverAccountOf(row);
+        if (account === undefined) return;
         const t = parseLapTimeToMs(row.BestLap);
         if (t == null) return;
-        const prev = bestByGroup.get(g);
-        if (!prev || t < prev.t) bestByGroup.set(g, { t, row });
+        const prev = bestByAccount.get(account);
+        if (!prev || t < prev.t) bestByAccount.set(account, { t, row });
       });
-      if (!bestByGroup.size) return rows;
+      if (!bestByAccount.size) return rows;
 
       return rows.filter(row => {
-        const g = groupOf(row);
-        if (g === undefined) return true;
-        const best = bestByGroup.get(g);
-        // No parseable time anywhere in the group: leave it alone rather
-        // than silently dropping every row the person has.
+        const account = driverAccountOf(row);
+        if (account === undefined) return true;
+        const best = bestByAccount.get(account);
+        // No parseable time anywhere for this driver: leave their rows
+        // alone rather than silently dropping all of them.
         return !best || best.row === row;
       });
     }
@@ -3447,7 +3455,7 @@
         rows = rows.filter(row => gameVersionForRow(activeTrack, row) === GAME_VERSION_DEFAULT);
       }
 
-      const cleanRows = collapseAliasRows(rows.filter(row => !isFlagged(row)));
+      const cleanRows = collapseDuplicateDrivers(rows.filter(row => !isFlagged(row)));
       const raceConfig = LEADERBOARDS[activeTrack];
       const isRace = Boolean(raceConfig && raceConfig.isRace);
 
@@ -3542,11 +3550,12 @@
       const filtered = currentLeaderboardEntries.filter(({ row }) => {
         const nationCode = row.FullName ? (driverNationMap[row.FullName.trim().toLowerCase()] || "") : "";
         const nationName = NATION_NAMES[nationCode] || "";
-        // The other spellings this person races under are searchable too.
-        // collapseAliasRows() keeps only their fastest row, so without this
-        // the retired spellings would find nothing at all — someone typing
-        // the name they remember would conclude the driver is missing.
-        const aliasNames = aliasNamesFor(row);
+        // The other names this person has raced under are searchable too.
+        // collapseDuplicateDrivers() keeps only their fastest row, so
+        // without this a retired spelling would find nothing at all, and
+        // someone typing the name they remember would conclude the driver
+        // had disappeared.
+        const aliasNames = otherNamesFor(row);
         const haystack = `${row.FullName || ""} ${aliasNames} ${row.CarName || ""} ${row.SessionDate || ""} ${row.SessionType || ""} ${nationCode} ${nationName}`.toLowerCase();
         return haystack.includes(query);
       });

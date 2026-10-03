@@ -208,12 +208,19 @@ and emits `nameToAccount` / `accountToNames` / `accountToNation` /
 committed together, so there was never a build where the page read a file
 in the other format.
 
-`DRIVER_ALIASES` + `collapseAliasRows()` — the explicit list that keeps one
-row per person — is now redundant in principle: rows could be grouped by
-account automatically. Deliberately left as a list, because doing it
-automatically would change the contents of every board (127 accounts have
-raced under more than one name), which is a product decision rather than a
-cleanup.
+`DRIVER_ALIASES` — the hand-written list that kept one row per person —
+was **removed on 2026-10-05**. `collapseDuplicateDrivers()` now groups rows
+by the account the index resolves each name to, so every renamed driver
+collapses, not just the listed one.
+
+Measured before switching it on: across all five boards it drops 7 rows
+from 6 drivers, every one a genuine rename, and **zero** merges where two
+rows shared a name. Only Nordschleife is affected. It is a no-op until the
+driver index resolves, since the name->account map is empty until then.
+
+Search folds in a person's other names, so a retired spelling still finds
+them — without that, typing the name someone remembers returns nothing and
+reads as the driver having disappeared.
 
 ### What this still does NOT fix
 
