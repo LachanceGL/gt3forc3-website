@@ -155,41 +155,68 @@ bookmark now opens Spa rather than that Nürburgring board. That was a
 deliberate call: the link says Spa. Verified on fresh page loads, not only
 on in-page hash changes, since those run different code paths.
 
-## `player_id` is not a person — don't group drivers by it
+## `guid` identifies a driver; `player_id` mostly does, and that is worse
 
 A driver can appear on a board several times under different spellings of
 their name; AssettoHosting treats each as its own entry. DunkMonkey held
 P62, P84 and P116 of the 0.9 top 200 at once, pushing three other drivers
 off it.
 
-The obvious fix is to group rows by `player_id` from the driver index and
-keep the fastest. **It is wrong.** Measured against the live index on
-2026-10-03:
+Session data offers two candidate identity keys per `drivers[]` entry, and
+they are not equally good:
 
-- one `player_id`, `76561197960271872`, is shared by **125 unrelated
-  names** — it is a placeholder the server reports when it has no real id
-  (note how low it is in the Steam range)
-- several more are shared by 3-5 unrelated people
+- **`guid`** — the `{a, b}` pair, the game's own per-account key, already
+  trusted elsewhere: it is what joins `laps[].driver_key` to a driver.
+  Stable across renames and across sessions (Ron Rico: one guid over 35
+  sessions and three months).
+- **`player_id`** — a Steam id, and the one the driver index actually
+  keys on today. Usually right. Not always.
 
-Grouping on it would have merged Ron Rico with erik johns, Duskyys yt with
-Butterfly CZ, and T D with Justus Franz — silently deleting real drivers
-from the board, each looking exactly like a legitimate de-duplication.
+Measured over every server1 session, 2026-10-03, using "do these two names
+share a guid" as ground truth:
 
-So `DRIVER_ALIASES` in `index.html` is an explicit, reviewable list of
-names belonging to one person, and `collapseAliasRows()` keeps the fastest
-row among them. Tedious, but it cannot delete somebody by accident.
+| pair | same guid | same player_id |
+|---|---|---|
+| ron rico / erik johns | yes | yes |
+| t d / justus franz | yes | yes |
+| for dunkmonkey / zsolt steinbacher | yes | yes |
+| g. lach / guile l | yes | yes |
+| brian clark / b clark | yes | yes |
+| **duskyys yt / butterfly cz** | **no** | **yes** |
 
-**The same bad data already reaches the badges.** `expandNamesByPlayerId()`
-expands `VERIFIED_DRIVERS` and `FLAGGED_DRIVERS` by `player_id`, so a
-shared id hands one driver's badge to another. As of 2026-10-03 it affects
-10 names from the verified list and 1 from the flagged list. Most are real
-renames (`G. LACH` / `g. lachance` / `guile l`, `Brian Clark` / `b clark`),
-but at least `Ron Rico` -> `erik johns` and `FOR DunkMonkey` -> `zsolt
-steinbacher` are not. Nobody verified or flagged maps to the 125-name
-placeholder, which is the only reason this is small. Not fixed — it is the
-person's call whether to drop the expansion, and the flagged side is the
-one that actually matters, since a wrongly inherited flag strikes an
-innocent driver's time.
+So `player_id` produces real false merges, and the worst case is bigger
+than one pair: the value `76561197960271872` is attached to **128 names
+carrying 137 distinct guids** — a placeholder the server reports when it
+has no real id (note how low it sits in the Steam range). Grouping rows by
+`player_id` would eventually collapse unrelated drivers into one and
+delete them from a board, looking exactly like correct de-duplication.
+
+**Correcting an earlier version of this entry**, which claimed `ron rico /
+erik johns` and `t d / justus franz` were false merges. They are not —
+both are genuine renames, confirmed by guid. That claim came from the
+names looking unrelated, which is not evidence. `duskyys yt / butterfly
+cz` is the one real false merge found, and the placeholder is the real
+hazard.
+
+### What this means for the two features that use identity
+
+`DRIVER_ALIASES` + `collapseAliasRows()` in `index.html` keep one row per
+person, the fastest. It is an explicit hand-written list. That remains the
+safe choice while the index keys on `player_id`, and it would become
+unnecessary if the index moved to `guid`.
+
+`expandNamesByPlayerId()` spreads `VERIFIED_DRIVERS` and `FLAGGED_DRIVERS`
+across a person's other names, keyed on `player_id`. As of 2026-10-03 it
+reaches 10 extra names from the verified list and 1 from the flagged list,
+and every pair checked by guid was a genuine rename — so it is currently
+doing the right thing, by luck as much as design. A driver sharing the
+128-name placeholder would break it, and the flagged side is the one that
+matters: a wrongly inherited flag strikes an innocent driver's time.
+
+**The fix for both is the same**: key the driver index on `guid` rather
+than `player_id` (`build_driver_index.py` builds `nameToPlayerId` /
+`playerIdToNames`). Not done — it changes the index format and everything
+reading it, and nothing is visibly broken today.
 
 ## A `401` on a freshly-repointed leaderboard usually isn't a bug here
 

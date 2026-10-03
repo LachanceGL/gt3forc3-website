@@ -3004,13 +3004,16 @@
     // three spellings, pushing three other drivers out of it.
     //
     // Deliberately an explicit list, NOT grouping by `player_id` from the
-    // driver index — which looks like the obvious key and is not safe.
-    // Measured 2026-10-03 against the live index: one player_id value is
-    // shared by 125 unrelated names (a placeholder the server reports when
-    // it has no real id), and several more are shared by 3-5 unrelated
-    // people. Grouping on it would have merged Ron Rico with erik johns,
-    // Duskyys yt with Butterfly CZ, and T D with Justus Franz — deleting
-    // real drivers from the board.
+    // driver index. player_id is usually a person and sometimes isn't:
+    // `76561197960271872` is attached to 128 names carrying 137 distinct
+    // guids — a placeholder the server reports when it has no real id —
+    // and `duskyys yt` / `butterfly cz` share a player_id while having
+    // different guids. Grouping on it would eventually delete a real
+    // driver from a board, looking just like correct de-duplication.
+    //
+    // `guid` IS reliable (it is what joins laps to drivers, and survives
+    // renames), but the index doesn't key on it. See docs/DECISIONS.md —
+    // moving the index to guid would make this list unnecessary.
     //
     // The surviving row keeps whichever NAME set the fastest lap. Use
     // DISPLAY_NAME_OVERRIDES if a particular spelling should be shown.
