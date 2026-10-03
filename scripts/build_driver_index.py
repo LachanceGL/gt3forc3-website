@@ -91,6 +91,52 @@ RETRIES = 3
 WORKERS = 12
 
 
+def account_key(guid):
+    """Stable string for a driver's account, from the game's own `guid`.
+
+    `guid` is the {a, b} pair on each drivers[] entry, and is what
+    laps[].driver_key joins against -- so the game already treats it as
+    THE per-account identifier. It survives renames: one account showed a
+    single guid across 35 sessions and three months.
+
+    This replaced `player_id` on 2026-10-04. player_id is a Steam id and is
+    usually right, but not always: the value 76561197960271872 is attached
+    to 128 names carrying 137 distinct guids (a placeholder the server
+    reports when it has no real id), and at least one other pair of
+    unrelated drivers shares one. Keying identity on it merged people who
+    are not the same person. See docs/DECISIONS.md.
+    """
+    if not guid:
+        return None
+    a, b = guid.get("a"), guid.get("b")
+    if not a and not b:
+        return None
+    return "%s:%s" % (a, b)
+
+
+def account_id(guid, registry):
+    """Compact, stable-within-a-build id for an account.
+
+    The guid itself is never emitted. Written out verbatim it costs real
+    bandwidth: two ~20-digit numbers per account, and being essentially
+    random they barely compress, which took the gzipped index from 537KB to
+    1251KB -- paid by every visitor on first load. Nothing downstream reads
+    these values, they are only ever compared to each other, so a small
+    integer does the same job and compresses well.
+
+    The registry is shared across ALL sources on purpose: `seenAccountKeys`
+    is unioned across tracks to count unique drivers, so numbering each
+    source independently would make account 3 on server1 collide with a
+    different account 3 on server2 and undercount.
+    """
+    key = account_key(guid)
+    if key is None:
+        return None
+    if key not in registry:
+        registry[key] = len(registry)
+    return registry[key]
+
+
 def get_json(url):
     last = None
     for attempt in range(RETRIES):
@@ -109,7 +155,7 @@ def get_json(url):
     raise RuntimeError("failed after %d attempts: %s (%s)" % (RETRIES, url, last))
 
 
-def build_source(source_id, prefix):
+def build_source(source_id, prefix, accounts):
     listing = get_json(WORKER_URL + prefix + "/api/v1/results")
     sessions = sorted(
         listing.get("results") or [],
@@ -131,12 +177,12 @@ def build_source(source_id, prefix):
 
     failures = sum(1 for d in details if d is None)
 
-    seen_players = set()
+    seen_accounts = set()
     nation_counts = {}
     name_to_nation = {}
-    name_to_player_id = {}
-    player_id_to_names = {}
-    player_id_to_nation = {}
+    name_to_account = {}
+    account_to_names = {}
+    account_to_nation = {}
 
     for detail in details:                 # already newest-first
         if not detail:
@@ -144,26 +190,30 @@ def build_source(source_id, prefix):
         for driver in (detail.get("drivers") or []):
             first = driver.get("first_name") or ""
             last = driver.get("last_name") or ""
-            pid = driver.get("player_id")
             nation = driver.get("nation")
 
-            key = pid or ("%s-%s" % (first, last))
+            account = account_id(driver.get("guid"), accounts)
             name_key = ("%s %s" % (first, last)).strip().lower()
+            # Falls back to the name when a driver somehow has no guid, so
+            # such a row is still counted once rather than dropped. Measured
+            # 2026-10-03: 0 of 23812 driver entries lacked one, so this is
+            # belt-and-braces, not a path anything relies on.
+            key = account if account is not None else ("name:%s" % name_key)
 
             if name_key and nation and name_key not in name_to_nation:
                 name_to_nation[name_key] = nation
 
-            if name_key and pid:
-                if name_key not in name_to_player_id:
-                    name_to_player_id[name_key] = pid
-                player_id_to_names.setdefault(pid, set()).add(name_key)
+            if name_key and account is not None:
+                if name_key not in name_to_account:
+                    name_to_account[name_key] = account
+                account_to_names.setdefault(account, set()).add(name_key)
 
-            if pid and nation and pid not in player_id_to_nation:
-                player_id_to_nation[pid] = nation
+            if account is not None and nation and account not in account_to_nation:
+                account_to_nation[account] = nation
 
-            if key in seen_players:
+            if key in seen_accounts:
                 continue
-            seen_players.add(key)
+            seen_accounts.add(key)
 
             if not nation or nation in EXCLUDED_NATIONS:
                 continue
@@ -174,12 +224,13 @@ def build_source(source_id, prefix):
         "failedSessions": failures,
         "nationCounts": nation_counts,
         "nameToNation": name_to_nation,
-        "nameToPlayerId": name_to_player_id,
+        "nameToAccount": name_to_account,
         # Sets don't survive JSON; the browser rehydrates these, exactly as
         # the old localStorage cache already did.
-        "playerIdToNames": {k: sorted(v) for k, v in player_id_to_names.items()},
-        "playerIdToNation": player_id_to_nation,
-        "seenPlayerKeys": sorted(seen_players),
+        "accountToNames": {k: sorted(v) for k, v in account_to_names.items()},
+        "accountToNation": account_to_nation,
+        # str() keys sort against int ones, which plain sorted() refuses.
+        "seenAccountKeys": sorted(seen_accounts, key=str),
     }
 
 
@@ -191,13 +242,18 @@ def main():
     out = {"version": 1, "sources": {}}
     total_failures = 0
 
+    # Shared across every source so account ids mean the same thing on all
+    # of them -- seenAccountKeys is unioned across tracks to count unique
+    # drivers, and per-source numbering would collide.
+    accounts = {}
+
     for source_id, prefix in SOURCES.items():
         print("building %s (%s)..." % (source_id, prefix))
-        data = build_source(source_id, prefix)
+        data = build_source(source_id, prefix, accounts)
         out["sources"][source_id] = data
         total_failures += data["failedSessions"]
         print("  sessions=%d  drivers=%d  nations=%d  failed=%d" % (
-            data["sessionCount"], len(data["seenPlayerKeys"]),
+            data["sessionCount"], len(data["seenAccountKeys"]),
             len(data["nationCounts"]), data["failedSessions"]))
 
     # Refuse to emit a half-built index. A partial run would silently drop

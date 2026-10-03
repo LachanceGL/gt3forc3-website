@@ -2317,54 +2317,54 @@
 
     // Lowercase driver-name sets, expanded from FLAGGED_DRIVERS/VERIFIED_DRIVERS
     // to also include every other name the same underlying account (by
-    // player_id) has raced under — so a rename doesn't let a flagged driver
+    // `guid`) has raced under — so a rename doesn't let a flagged driver
     // dodge the flag, and doesn't strip a verified driver's badge. Falls
     // back to exact-name-only matching until the driver scan has resolved
-    // at least one track's player_id data.
+    // at least one track's account data.
     let expandedFlaggedNameKeys = new Set();
     let expandedVerifiedNameKeys = new Set();
 
     function recomputeAndRenderTrackData() {
       const combinedCounts = {};
       const combinedNameToNation = {};
-      const combinedNameToPlayerId = {};
-      const combinedPlayerIdToNames = {};
-      const combinedPlayerIdToNation = {};
-      const combinedSeenPlayerKeys = new Set();
+      const combinedNameToAccount = {};
+      const combinedAccountToNames = {};
+      const combinedAccountToNation = {};
+      const combinedSeenAccountKeys = new Set();
 
-      Object.values(loadedTrackData).forEach(({ nationCounts, nameToNation, nameToPlayerId, playerIdToNames, playerIdToNation, seenPlayerKeys }) => {
+      Object.values(loadedTrackData).forEach(({ nationCounts, nameToNation, nameToAccount, accountToNames, accountToNation, seenAccountKeys }) => {
         Object.entries(nationCounts).forEach(([code, count]) => {
           combinedCounts[code] = (combinedCounts[code] || 0) + count;
         });
         Object.entries(nameToNation).forEach(([name, nation]) => {
           if (!(name in combinedNameToNation)) combinedNameToNation[name] = nation;
         });
-        if (nameToPlayerId) {
-          Object.entries(nameToPlayerId).forEach(([name, pid]) => {
-            if (!(name in combinedNameToPlayerId)) combinedNameToPlayerId[name] = pid;
+        if (nameToAccount) {
+          Object.entries(nameToAccount).forEach(([name, account]) => {
+            if (!(name in combinedNameToAccount)) combinedNameToAccount[name] = account;
           });
         }
-        if (playerIdToNames) {
-          Object.entries(playerIdToNames).forEach(([pid, namesSet]) => {
-            if (!combinedPlayerIdToNames[pid]) combinedPlayerIdToNames[pid] = new Set();
-            namesSet.forEach(n => combinedPlayerIdToNames[pid].add(n));
+        if (accountToNames) {
+          Object.entries(accountToNames).forEach(([account, namesSet]) => {
+            if (!combinedAccountToNames[account]) combinedAccountToNames[account] = new Set();
+            namesSet.forEach(n => combinedAccountToNames[account].add(n));
           });
         }
-        if (playerIdToNation) {
-          Object.entries(playerIdToNation).forEach(([pid, nation]) => {
-            if (!(pid in combinedPlayerIdToNation)) combinedPlayerIdToNation[pid] = nation;
+        if (accountToNation) {
+          Object.entries(accountToNation).forEach(([account, nation]) => {
+            if (!(account in combinedAccountToNation)) combinedAccountToNation[account] = nation;
           });
         }
-        // A driver's key (player_id, or a name-based fallback if that's
-        // missing) is the same across tracks, so unioning these Sets gives
-        // a true cross-track unique count — someone who's raced both
-        // Nordschleife and Spa is counted once, not twice.
-        if (seenPlayerKeys) {
-          seenPlayerKeys.forEach(key => combinedSeenPlayerKeys.add(key));
+        // A driver's account key (their guid) is the same across tracks,
+        // so unioning these Sets gives a true cross-track unique count —
+        // someone who's raced both Nordschleife and Spa is counted once,
+        // not twice.
+        if (seenAccountKeys) {
+          seenAccountKeys.forEach(key => combinedSeenAccountKeys.add(key));
         }
       });
 
-      renderCountryData(combinedCounts, combinedSeenPlayerKeys.size);
+      renderCountryData(combinedCounts, combinedSeenAccountKeys.size);
 
       // Start from the plain per-name lookup, then override every name
       // variant of a known account with that account's most recent
@@ -2374,8 +2374,8 @@
       // If the driver genuinely changed country, this override is exactly
       // what picks that change up.
       const finalNameToNation = { ...combinedNameToNation };
-      Object.entries(combinedPlayerIdToNames).forEach(([pid, namesSet]) => {
-        const currentNation = combinedPlayerIdToNation[pid];
+      Object.entries(combinedAccountToNames).forEach(([account, namesSet]) => {
+        const currentNation = combinedAccountToNation[account];
         if (!currentNation) return;
         namesSet.forEach(name => { finalNameToNation[name] = currentNation; });
       });
@@ -2385,25 +2385,34 @@
       });
       driverNationMap = finalNameToNation;
 
-      // For each name in a source list, resolve its player_id (if known)
-      // and add every other name seen under that same player_id — so the
+      // For each name in a source list, resolve its account (if known) and
+      // add every other name seen under that same account — so the
       // flag/badge follows the account across renames, not just the exact
       // string an admin typed in.
-      function expandNamesByPlayerId(namesIterable) {
+      //
+      // Keyed on the game's `guid` since 2026-10-04, not `player_id`:
+      // player_id is usually one-per-person and demonstrably isn't always,
+      // which handed one driver's badge to another. See docs/DECISIONS.md.
+      //
+      // Still not infallible, and the limit is not the key: the leaderboard
+      // gives only a NAME, and 213 names of 12178 have been used by more
+      // than one account ("max verstappen" by six). Those resolve to
+      // whichever account was seen first.
+      function expandNamesByAccount(namesIterable) {
         const expanded = new Set();
         for (const name of namesIterable) {
           const nameKey = name.trim().toLowerCase();
           expanded.add(nameKey);
-          const pid = combinedNameToPlayerId[nameKey];
-          if (pid && combinedPlayerIdToNames[pid]) {
-            combinedPlayerIdToNames[pid].forEach(n => expanded.add(n));
+          const account = combinedNameToAccount[nameKey];
+          if (account && combinedAccountToNames[account]) {
+            combinedAccountToNames[account].forEach(n => expanded.add(n));
           }
         }
         return expanded;
       }
 
-      expandedFlaggedNameKeys = expandNamesByPlayerId(Object.keys(FLAGGED_DRIVERS));
-      expandedVerifiedNameKeys = expandNamesByPlayerId(VERIFIED_DRIVERS);
+      expandedFlaggedNameKeys = expandNamesByAccount(Object.keys(FLAGGED_DRIVERS));
+      expandedVerifiedNameKeys = expandNamesByAccount(VERIFIED_DRIVERS);
 
       refreshLeaderboardFlags();
     }
@@ -2455,17 +2464,17 @@
             // rehydrate the two that recomputeAndRenderTrackData expects to
             // be real Sets, or the cross-track de-duplication silently
             // stops working.
-            const playerIdToNames = {};
-            Object.entries(data.playerIdToNames || {}).forEach(([pid, names]) => {
-              playerIdToNames[pid] = new Set(names);
+            const accountToNames = {};
+            Object.entries(data.accountToNames || {}).forEach(([account, names]) => {
+              accountToNames[account] = new Set(names);
             });
             loadedTrackData[sourceId] = {
               nationCounts: data.nationCounts || {},
               nameToNation: data.nameToNation || {},
-              nameToPlayerId: data.nameToPlayerId || {},
-              playerIdToNames,
-              playerIdToNation: data.playerIdToNation || {},
-              seenPlayerKeys: new Set(data.seenPlayerKeys || [])
+              nameToAccount: data.nameToAccount || {},
+              accountToNames,
+              accountToNation: data.accountToNation || {},
+              seenAccountKeys: new Set(data.seenAccountKeys || [])
             };
           });
 
@@ -3003,17 +3012,16 @@
     // board. DunkMonkey held P62, P84 and P116 of the 0.9 top 200 under
     // three spellings, pushing three other drivers out of it.
     //
-    // Deliberately an explicit list, NOT grouping by `player_id` from the
-    // driver index. player_id is usually a person and sometimes isn't:
-    // `76561197960271872` is attached to 128 names carrying 137 distinct
-    // guids — a placeholder the server reports when it has no real id —
-    // and `duskyys yt` / `butterfly cz` share a player_id while having
-    // different guids. Grouping on it would eventually delete a real
-    // driver from a board, looking just like correct de-duplication.
+    // An explicit list, written before the driver index keyed on `guid`.
+    // It no longer HAS to be explicit: as of 2026-10-04 the index resolves
+    // a name to the game's own account key, which is reliable, so these
+    // rows could be grouped automatically by account instead — collapsing
+    // every renamed driver's duplicates, not just the ones listed here.
     //
-    // `guid` IS reliable (it is what joins laps to drivers, and survives
-    // renames), but the index doesn't key on it. See docs/DECISIONS.md —
-    // moving the index to guid would make this list unnecessary.
+    // Left as a list on purpose: doing it automatically would quietly
+    // change the contents of every board (127 accounts have raced under
+    // more than one name), which is a decision about the leaderboards
+    // rather than a cleanup. See docs/DECISIONS.md.
     //
     // The surviving row keeps whichever NAME set the fastest lap. Use
     // DISPLAY_NAME_OVERRIDES if a particular spelling should be shown.

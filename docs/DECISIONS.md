@@ -198,25 +198,41 @@ names looking unrelated, which is not evidence. `duskyys yt / butterfly
 cz` is the one real false merge found, and the placeholder is the real
 hazard.
 
-### What this means for the two features that use identity
+### Switched to `guid` on 2026-10-04
 
-`DRIVER_ALIASES` + `collapseAliasRows()` in `index.html` keep one row per
-person, the fastest. It is an explicit hand-written list. That remains the
-safe choice while the index keys on `player_id`, and it would become
-unnecessary if the index moved to `guid`.
+`build_driver_index.py` now keys identity on the guid, via `account_key()`,
+and emits `nameToAccount` / `accountToNames` / `accountToNation` /
+`seenAccountKeys` where it used to emit the `player_id` equivalents.
+`index.html` reads those, and `expandNamesByPlayerId()` is now
+`expandNamesByAccount()`. The script and the regenerated file were
+committed together, so there was never a build where the page read a file
+in the other format.
 
-`expandNamesByPlayerId()` spreads `VERIFIED_DRIVERS` and `FLAGGED_DRIVERS`
-across a person's other names, keyed on `player_id`. As of 2026-10-03 it
-reaches 10 extra names from the verified list and 1 from the flagged list,
-and every pair checked by guid was a genuine rename — so it is currently
-doing the right thing, by luck as much as design. A driver sharing the
-128-name placeholder would break it, and the flagged side is the one that
-matters: a wrongly inherited flag strikes an innocent driver's time.
+`DRIVER_ALIASES` + `collapseAliasRows()` — the explicit list that keeps one
+row per person — is now redundant in principle: rows could be grouped by
+account automatically. Deliberately left as a list, because doing it
+automatically would change the contents of every board (127 accounts have
+raced under more than one name), which is a product decision rather than a
+cleanup.
 
-**The fix for both is the same**: key the driver index on `guid` rather
-than `player_id` (`build_driver_index.py` builds `nameToPlayerId` /
-`playerIdToNames`). Not done — it changes the index format and everything
-reading it, and nothing is visibly broken today.
+### What this still does NOT fix
+
+The limit is no longer the key, it is the leaderboard. `/rows` gives a
+NAME and nothing else, so identity must be resolved name -> account.
+Measured across all five servers, 2026-10-04:
+
+- 23,812 driver entries, **0** without a usable guid
+- 12,282 accounts, 12,178 distinct names
+- **213 names have been used by more than one account** — `max verstappen`
+  by six, `john smith` and `ricky bobby` by five each
+
+Those 213 resolve to whichever account was seen first, and no key choice
+can do better, because the only thing a leaderboard row carries is the
+name. ~1.7% of names are ambiguous; the other 98.3% resolve cleanly.
+
+Two softer limits: one person with two accounts reads as two people
+(under-merging, the safe direction), and the evidence lives in the session
+files — prune those and renames recorded only there become invisible.
 
 ## A `401` on a freshly-repointed leaderboard usually isn't a bug here
 

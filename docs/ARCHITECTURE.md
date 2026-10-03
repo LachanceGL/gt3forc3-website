@@ -184,6 +184,10 @@ Verified against a real session: 35 of 35 laps matched a driver, so the
 join is reliable, not best-effort. Note this is NOT `player_id`; that
 field exists on `drivers[]` too but does not appear on a lap.
 
+That the game keys laps on `guid` is also why `guid` — not `player_id` —
+is what the driver index uses to decide that two names are one person.
+See `docs/DECISIONS.md`.
+
 **Why it looks like lap data doesn't exist.** Most sessions have
 `laps: []`. In a 31-session sample spread across the full history, only
 10 (~32%) had any laps at all — the rest are a single driver joining and
