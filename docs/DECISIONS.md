@@ -155,6 +155,42 @@ bookmark now opens Spa rather than that Nürburgring board. That was a
 deliberate call: the link says Spa. Verified on fresh page loads, not only
 on in-page hash changes, since those run different code paths.
 
+## `player_id` is not a person — don't group drivers by it
+
+A driver can appear on a board several times under different spellings of
+their name; AssettoHosting treats each as its own entry. DunkMonkey held
+P62, P84 and P116 of the 0.9 top 200 at once, pushing three other drivers
+off it.
+
+The obvious fix is to group rows by `player_id` from the driver index and
+keep the fastest. **It is wrong.** Measured against the live index on
+2026-10-03:
+
+- one `player_id`, `76561197960271872`, is shared by **125 unrelated
+  names** — it is a placeholder the server reports when it has no real id
+  (note how low it is in the Steam range)
+- several more are shared by 3-5 unrelated people
+
+Grouping on it would have merged Ron Rico with erik johns, Duskyys yt with
+Butterfly CZ, and T D with Justus Franz — silently deleting real drivers
+from the board, each looking exactly like a legitimate de-duplication.
+
+So `DRIVER_ALIASES` in `index.html` is an explicit, reviewable list of
+names belonging to one person, and `collapseAliasRows()` keeps the fastest
+row among them. Tedious, but it cannot delete somebody by accident.
+
+**The same bad data already reaches the badges.** `expandNamesByPlayerId()`
+expands `VERIFIED_DRIVERS` and `FLAGGED_DRIVERS` by `player_id`, so a
+shared id hands one driver's badge to another. As of 2026-10-03 it affects
+10 names from the verified list and 1 from the flagged list. Most are real
+renames (`G. LACH` / `g. lachance` / `guile l`, `Brian Clark` / `b clark`),
+but at least `Ron Rico` -> `erik johns` and `FOR DunkMonkey` -> `zsolt
+steinbacher` are not. Nobody verified or flagged maps to the 125-name
+placeholder, which is the only reason this is small. Not fixed — it is the
+person's call whether to drop the expansion, and the flagged side is the
+one that actually matters, since a wrongly inherited flag strikes an
+innocent driver's time.
+
 ## A `401` on a freshly-repointed leaderboard usually isn't a bug here
 
 When a `LEADERBOARDS` entry gets pointed at a new AssettoHosting share

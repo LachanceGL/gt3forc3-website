@@ -2998,6 +2998,77 @@
     // real FullName (from the game) is still what's used for flagging,
     // verification, nationality lookup, and search. Useful for names that
     // are just visually awkward (e.g. a repeated word).
+    // Names the game reports for ONE person. Their rows collapse to the
+    // single fastest, instead of each name holding its own place on the
+    // board. DunkMonkey held P62, P84 and P116 of the 0.9 top 200 under
+    // three spellings, pushing three other drivers out of it.
+    //
+    // Deliberately an explicit list, NOT grouping by `player_id` from the
+    // driver index — which looks like the obvious key and is not safe.
+    // Measured 2026-10-03 against the live index: one player_id value is
+    // shared by 125 unrelated names (a placeholder the server reports when
+    // it has no real id), and several more are shared by 3-5 unrelated
+    // people. Grouping on it would have merged Ron Rico with erik johns,
+    // Duskyys yt with Butterfly CZ, and T D with Justus Franz — deleting
+    // real drivers from the board.
+    //
+    // The surviving row keeps whichever NAME set the fastest lap. Use
+    // DISPLAY_NAME_OVERRIDES if a particular spelling should be shown.
+    const DRIVER_ALIASES = [
+      ["FOR DunkMonkey", "FOR DrunkenMonkey", "FOR DunkenMonkey"]
+    ];
+
+    // name(lowercase) -> index of its DRIVER_ALIASES group.
+    const ALIAS_GROUP_BY_NAME = (() => {
+      const map = new Map();
+      DRIVER_ALIASES.forEach((group, i) => {
+        group.forEach(name => map.set(name.trim().toLowerCase(), i));
+      });
+      return map;
+    })();
+
+    // Every name in this row's alias group, as one space-joined string, or
+    // "" when the driver has no aliases. Feeds the search haystack.
+    function aliasNamesFor(row) {
+      if (!row.FullName) return "";
+      const g = ALIAS_GROUP_BY_NAME.get(row.FullName.trim().toLowerCase());
+      return g === undefined ? "" : DRIVER_ALIASES[g].join(" ");
+    }
+
+    // Keeps one row per alias group: the fastest. Everything not in a group
+    // passes through untouched, so this is a no-op on boards nobody in
+    // DRIVER_ALIASES appears on.
+    //
+    // Ranked on BestLap even on Race boards sorted by Race Time. Both rows
+    // belong to the same person either way, so which one survives only
+    // changes the time shown, and no alias currently appears on a Race
+    // board. Revisit if that stops being true.
+    function collapseAliasRows(rows) {
+      if (!ALIAS_GROUP_BY_NAME.size) return rows;
+      const groupOf = row =>
+        row.FullName ? ALIAS_GROUP_BY_NAME.get(row.FullName.trim().toLowerCase()) : undefined;
+
+      const bestByGroup = new Map();
+      rows.forEach(row => {
+        const g = groupOf(row);
+        if (g === undefined) return;
+        const t = parseLapTimeToMs(row.BestLap);
+        if (t == null) return;
+        const prev = bestByGroup.get(g);
+        if (!prev || t < prev.t) bestByGroup.set(g, { t, row });
+      });
+      if (!bestByGroup.size) return rows;
+
+      return rows.filter(row => {
+        const g = groupOf(row);
+        if (g === undefined) return true;
+        const best = bestByGroup.get(g);
+        // No parseable time anywhere in the group: leave it alone rather
+        // than silently dropping every row the person has.
+        return !best || best.row === row;
+      });
+    }
+
     const DISPLAY_NAME_OVERRIDES = {
       "TMRD TMRD": "TMRD",
       "enjoy enjoy": "enjoy",
@@ -3365,7 +3436,7 @@
         rows = rows.filter(row => gameVersionForRow(activeTrack, row) === GAME_VERSION_DEFAULT);
       }
 
-      const cleanRows = rows.filter(row => !isFlagged(row));
+      const cleanRows = collapseAliasRows(rows.filter(row => !isFlagged(row)));
       const raceConfig = LEADERBOARDS[activeTrack];
       const isRace = Boolean(raceConfig && raceConfig.isRace);
 
@@ -3460,7 +3531,12 @@
       const filtered = currentLeaderboardEntries.filter(({ row }) => {
         const nationCode = row.FullName ? (driverNationMap[row.FullName.trim().toLowerCase()] || "") : "";
         const nationName = NATION_NAMES[nationCode] || "";
-        const haystack = `${row.FullName || ""} ${row.CarName || ""} ${row.SessionDate || ""} ${row.SessionType || ""} ${nationCode} ${nationName}`.toLowerCase();
+        // The other spellings this person races under are searchable too.
+        // collapseAliasRows() keeps only their fastest row, so without this
+        // the retired spellings would find nothing at all — someone typing
+        // the name they remember would conclude the driver is missing.
+        const aliasNames = aliasNamesFor(row);
+        const haystack = `${row.FullName || ""} ${aliasNames} ${row.CarName || ""} ${row.SessionDate || ""} ${row.SessionType || ""} ${nationCode} ${nationName}`.toLowerCase();
         return haystack.includes(query);
       });
 
