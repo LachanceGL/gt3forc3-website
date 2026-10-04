@@ -430,6 +430,25 @@
       width: 20px;
       height: 20px;
     }
+    /* Precondition for the whole form, so it sits above the first field
+       rather than beside the submit button — someone who reads it only
+       after filling everything in has already wasted the effort.
+       Orange, this file's established "read this" colour, rather than the
+       red used for errors: nothing has gone wrong yet. */
+    .verify-modal-note {
+      margin: -8px 0 18px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255, 153, 0, 0.35);
+      border-radius: 8px;
+      background: rgba(255, 153, 0, 0.08);
+      color: #ffb84d;
+      font-size: 12px;
+      line-height: 1.5;
+    }
+    .verify-modal-note a {
+      color: #ff9900;
+      font-weight: 700;
+    }
     .verify-modal-close {
       position: absolute;
       top: 16px;
@@ -2164,6 +2183,11 @@
         <img src="https://raw.githubusercontent.com/LachanceGL/gt3forc3-website/refs/heads/main/GT3FORC3_VerifiedBadge01.png" alt="" class="verify-modal-badge-icon">
         Verified Badge
       </h3>
+      <p class="verify-modal-note">
+        Join the <a href="https://discord.gg/dfcK4x64vb" target="_blank" rel="noopener">GT3FORC3 Discord</a>
+        before submitting — we confirm your badge by message there, and if
+        you aren't in the server we have no way to reach you back.
+      </p>
       <div class="verify-field">
         <label for="verify-discord">Discord username</label>
         <input type="text" id="verify-discord" placeholder="Your Discord ID" maxlength="100">
