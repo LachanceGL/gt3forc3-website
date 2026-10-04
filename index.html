@@ -2356,6 +2356,11 @@
     let driverAccountMap = {};
     let driverAccountNames = {};
 
+    // Accounts resolved from PRIVATE_ALIAS_DRIVERS, filled at the same time
+    // as the maps above. Empty until the driver index loads, which fails
+    // safe: with no account map there are no aliases to show either.
+    let privateAliasAccounts = new Set();
+
     // Lowercase driver-name sets, expanded from FLAGGED_DRIVERS/VERIFIED_DRIVERS
     // to also include every other name the same underlying account (by
     // `guid`) has raced under — so a rename doesn't let a flagged driver
@@ -2429,6 +2434,11 @@
       driverNationMap = finalNameToNation;
       driverAccountMap = combinedNameToAccount;
       driverAccountNames = combinedAccountToNames;
+      privateAliasAccounts = new Set();
+      PRIVATE_ALIAS_DRIVERS.forEach(name => {
+        const account = combinedNameToAccount[name.trim().toLowerCase()];
+        if (account !== undefined) privateAliasAccounts.add(account);
+      });
 
       // For each name in a source list, resolve its account (if known) and
       // add every other name seen under that same account — so the
@@ -3097,6 +3107,7 @@
     function otherHandlesFor(row) {
       const account = driverAccountOf(row);
       if (account === undefined) return [];
+      if (privateAliasAccounts.has(account)) return [];
       const names = driverAccountNames[account];
       if (!names) return [];
       const shown = (row.FullName || "").trim().toLowerCase();
@@ -3148,6 +3159,22 @@
         return !best || best.row === row;
       });
     }
+
+    // Drivers who have asked that their other handles not be shown. Their
+    // row gets no "Also races as" tooltip and their old names are dropped
+    // from the search haystack, so neither the page nor a search links the
+    // names together.
+    //
+    // Listed by ANY ONE name the account has used — it is resolved to the
+    // account, which then covers every other spelling without naming them
+    // here. That matters: writing the aliases into this file to hide them
+    // would publish the very thing being hidden, in a public repo.
+    //
+    // Row collapsing is unaffected: a driver with rows under two names
+    // still keeps only their fastest, it just isn't labelled as a rename.
+    const PRIVATE_ALIAS_DRIVERS = new Set([
+      "G. LACH"
+    ]);
 
     const DISPLAY_NAME_OVERRIDES = {
       "TMRD TMRD": "TMRD",
