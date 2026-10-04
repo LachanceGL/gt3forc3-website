@@ -2394,7 +2394,9 @@
       Object.entries(combinedAccountToNames).forEach(([account, namesSet]) => {
         const currentNation = combinedAccountToNation[account];
         if (!currentNation) return;
-        namesSet.forEach(name => { finalNameToNation[name] = currentNation; });
+        // Same reason as above: driverNationMap is keyed on lowercased
+        // names, while these are display spellings.
+        namesSet.forEach(name => { finalNameToNation[name.trim().toLowerCase()] = currentNation; });
       });
       // Manual overrides always win, applied last.
       Object.entries(NATION_OVERRIDES).forEach(([name, nation]) => {
@@ -2423,8 +2425,16 @@
           const nameKey = name.trim().toLowerCase();
           expanded.add(nameKey);
           const account = combinedNameToAccount[nameKey];
-          if (account && combinedAccountToNames[account]) {
-            combinedAccountToNames[account].forEach(n => expanded.add(n));
+          // `=== undefined`, not truthiness: account ids start at 0 and 0
+          // is falsy, so the very first account in the registry would
+          // silently never expand.
+          if (account !== undefined && combinedAccountToNames[account]) {
+            // accountToNames holds DISPLAY spellings for the hover tooltip;
+            // this Set is matched against lowercased row names, so lowercase
+            // on the way in. Without it a renamed driver loses their badge
+            // the moment they rename — which is exactly what this expansion
+            // exists to prevent.
+            combinedAccountToNames[account].forEach(n => expanded.add(n.trim().toLowerCase()));
           }
         }
         return expanded;
