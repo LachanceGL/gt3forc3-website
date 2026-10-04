@@ -982,6 +982,15 @@
     .lb-driver-name {
       font-weight: 700;
     }
+    /* Marks a driver who has raced under other names — hovering shows them.
+       A dotted underline rather than a tooltip bubble of our own: this cell
+       lives inside .leaderboard-frame, which scrolls, so anything absolutely
+       positioned in here gets clipped at the frame edge. The browser's own
+       tooltip is drawn outside the document and has no such problem. */
+    .lb-driver-alt {
+      border-bottom: 1px dotted rgba(238, 238, 238, 0.35);
+      cursor: help;
+    }
     .lb-driver-flag {
       width: 16px;
       height: 11px;
@@ -3049,15 +3058,33 @@
       return driverAccountMap[row.FullName.trim().toLowerCase()];
     }
 
-    // Every OTHER name this person has raced under, space-joined, or "".
-    // Feeds the search haystack so a retired spelling still finds them —
-    // without it, searching the name someone remembers returns nothing and
-    // reads as "this driver is gone".
-    function otherNamesFor(row) {
+    // Every OTHER name this person has raced under. Empty for the vast
+    // majority of drivers, who have only ever used one.
+    function otherHandlesFor(row) {
       const account = driverAccountOf(row);
-      if (account === undefined) return "";
+      if (account === undefined) return [];
       const names = driverAccountNames[account];
-      return names ? [...names].join(" ") : "";
+      if (!names) return [];
+      const shown = (row.FullName || "").trim().toLowerCase();
+      return [...names].filter(n => n.trim().toLowerCase() !== shown);
+    }
+
+    // The same names space-joined, for the search haystack, so a retired
+    // spelling still finds them — without it, searching the name someone
+    // remembers returns nothing and reads as "this driver is gone".
+    function otherNamesFor(row) {
+      return otherHandlesFor(row).join(" ");
+    }
+
+    // Minimal escaping for text going into an HTML attribute. Driver names
+    // come from the game and a quote in one would otherwise break out of
+    // the title attribute and mangle the row.
+    function escapeAttr(value) {
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/"/g, "&quot;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;");
     }
 
     // Keeps the fastest row per account. Rows whose driver can't be
@@ -3218,6 +3245,15 @@
           VERIFIED_DRIVERS.has(row.FullName) ||
           expandedVerifiedNameKeys.has(row.FullName.trim().toLowerCase())
         );
+        // Name, wrapped so a driver with other handles gets a hover tooltip
+        // listing them. collapseDuplicateDrivers() has already folded those
+        // other rows away, so without this nothing on the page says the two
+        // names are one person.
+        const shownName = (row.FullName && DISPLAY_NAME_OVERRIDES[row.FullName]) || row.FullName || "—";
+        const otherHandles = otherHandlesFor(row);
+        const nameHtml = otherHandles.length
+          ? `<span class="lb-driver-alt" title="${escapeAttr("Also races as: " + otherHandles.join(", "))}">${shownName}</span>`
+          : shownName;
         const verifiedHtml = isVerified
           ? `<img class="lb-verified-badge" src="${VERIFIED_BADGE_URL}" alt="Verified" title="Verified Driver">`
           : "";
@@ -3254,7 +3290,7 @@
           : "";
         tr.innerHTML = `
           <td class="lb-pos">${posChip}</td>
-          <td><div class="lb-driver-name">${flagHtml}${(row.FullName && DISPLAY_NAME_OVERRIDES[row.FullName]) || row.FullName || "—"}${verifiedHtml}</div></td>
+          <td><div class="lb-driver-name">${flagHtml}${nameHtml}${verifiedHtml}</div></td>
           <td class="lb-car">${(row.CarName && CAR_NAME_OVERRIDES[row.CarName]) || row.CarName || "—"}</td>
           <td class="lb-best">${row.BestLap || "-"}</td>
           ${totalTimeCell}

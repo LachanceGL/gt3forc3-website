@@ -191,6 +191,7 @@ def build_source(source_id, prefix, accounts):
             first = driver.get("first_name") or ""
             last = driver.get("last_name") or ""
             nation = driver.get("nation")
+            display_name = ("%s %s" % (first, last)).strip()
 
             account = account_id(driver.get("guid"), accounts)
             name_key = ("%s %s" % (first, last)).strip().lower()
@@ -206,7 +207,14 @@ def build_source(source_id, prefix, accounts):
             if name_key and account is not None:
                 if name_key not in name_to_account:
                     name_to_account[name_key] = account
-                account_to_names.setdefault(account, set()).add(name_key)
+                # lowercase key -> the name as the game spells it. The key
+                # is what everything matches on; the value is what a reader
+                # sees in the "also races as" tooltip, so "FOR DunkMonkey"
+                # does not get shown as "for dunkmonkey". Sessions arrive
+                # newest-first and the first spelling seen wins, so this is
+                # the driver's most recent casing.
+                account_to_names.setdefault(account, {}).setdefault(
+                    name_key, display_name)
 
             if account is not None and nation and account not in account_to_nation:
                 account_to_nation[account] = nation
@@ -227,7 +235,12 @@ def build_source(source_id, prefix, accounts):
         "nameToAccount": name_to_account,
         # Sets don't survive JSON; the browser rehydrates these, exactly as
         # the old localStorage cache already did.
-        "accountToNames": {k: sorted(v) for k, v in account_to_names.items()},
+        # Sorted by the lowercase key so the order is stable between runs;
+        # the values are the display spellings.
+        "accountToNames": {
+            k: [v for _, v in sorted(names.items())]
+            for k, names in account_to_names.items()
+        },
         "accountToNation": account_to_nation,
         # str() keys sort against int ones, which plain sorted() refuses.
         "seenAccountKeys": sorted(seen_accounts, key=str),

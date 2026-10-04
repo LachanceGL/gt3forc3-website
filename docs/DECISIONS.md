@@ -222,6 +222,16 @@ Search folds in a person's other names, so a retired spelling still finds
 them — without that, typing the name someone remembers returns nothing and
 reads as the driver having disappeared.
 
+Those names are also surfaced on the row itself: a driver with others gets
+a dotted underline and a hover tooltip, "Also races as: ...". 12 of the 200
+rows on the 0.9 board carry one. It is the browser's own tooltip rather
+than a styled bubble on purpose — the name cell sits inside
+`.leaderboard-frame`, which scrolls, so anything absolutely positioned
+there is clipped at the frame edge. For the tooltip to read properly the
+index now stores each name's original spelling alongside the lowercase key
+it matches on, so "FOR DunkMonkey" isn't shown as "for dunkmonkey"; that
+cost 390KB -> 398KB gzipped.
+
 ### What this still does NOT fix
 
 The limit is no longer the key, it is the leaderboard. `/rows` gives a
