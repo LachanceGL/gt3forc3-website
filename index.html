@@ -961,8 +961,7 @@
     /* Session and Ver share the dimmer header treatment: both are
        metadata about a lap rather than the result itself, so they read as
        one trailing block set slightly back from the timing columns. */
-    .leaderboard-frame thead th.lb-session,
-    .leaderboard-frame thead th.lb-version {
+    .leaderboard-frame thead th.lb-session {
       background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), transparent), var(--surface-dim);
     }
     .leaderboard-frame thead th:nth-child(2),
@@ -1074,16 +1073,6 @@
     .lb-total-time-strike {
       text-decoration: line-through;
       opacity: 0.6;
-    }
-    /* Deliberately understated: the version qualifies a lap time, it isn't
-       a result in its own right, so it should be readable without
-       competing with the driver name or the time itself. */
-    .lb-version {
-      text-align: right;
-      color: rgba(238, 238, 238, 0.4);
-      font-family: ui-monospace, "SF Mono", "Cascadia Code", Consolas, monospace;
-      font-size: 12px;
-      white-space: nowrap;
     }
     .lb-session {
       text-align: right;
@@ -1656,7 +1645,7 @@
         text-overflow: ellipsis;
         white-space: nowrap;
       }
-      .lb-session, .lb-version {
+      .lb-session {
         font-size: 11px;
       }
 
@@ -3288,7 +3277,6 @@
             <th class="lb-best">Best Lap</th>
             ${isRace ? `<th class="lb-total-time${bestLapModeActive ? " lb-total-time-grayed" : ""}">Race Time</th>` : ""}
             <th class="lb-session">Session</th>
-            <th class="lb-version" title="Assetto Corsa EVO build this lap was set on">Ver</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -3359,13 +3347,15 @@
           <td class="lb-best">${row.BestLap || "-"}</td>
           ${totalTimeCell}
           <td class="lb-session">${formatSessionDate(row.SessionDate)}</td>
-          <td class="lb-version">${gameVersionForRow(activeTrack, row)}</td>
         `;
         tbody.appendChild(tr);
       });
 
       if (entries.length === 0) {
         const tr = document.createElement("tr");
+        // 5 columns normally (rank, driver, car, best lap, session), 6 on a
+        // Race board, which adds Race Time. These numbers were wrong by one
+        // while the Ver column existed and are right again now it's gone.
         tr.innerHTML = `<td colspan="${isRace ? 6 : 5}" style="text-align:center; color:#999; padding:20px;">No results match your search.</td>`;
         tbody.appendChild(tr);
       }

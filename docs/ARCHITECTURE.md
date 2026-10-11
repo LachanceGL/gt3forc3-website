@@ -294,13 +294,18 @@ Undoing it is deleting that one line. When 1.0 arrives, add it to
 `versionOverrides` and leave the flag alone: the retired build stays 0.8,
 because `GAME_VERSION_DEFAULT` is what "no override matched" means.
 
-⚠️ **The VER column still reads `0.8` on the four non-Nordschleife
-boards.** Those boards have no `versionOverrides`, so every row falls back
-to the default label — and their laps actually span both builds, so the
-column is guessing there and always was. It only ever carried real
-information on Nordschleife, which now has a single build and therefore a
-column of identical values. Worth removing or scoping to boards with a
-real split; left alone pending a decision.
+**The VER column was removed on 2026-10-10.** It had stopped carrying
+information anywhere: the four non-Nordschleife boards have no
+`versionOverrides`, so every row fell back to the default label `0.8`
+while their laps actually span both builds — it was guessing there, and
+always had been — and Nordschleife, having retired 0.8, showed a column of
+identical `0.9`s.
+
+The version machinery itself is untouched: `gameVersionForRow()` and the
+`versionOverrides` filtering still work, so adding 1.0 still splits the
+board. Only the per-row label is gone. Removing it also corrected the
+"No results match your search" row, whose `colspan` had been one short
+since the column was added.
 
 ## Data flow for a leaderboard tab load
 
