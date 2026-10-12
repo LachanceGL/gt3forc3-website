@@ -307,6 +307,47 @@ board. Only the per-row label is gone. Removing it also corrected the
 "No results match your search" row, whose `colspan` had been one short
 since the column was added.
 
+## The all-time record (`data/all-time.json`)
+
+An accumulating archive of every valid lap ever seen, built by
+`scripts/build_all_time.py` in the hourly workflow. **Repo-side only** —
+nothing on the site fetches it.
+
+It exists because the leaderboards are live and mutable. The main
+Nordschleife board read 2211 rows on 2026-09-11, 1341 on 2026-09-21 and
+1866 on 2026-10-12; the small boards have swung about too. A board losing
+entries is normally fine (AssettoHosting's invalid-lap cleanup was most of
+that drop) but nothing on our side held the ones that went. This file
+does: once a lap is recorded it stays, even if the board and the session
+behind it both disappear. At first build it already held **62 Nordschleife
+drivers who appear on no live board**, the fastest a 6:37.182 from
+2026-07-11 — top-ten pace today.
+
+Three choices in it are load-bearing:
+
+- **Only `flags & 2` laps.** An all-time record of cut laps would be
+  worthless.
+- **Keyed on the raw `guid`, not the compact account ids.** Those ids are
+  assigned per build in registry insertion order, so they are not stable
+  between runs and would silently re-point every record. The guid costs
+  more bytes; that matters for the index every visitor downloads, and not
+  at all here.
+- **Track read from the session, not from a `LEADERBOARDS` board id.**
+  Servers get repointed and keep their history, so a board id would attach
+  a record to whatever that slot shows today. The server prefix stays in
+  the key even though the track name would group them: server2 and server5
+  both run Touristenfahrten but with different car classes, so the times
+  are not comparable.
+
+**Incremental**, via a per-server cursor of the newest session processed —
+seconds per run after the first. That would be wrong for
+`build_driver_index.py`, whose nation counts depend on which session was
+seen first, which is why that one rebuilds fully. It is safe here because
+the merge is a `min()` over lap times: order-independent and idempotent. A
+failed session fetch stops that server's cursor rather than advancing past
+it, so the next run retries instead of skipping it forever. `--rebuild`
+ignores the cursors entirely.
+
 ## Data flow for a leaderboard tab load
 
 1. Person clicks a track tab (or loads a URL with a track hash). The hash

@@ -45,19 +45,31 @@ jobs:
       - name: Rebuild the index
         run: python scripts/build_driver_index.py --out data/driver-index.json
 
+      # Accumulating archive of every valid lap ever seen, so a leaderboard
+      # losing entries upstream stops being data loss. Incremental: it reads
+      # only sessions newer than its stored cursor, so this is seconds once
+      # the first run has walked the history -- unlike the index above,
+      # which has to rebuild fully every time.
+      - name: Update the all-time record
+        run: python scripts/build_all_time.py --out data/all-time.json
+
       # Commit ONLY when the content actually changed, so the repo doesn't
       # take an empty 1.1MB commit every hour forever. Most hours nothing
       # will have: a new session appears constantly, but a new *driver*
-      # does not, and only drivers affect this file.
+      # does not, and only drivers affect the index.
+      #
+      # all-time.json moves more often -- any new personal best touches it --
+      # but it too rewrites only on a real change, so quiet hours stay
+      # commit-free.
       - name: Commit if changed
         run: |
-          if git diff --quiet -- data/driver-index.json; then
-            echo "No change to the driver index; nothing to commit."
+          if git diff --quiet -- data/driver-index.json data/all-time.json; then
+            echo "No change to the derived data; nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/driver-index.json
+          git add data/driver-index.json data/all-time.json
           git commit -m "Rebuild driver index
 
           Automated rebuild via .github/workflows/driver-index.yml.
