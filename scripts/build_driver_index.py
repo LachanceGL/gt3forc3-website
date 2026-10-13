@@ -51,6 +51,7 @@ import argparse
 import json
 import os
 import sys
+import time
 import urllib.request
 import urllib.error
 from concurrent.futures import ThreadPoolExecutor
@@ -86,9 +87,16 @@ EXCLUDED_NATIONS = {
     "TKL", "CXR", "JEY", "VIR", "IMN",
 }
 
-TIMEOUT = 30
-RETRIES = 3
+# 60s, not the 30 this had: on 2026-10-13 seven of 1606 server1 fetches
+# timed out and the whole run failed. Nothing was wrong -- the origin was
+# briefly slow, and a 30s ceiling turned that into a hard failure.
+TIMEOUT = 60
+RETRIES = 4
 WORKERS = 12
+# Retries used to fire back-to-back, which is the worst thing to do when a
+# server is momentarily slow: three attempts land inside the same bad
+# moment and all three fail. Wait 1s, 2s, then 4s instead.
+RETRY_BACKOFF_S = 1
 
 
 def account_key(guid):
@@ -152,6 +160,8 @@ def get_json(url):
                 return json.loads(r.read().decode("utf-8"))
         except Exception as e:      # noqa: BLE001 - retry anything transient
             last = e
+            if attempt < RETRIES - 1:
+                time.sleep(RETRY_BACKOFF_S * (2 ** attempt))
     raise RuntimeError("failed after %d attempts: %s (%s)" % (RETRIES, url, last))
 
 

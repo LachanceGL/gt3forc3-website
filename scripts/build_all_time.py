@@ -66,6 +66,7 @@ import gzip
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
@@ -77,8 +78,11 @@ WORKER_URL = "https://raspy-salad-d894.contact-eb9.workers.dev"
 PREFIXES = ["/server1", "/server2", "/server3", "/server4", "/server5"]
 
 TIMEOUT = 120
-RETRIES = 3
+RETRIES = 4
 WORKERS = 12
+# Same reasoning as build_driver_index.py: back-to-back retries all land
+# inside the same slow moment. Wait 1s, 2s, then 4s.
+RETRY_BACKOFF_S = 1
 
 # Bit 1 of laps[].flags: the lap counted toward the session standings.
 LAP_COUNTS = 2
@@ -86,7 +90,7 @@ LAP_COUNTS = 2
 
 def get_json(url):
     last = None
-    for _ in range(RETRIES):
+    for attempt in range(RETRIES):
         try:
             # Explicit User-Agent is required, not cosmetic: Cloudflare 403s
             # urllib's default before the request reaches the Worker.
@@ -101,6 +105,8 @@ def get_json(url):
                 return json.loads(raw.decode("utf-8"))
         except Exception as e:      # noqa: BLE001 - retry anything transient
             last = e
+            if attempt < RETRIES - 1:
+                time.sleep(RETRY_BACKOFF_S * (2 ** attempt))
     raise RuntimeError("failed after %d attempts: %s (%s)" % (RETRIES, url, last))
 
 

@@ -50,7 +50,14 @@ jobs:
       # only sessions newer than its stored cursor, so this is seconds once
       # the first run has walked the history -- unlike the index above,
       # which has to rebuild fully every time.
+      #
+      # Runs even if the index step failed. The index refuses to write a
+      # partial file and exits 1 when any session fetch fails, which on
+      # 2026-10-13 was 7 of 1606 transient timeouts -- and that skipped this
+      # step entirely. Wrong way round: the archive is the one thing that
+      # must not miss a session, and it is independent of the index.
       - name: Update the all-time record
+        if: ${{ !cancelled() }}
         run: python scripts/build_all_time.py --out data/all-time.json
 
       # Commit ONLY when the content actually changed, so the repo doesn't
@@ -61,7 +68,12 @@ jobs:
       # all-time.json moves more often -- any new personal best touches it --
       # but it too rewrites only on a real change, so quiet hours stay
       # commit-free.
+      # Also runs after a failed step, so whatever DID rebuild still gets
+      # committed. A script that fails writes nothing, so there is never a
+      # half-built file to commit here. The job still reports failure, so a
+      # real problem is still visible.
       - name: Commit if changed
+        if: ${{ !cancelled() }}
         run: |
           if git diff --quiet -- data/driver-index.json data/all-time.json; then
             echo "No change to the derived data; nothing to commit."
