@@ -29,14 +29,32 @@ leaderboard row frozen under an old name still resolves to the nation from
 that account's most recent session. Reverse the order and every flag
 silently reverts to whatever the driver first signed up as.
 
-This does a FULL rebuild every run rather than merging new sessions into a
-previous result. Incremental merging looks tempting and is subtly wrong
-here: `nationCounts` counts each driver once, and which nation gets that
-count depends on which session was seen first. A driver who changed nation
-would keep their stale count forever under an incremental merge, with
-nothing to flag it. A full rebuild is provably identical to the old client
-behaviour, and at ~900 files with a thread pool it costs well under a
-minute.
+Incremental downloads, full aggregation
+---------------------------------------
+Session files are immutable once written, so re-downloading all 1606 of
+them every hour was the whole cost: 11m31s by 2026-10-13, growing with the
+history, and on one run seven fetches timed out and failed the job.
+
+Each session is now reduced to the three fields this index needs -- guid,
+name, nation -- and kept in `data/session-digest.json`. A run downloads
+only sessions the digest lacks, then re-aggregates the WHOLE digest from
+scratch. 11m31s -> 3.6s with nothing new to fetch.
+
+The split matters. Merging new sessions into a previous *result* is subtly
+wrong here: `nationCounts` counts each driver once and which nation gets
+that count depends on which session was seen first, so a driver who
+changed nation would keep a stale count forever. Re-aggregating everything
+every time avoids that entirely -- the newest-first/first-wins rule is
+applied to the full history, exactly as before. Only the download is
+incremental, never the reasoning.
+
+Verified on the switchover: the rebuilt index is semantically identical to
+the one the full-download version produced -- same nation counts, same
+name->nation map, same grouping of names into accounts, same per-account
+nation -- across all five sources.
+
+Keyed on filename rather than a newest-timestamp cursor, so a session that
+shows up late is still picked up. `--rebuild` discards the digest.
 
 Fetching is parallel here on purpose. The browser's version had to go
 strictly sequential with a delay between requests, because parallel bursts
@@ -48,6 +66,7 @@ Usage:
   python scripts/build_driver_index.py [--out data/driver-index.json]
 """
 import argparse
+import gzip
 import json
 import os
 import sys
@@ -98,6 +117,9 @@ WORKERS = 12
 # moment and all three fail. Wait 1s, 2s, then 4s instead.
 RETRY_BACKOFF_S = 1
 
+# json.dump doesn't add one.
+NEWLINE = chr(10)
+
 
 def account_key(guid):
     """Stable string for a driver's account, from the game's own `guid`.
@@ -122,27 +144,75 @@ def account_key(guid):
     return "%s:%s" % (a, b)
 
 
-def account_id(guid, registry):
-    """Compact, stable-within-a-build id for an account.
+def update_digest(digest, source_id, prefix):
+    """Download any session this source has that the digest lacks.
 
-    The guid itself is never emitted. Written out verbatim it costs real
-    bandwidth: two ~20-digit numbers per account, and being essentially
-    random they barely compress, which took the gzipped index from 537KB to
-    1251KB -- paid by every visitor on first load. Nothing downstream reads
-    these values, they are only ever compared to each other, so a small
-    integer does the same job and compresses well.
+    The digest is the expensive thing made cheap: a session file is
+    immutable once written, so there is no reason to download all 1606 of
+    them every hour. Each is reduced to the three fields this index needs
+    -- guid, name, nation -- and kept.
 
-    The registry is shared across ALL sources on purpose: `seenAccountKeys`
-    is unioned across tracks to count unique drivers, so numbering each
-    source independently would make account 3 on server1 collide with a
-    different account 3 on server2 and undercount.
+    Deliberately NOT the same trick as build_all_time.py's cursor. That one
+    skips sessions older than the newest it has seen; this keys on filename,
+    so a session that shows up late is still picked up.
     """
-    key = account_key(guid)
-    if key is None:
-        return None
-    if key not in registry:
-        registry[key] = len(registry)
-    return registry[key]
+    have = {e["f"] for e in digest}
+    listing = get_json(WORKER_URL + prefix + "/api/v1/results")
+    missing = [s for s in (listing.get("results") or [])
+               if s["filename"] not in have]
+    print("  %s: %d session(s) in digest, %d to fetch"
+          % (source_id, len(have), len(missing)))
+    if not missing:
+        return 0, 0
+
+    def fetch(s):
+        try:
+            return s, get_json(WORKER_URL + prefix + s["download_url"])
+        except Exception as e:             # noqa: BLE001
+            print("    warn: %s (%s)" % (s.get("download_url"), e), file=sys.stderr)
+            return s, None
+
+    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
+        fetched = list(pool.map(fetch, missing))
+
+    failures = 0
+    for s, detail in fetched:
+        if detail is None:
+            failures += 1
+            continue
+        rows = []
+        for driver in (detail.get("drivers") or []):
+            guid = account_key(driver.get("guid"))
+            name = ("%s %s" % (driver.get("first_name") or "",
+                               driver.get("last_name") or "")).strip()
+            if not guid and not name:
+                continue
+            rows.append([guid, name, driver.get("nation") or ""])
+        digest.append({"f": s["filename"], "t": s["timestamp"], "d": rows})
+    return len(missing) - failures, failures
+
+
+def build_registry(digest_by_source):
+    """guid -> compact id, assigned in oldest-session-first order.
+
+    Oldest first so the mapping is append-only: a new session can only add
+    accounts at the end, leaving every existing id where it was. Newest
+    first would renumber most of the file every time somebody new turned
+    up, which is the same bytes rewritten for no reason on every commit.
+
+    Ordering is global across sources, not per source, for the same reason:
+    numbering server1 then server2 would shift server2 every time server1
+    gained an account.
+    """
+    registry = {}
+    everything = []
+    for sessions in digest_by_source.values():
+        everything.extend(sessions)
+    for entry in sorted(everything, key=lambda e: (e["t"], e["f"])):
+        for guid, _name, _nation in entry["d"]:
+            if guid and guid not in registry:
+                registry[guid] = len(registry)
+    return registry
 
 
 def get_json(url):
@@ -153,11 +223,17 @@ def get_json(url):
             # rejects urllib's default ("Python-urllib/x.y") with a 403
             # before the request ever reaches the Worker.
             req = urllib.request.Request(url, headers={
-                "Accept-Encoding": "identity",
+                # gzip, not identity. A session file is ~4.6MB raw and
+                # ~565KB compressed -- eight times less over the wire, which
+                # is most of why a full walk took 11 minutes.
+                "Accept-Encoding": "gzip",
                 "User-Agent": "gt3forc3-driver-index/1.0 (+https://gt3forc3.com)",
             })
             with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
-                return json.loads(r.read().decode("utf-8"))
+                raw = r.read()
+                if r.headers.get("Content-Encoding") == "gzip":
+                    raw = gzip.decompress(raw)
+                return json.loads(raw.decode("utf-8"))
         except Exception as e:      # noqa: BLE001 - retry anything transient
             last = e
             if attempt < RETRIES - 1:
@@ -165,27 +241,16 @@ def get_json(url):
     raise RuntimeError("failed after %d attempts: %s (%s)" % (RETRIES, url, last))
 
 
-def build_source(source_id, prefix, accounts):
-    listing = get_json(WORKER_URL + prefix + "/api/v1/results")
-    sessions = sorted(
-        listing.get("results") or [],
-        key=lambda s: s.get("timestamp") or "",
-        reverse=True,                      # NEWEST FIRST -- see module docstring
-    )
+def build_source(digest_sessions, accounts):
+    """Aggregate one source from its digest entries.
 
-    # Fetch in parallel but KEEP the newest-first ordering when merging:
-    # the order results are merged in decides which nation wins.
-    def fetch(s):
-        try:
-            return get_json(WORKER_URL + prefix + s["download_url"])
-        except Exception as e:             # noqa: BLE001
-            print("    warn: %s (%s)" % (s.get("download_url"), e), file=sys.stderr)
-            return None
-
-    with ThreadPoolExecutor(max_workers=WORKERS) as pool:
-        details = list(pool.map(fetch, sessions))
-
-    failures = sum(1 for d in details if d is None)
+    Takes digest rows rather than fetching: the download is now done once
+    per session ever, in update_digest(), instead of once per session per
+    run. The aggregation itself is unchanged and still runs over the FULL
+    history every time -- it is cheap, and doing it fully is what keeps the
+    newest-first/first-wins rule exact rather than approximated.
+    """
+    details = sorted(digest_sessions, key=lambda s: s["t"], reverse=True)
 
     seen_accounts = set()
     nation_counts = {}
@@ -194,17 +259,10 @@ def build_source(source_id, prefix, accounts):
     account_to_names = {}
     account_to_nation = {}
 
-    for detail in details:                 # already newest-first
-        if not detail:
-            continue
-        for driver in (detail.get("drivers") or []):
-            first = driver.get("first_name") or ""
-            last = driver.get("last_name") or ""
-            nation = driver.get("nation")
-            display_name = ("%s %s" % (first, last)).strip()
-
-            account = account_id(driver.get("guid"), accounts)
-            name_key = ("%s %s" % (first, last)).strip().lower()
+    for entry in details:                  # already newest-first
+        for guid, display_name, nation in entry["d"]:
+            account = accounts.get(guid)
+            name_key = display_name.strip().lower()
             # Falls back to the name when a driver somehow has no guid, so
             # such a row is still counted once rather than dropped. Measured
             # 2026-10-03: 0 of 23812 driver entries lacked one, so this is
@@ -238,8 +296,8 @@ def build_source(source_id, prefix, accounts):
             nation_counts[nation] = nation_counts.get(nation, 0) + 1
 
     return {
-        "sessionCount": len(sessions),
-        "failedSessions": failures,
+        # sessionCount / failedSessions are filled in by main(), which is
+        # what now knows about sessions and fetching.
         "nationCounts": nation_counts,
         "nameToNation": name_to_nation,
         "nameToAccount": name_to_account,
@@ -260,40 +318,67 @@ def build_source(source_id, prefix, accounts):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", default=os.path.join("data", "driver-index.json"))
+    ap.add_argument("--digest", default=os.path.join("data", "session-digest.json"),
+                    help="where the per-session cache lives")
+    ap.add_argument("--rebuild", action="store_true",
+                    help="throw the digest away and re-download every session")
     args = ap.parse_args()
 
-    out = {"version": 1, "sources": {}}
+    digest = {}
+    if not args.rebuild and os.path.exists(args.digest):
+        with open(args.digest, encoding="utf-8") as f:
+            digest = json.load(f).get("sources") or {}
+
     total_failures = 0
-
-    # Shared across every source so account ids mean the same thing on all
-    # of them -- seenAccountKeys is unioned across tracks to count unique
-    # drivers, and per-source numbering would collide.
-    accounts = {}
-
+    added = 0
     for source_id, prefix in SOURCES.items():
-        print("building %s (%s)..." % (source_id, prefix))
-        data = build_source(source_id, prefix, accounts)
-        out["sources"][source_id] = data
-        total_failures += data["failedSessions"]
-        print("  sessions=%d  drivers=%d  nations=%d  failed=%d" % (
-            data["sessionCount"], len(data["seenAccountKeys"]),
-            len(data["nationCounts"]), data["failedSessions"]))
+        sessions = digest.setdefault(source_id, [])
+        new_count, failures = update_digest(sessions, source_id, prefix)
+        added += new_count
+        total_failures += failures
 
     # Refuse to emit a half-built index. A partial run would silently drop
     # drivers from the country grid and flags from leaderboard rows, and
     # would look exactly like a successful run -- better to fail loudly and
     # leave the previous good file in place.
+    #
+    # The digest is NOT written when this happens either: a session missing
+    # from it would never be retried, since update_digest() only fetches
+    # what the digest lacks and a half-written one would claim to have it.
     if total_failures:
         print("ERROR: %d session fetches failed; refusing to write a partial index"
               % total_failures, file=sys.stderr)
         return 1
 
+    # One registry over every source, built oldest-first so ids are stable
+    # between runs. See build_registry().
+    accounts = build_registry(digest)
+
+    out = {"version": 1, "sources": {}}
+    for source_id in SOURCES:
+        data = build_source(digest[source_id], accounts)
+        data["sessionCount"] = len(digest[source_id])
+        data["failedSessions"] = 0
+        out["sources"][source_id] = data
+        print("  %-16s sessions=%-5d drivers=%-6d nations=%d" % (
+            source_id, data["sessionCount"], len(data["seenAccountKeys"]),
+            len(data["nationCounts"])))
+
     os.makedirs(os.path.dirname(args.out) or ".", exist_ok=True)
     with open(args.out, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-        f.write("\n")
+        f.write(NEWLINE)
 
-    print("wrote %s (%.1f KB)" % (args.out, os.path.getsize(args.out) / 1024))
+    # Written after the index, and only on success, so the two can never
+    # disagree about which sessions have been seen.
+    with open(args.digest, "w", encoding="utf-8") as f:
+        json.dump({"version": 1, "sources": digest}, f,
+                  ensure_ascii=False, separators=(",", ":"), sort_keys=True)
+        f.write(NEWLINE)
+
+    print(NEWLINE + "%d new session(s) fetched; wrote %s (%.1f KB) and %s (%.1f KB)" % (
+        added, args.out, os.path.getsize(args.out) / 1024,
+        args.digest, os.path.getsize(args.digest) / 1024))
     return 0
 
 

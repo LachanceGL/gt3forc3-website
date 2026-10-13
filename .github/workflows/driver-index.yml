@@ -42,6 +42,9 @@ jobs:
 
       # No pip install step on purpose -- the script deliberately uses only
       # the standard library, so there's nothing to resolve, pin or break.
+      # Downloads only sessions data/session-digest.json lacks, then
+      # re-aggregates the whole thing. Was 11m31s of re-downloading every
+      # session every hour; now seconds when nothing is new.
       - name: Rebuild the index
         run: python scripts/build_driver_index.py --out data/driver-index.json
 
@@ -75,13 +78,13 @@ jobs:
       - name: Commit if changed
         if: ${{ !cancelled() }}
         run: |
-          if git diff --quiet -- data/driver-index.json data/all-time.json; then
+          if git diff --quiet -- data/driver-index.json data/all-time.json data/session-digest.json; then
             echo "No change to the derived data; nothing to commit."
             exit 0
           fi
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/driver-index.json data/all-time.json
+          git add data/driver-index.json data/all-time.json data/session-digest.json
           git commit -m "Rebuild driver index
 
           Automated rebuild via .github/workflows/driver-index.yml.
