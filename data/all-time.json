@@ -2,11 +2,11 @@
  "cursors": {
   "/server1": "2026-10-13T07:53:29Z",
   "/server2": "2026-10-12T21:27:46Z",
-  "/server3": "2026-10-12T17:37:04Z",
-  "/server4": "2026-10-12T13:56:26Z",
+  "/server3": "2026-10-13T11:53:33Z",
+  "/server4": "2026-10-13T11:11:59Z",
   "/server5": "2026-10-11T15:34:36Z"
  },
- "generated": "2026-10-13T09:37:17Z",
+ "generated": "2026-10-13T18:12:17Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -14895,13 +14895,13 @@
      "session": "results_20261004_190333_race"
     },
     "5537924507461323160:8502717023030692481": {
-     "car": "Ferrari 296 GT3",
-     "date": "2026-08-08",
-     "lap": "2:01.068",
-     "ms": 121068,
-     "name": "Martin Peters [PNT]",
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-13",
+     "lap": "1:58.683",
+     "ms": 118683,
+     "name": "slow  motion [PNT]",
      "recorded": "2026-10-12",
-     "session": "results_20260808_171609_race"
+     "session": "results_20261013_110733_qualify"
     },
     "5603597891898936010:17606832142286852239": {
      "car": "Porsche 911 GT3 Cup (992)",
@@ -15126,6 +15126,15 @@
      "name": "Mitchell Klarman",
      "recorded": "2026-10-12",
      "session": "results_20261012_050959_practice"
+    },
+    "5276315604724721979:12634016965684148383": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-13",
+     "lap": "2:36.396",
+     "ms": 156396,
+     "name": "DINK JARVIS",
+     "recorded": "2026-10-13",
+     "session": "results_20261013_111159_practice"
     },
     "5364530465699696612:13085593578338168208": {
      "car": "BMW M4 GT3 Evo",
