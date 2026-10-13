@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-13T00:58:24Z",
+  "/server1": "2026-10-13T07:53:29Z",
   "/server2": "2026-10-12T21:27:46Z",
   "/server3": "2026-10-12T17:37:04Z",
   "/server4": "2026-10-12T13:56:26Z",
   "/server5": "2026-10-11T15:34:36Z"
  },
- "generated": "2026-10-13T02:10:28Z",
+ "generated": "2026-10-13T09:37:17Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -9576,6 +9576,15 @@
      "name": "Xavier Menou",
      "recorded": "2026-10-12",
      "session": "results_20261012_003455_practice"
+    },
+    "5385293098377898905:8077724753646977201": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-13",
+     "lap": "6:54.915",
+     "ms": 414915,
+     "name": "Gonzalo Minguillon",
+     "recorded": "2026-10-13",
+     "session": "results_20261013_041949_practice"
     },
     "5386200129362291288:7931038389002845102": {
      "car": "Ferrari 296 GT3",
