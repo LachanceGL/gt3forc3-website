@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-14T01:36:41Z",
+  "/server1": "2026-10-14T08:17:50Z",
   "/server2": "2026-10-13T21:26:08Z",
   "/server3": "2026-10-13T20:13:24Z",
-  "/server4": "2026-10-13T11:11:59Z",
+  "/server4": "2026-10-14T11:41:12Z",
   "/server5": "2026-10-11T15:34:36Z"
  },
- "generated": "2026-10-14T01:58:26Z",
+ "generated": "2026-10-14T13:49:27Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -5895,6 +5895,15 @@
      "name": "Marcus Long Jr",
      "recorded": "2026-10-12",
      "session": "results_20260721_054643_practice"
+    },
+    "5056517939699082962:18182787377805083814": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-14",
+     "lap": "6:54.405",
+     "ms": 414405,
+     "name": "Tero Puhakka",
+     "recorded": "2026-10-14",
+     "session": "results_20261014_081750_practice"
     },
     "5057059787669618845:7894594890758244739": {
      "car": "BMW M4 GT3 Evo",
@@ -15416,13 +15425,13 @@
      "session": "results_20260914_204348_practice"
     },
     "5620638437246979207:4979241113263391637": {
-     "car": "BMW M4 GT3 Evo",
-     "date": "2026-10-08",
-     "lap": "2:19.032",
-     "ms": 139032,
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-10-14",
+     "lap": "2:18.267",
+     "ms": 138267,
      "name": "Dani Sanchez",
      "recorded": "2026-10-12",
-     "session": "results_20261008_115202_practice"
+     "session": "results_20261014_114112_practice"
     },
     "5623985215046796738:14450958392813631417": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
