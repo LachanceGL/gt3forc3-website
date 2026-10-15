@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-15T01:10:37Z",
+  "/server1": "2026-10-15T07:46:12Z",
   "/server2": "2026-10-14T18:25:55Z",
-  "/server3": "2026-10-15T01:00:18Z",
+  "/server3": "2026-10-15T18:21:19Z",
   "/server4": "2026-10-14T11:41:12Z",
   "/server5": "2026-10-11T15:34:36Z"
  },
- "generated": "2026-10-15T01:33:02Z",
+ "generated": "2026-10-15T18:22:22Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -15154,6 +15154,15 @@
      "name": "John Stender",
      "recorded": "2026-10-12",
      "session": "results_20260927_181447_race"
+    },
+    "4703530838543642557:5715401707414257536": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-15",
+     "lap": "1:58.944",
+     "ms": 118944,
+     "name": "Dominik Weber",
+     "recorded": "2026-10-15",
+     "session": "results_20261015_182119_qualify"
     },
     "4710786193115731607:2921476057077462200": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
