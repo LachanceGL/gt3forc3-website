@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-15T20:11:42Z",
+  "/server1": "2026-10-16T05:27:58Z",
   "/server2": "2026-10-14T18:25:55Z",
   "/server3": "2026-10-15T18:21:19Z",
   "/server4": "2026-10-14T11:41:12Z",
   "/server5": "2026-10-15T21:11:55Z"
  },
- "generated": "2026-10-15T22:26:02Z",
+ "generated": "2026-10-16T07:18:14Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -414,6 +414,15 @@
      "name": "stefano lupetti",
      "recorded": "2026-10-12",
      "session": "results_20260713_040923_practice"
+    },
+    "4638455838003023469:3808842104281273271": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-16",
+     "lap": "6:49.401",
+     "ms": 409401,
+     "name": "SHEP Pi",
+     "recorded": "2026-10-16",
+     "session": "results_20261016_052758_practice"
     },
     "4638697384557233804:17798375829658325429": {
      "car": "Ferrari 296 GT3",
@@ -10126,6 +10135,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260926_134250_practice"
     },
+    "5396625610075848104:8654087610878336688": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-16",
+     "lap": "6:52.242",
+     "ms": 412242,
+     "name": "Jared Sturgeon",
+     "recorded": "2026-10-16",
+     "session": "results_20261016_052758_practice"
+    },
     "5398916420359749069:9768553076479671466": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
      "date": "2026-10-11",
@@ -13293,6 +13311,15 @@
      "name": "Juan Charles",
      "recorded": "2026-10-12",
      "session": "results_20260716_212037_practice"
+    },
+    "5648326790035671834:3796220947280485047": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-16",
+     "lap": "6:52.164",
+     "ms": 412164,
+     "name": "Raouf DZGunner31",
+     "recorded": "2026-10-16",
+     "session": "results_20261016_052758_practice"
     },
     "5649005738939690181:16191162663522622891": {
      "car": "BMW M4 GT3 Evo",
