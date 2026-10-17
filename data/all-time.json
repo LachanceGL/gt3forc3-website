@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-17T05:18:13Z",
+  "/server1": "2026-10-17T09:59:11Z",
   "/server2": "2026-10-17T01:08:55Z",
-  "/server3": "2026-10-16T22:47:05Z",
+  "/server3": "2026-10-17T10:15:51Z",
   "/server4": "2026-10-16T11:26:11Z",
-  "/server5": "2026-10-15T21:11:55Z"
+  "/server5": "2026-10-17T09:30:18Z"
  },
- "generated": "2026-10-17T05:39:55Z",
+ "generated": "2026-10-17T10:54:04Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -15606,13 +15606,13 @@
      "session": "results_20260808_174618_race"
     },
     "5270082435405841647:6973066545607323526": {
-     "car": "Audi R8 LMS GT3 Evo II",
-     "date": "2026-10-16",
-     "lap": "2:04.020",
-     "ms": 124020,
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-17",
+     "lap": "2:01.932",
+     "ms": 121932,
      "name": "Leo  Stender",
      "recorded": "2026-10-12",
-     "session": "results_20261016_185643_race"
+     "session": "results_20261017_101509_race"
     },
     "5324845328050671996:2082945114934543521": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
