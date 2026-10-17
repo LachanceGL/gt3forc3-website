@@ -2,11 +2,11 @@
  "cursors": {
   "/server1": "2026-10-17T09:59:11Z",
   "/server2": "2026-10-17T01:08:55Z",
-  "/server3": "2026-10-17T17:17:15Z",
+  "/server3": "2026-10-17T17:28:26Z",
   "/server4": "2026-10-16T11:26:11Z",
   "/server5": "2026-10-17T16:59:31Z"
  },
- "generated": "2026-10-17T17:19:57Z",
+ "generated": "2026-10-17T20:42:42Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -15581,11 +15581,11 @@
     "5044032232926207884:16704383859323687814": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-10-17",
-     "lap": "2:01.383",
-     "ms": 121383,
+     "lap": "2:00.750",
+     "ms": 120750,
      "name": "Florian Leiendecker",
      "recorded": "2026-10-17",
-     "session": "results_20261017_171715_qualify"
+     "session": "results_20261017_172826_race"
     },
     "5155673296173406695:2086021259535456654": {
      "car": "Ferrari 296 GT3",
