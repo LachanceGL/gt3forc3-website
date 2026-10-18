@@ -2,11 +2,11 @@
  "cursors": {
   "/server1": "2026-10-18T11:04:27Z",
   "/server2": "2026-10-17T01:08:55Z",
-  "/server3": "2026-10-18T10:48:06Z",
+  "/server3": "2026-10-18T15:52:19Z",
   "/server4": "2026-10-17T22:27:15Z",
   "/server5": "2026-10-17T16:59:31Z"
  },
- "generated": "2026-10-18T11:19:41Z",
+ "generated": "2026-10-18T15:57:23Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -15930,13 +15930,13 @@
      "session": "results_20260820_194634_qualify"
     },
     "4692268761904376275:13953275818130501309": {
-     "car": "Porsche 911 GT3 R Rennsport (992)",
-     "date": "2026-10-16",
-     "lap": "2:04.905",
-     "ms": 124905,
+     "car": "Audi R8 LMS GT3 Evo II",
+     "date": "2026-10-18",
+     "lap": "2:04.611",
+     "ms": 124611,
      "name": "John Stender",
      "recorded": "2026-10-12",
-     "session": "results_20261016_185643_race"
+     "session": "results_20261018_155219_qualify"
     },
     "4703530838543642557:5715401707414257536": {
      "car": "Ferrari 296 GT3",
