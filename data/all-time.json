@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-19T00:07:42Z",
+  "/server1": "2026-10-19T04:42:42Z",
   "/server2": "2026-10-17T01:08:55Z",
   "/server3": "2026-10-18T16:22:35Z",
   "/server4": "2026-10-17T22:27:15Z",
   "/server5": "2026-10-17T16:59:31Z"
  },
- "generated": "2026-10-19T00:14:18Z",
+ "generated": "2026-10-19T04:53:52Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -5106,12 +5106,12 @@
     },
     "4958747131905382388:5598406104071077541": {
      "car": "Ford Mustang GT3",
-     "date": "2026-10-14",
-     "lap": "6:50.916",
-     "ms": 410916,
+     "date": "2026-10-19",
+     "lap": "6:50.715",
+     "ms": 410715,
      "name": "jason eppens",
      "recorded": "2026-10-12",
-     "session": "results_20261014_000301_practice"
+     "session": "results_20261019_021447_practice"
     },
     "4958903214083625662:1102977891803196056": {
      "car": "Ferrari 296 GT3",
@@ -9117,6 +9117,15 @@
      "name": "Kanister Köppe",
      "recorded": "2026-10-12",
      "session": "results_20260708_152037_race"
+    },
+    "5264365024833955750:13995167854789141426": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-19",
+     "lap": "7:13.731",
+     "ms": 433731,
+     "name": "Tieno Sita",
+     "recorded": "2026-10-19",
+     "session": "results_20261019_044242_practice"
     },
     "5265177502175741380:17821347868231377321": {
      "car": "Ford Mustang GT3",
