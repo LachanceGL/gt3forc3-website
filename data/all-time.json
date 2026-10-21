@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-21T01:36:42Z",
+  "/server1": "2026-10-21T07:46:13Z",
   "/server2": "2026-10-17T01:08:55Z",
   "/server3": "2026-10-18T16:22:35Z",
-  "/server4": "2026-10-20T18:34:09Z",
+  "/server4": "2026-10-21T06:49:53Z",
   "/server5": "2026-10-20T18:58:26Z"
  },
- "generated": "2026-10-21T01:40:57Z",
+ "generated": "2026-10-21T07:46:59Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -16612,6 +16612,15 @@
      "recorded": "2026-10-12",
      "session": "results_20261008_161020_practice"
     },
+    "4648853596317558135:1241362613451881620": {
+     "car": "Porsche 911 GT3 Cup (992)",
+     "date": "2026-10-21",
+     "lap": "2:36.432",
+     "ms": 156432,
+     "name": "Pascal Lubben",
+     "recorded": "2026-10-21",
+     "session": "results_20261021_064953_practice"
+    },
     "4667681660176239685:7544780321343525008": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-10-12",
@@ -16675,6 +16684,15 @@
      "recorded": "2026-10-12",
      "session": "results_20261010_182911_practice"
     },
+    "4851140954779531497:9827810758271361935": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-21",
+     "lap": "2:27.711",
+     "ms": 147711,
+     "name": "Jhoset Jimenez",
+     "recorded": "2026-10-21",
+     "session": "results_20261021_064953_practice"
+    },
     "4896173135879132084:17576472008077029806": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-09-14",
@@ -16683,6 +16701,15 @@
      "name": "Ali Özkan",
      "recorded": "2026-10-12",
      "session": "results_20260914_204348_practice"
+    },
+    "4961843194023286454:4789796016233015192": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-21",
+     "lap": "2:23.658",
+     "ms": 143658,
+     "name": "Ben Naber",
+     "recorded": "2026-10-21",
+     "session": "results_20261021_064953_practice"
     },
     "4997480967957980933:3138361070708583811": {
      "car": "Ferrari 296 GT3",
