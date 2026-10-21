@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-21T07:46:13Z",
+  "/server1": "2026-10-21T14:58:44Z",
   "/server2": "2026-10-17T01:08:55Z",
   "/server3": "2026-10-18T16:22:35Z",
   "/server4": "2026-10-21T06:49:53Z",
   "/server5": "2026-10-20T18:58:26Z"
  },
- "generated": "2026-10-21T07:46:59Z",
+ "generated": "2026-10-21T18:44:10Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -5761,6 +5761,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260727_183028_practice"
     },
+    "5002010274295612620:9265205966624048264": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-21",
+     "lap": "7:08.898",
+     "ms": 428898,
+     "name": "Odysseas Miliotis",
+     "recorded": "2026-10-21",
+     "session": "results_20261021_145844_practice"
+    },
     "5002247459999031286:3997229628660271536": {
      "car": "Ford Mustang GT3",
      "date": "2026-07-19",
@@ -7488,6 +7497,15 @@
      "name": "Sebastian Bohn",
      "recorded": "2026-10-12",
      "session": "results_20261005_004633_practice"
+    },
+    "5136370339068295742:8652234768551247543": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-21",
+     "lap": "6:52.032",
+     "ms": 412032,
+     "name": "Christian Suchy",
+     "recorded": "2026-10-21",
+     "session": "results_20261021_140221_practice"
     },
     "5136587268002168373:2398392914521813431": {
      "car": "BMW M4 GT3 Evo",
@@ -11493,6 +11511,15 @@
      "name": "Overlord",
      "recorded": "2026-10-12",
      "session": "results_20260723_225258_practice"
+    },
+    "5445973164192567514:8696757398387211175": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-10-21",
+     "lap": "6:55.227",
+     "ms": 415227,
+     "name": "luca Filloramo",
+     "recorded": "2026-10-21",
+     "session": "results_20261021_140221_practice"
     },
     "5446734578609912574:1323451978182348177": {
      "car": "Audi R8 LMS GT3 Evo II",
