@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-27T04:46:06Z",
+  "/server1": "2026-10-27T10:50:12Z",
   "/server2": "2026-10-26T21:35:23Z",
   "/server3": "2026-10-25T20:57:43Z",
-  "/server4": "2026-10-26T21:36:20Z",
-  "/server5": "2026-10-27T05:33:23Z"
+  "/server4": "2026-10-27T07:46:48Z",
+  "/server5": "2026-10-27T08:20:33Z"
  },
- "generated": "2026-10-27T06:23:47Z",
+ "generated": "2026-10-27T13:20:22Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -11035,6 +11035,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260926_134250_practice"
     },
+    "5329291130415973904:16697166069372860333": {
+     "car": "Porsche 911 GT3 RS (992)",
+     "date": "2026-10-27",
+     "lap": "7:24.933",
+     "ms": 444933,
+     "name": "Christo Joubert",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_092654_practice"
+    },
     "5329651148336604526:6202731123279433891": {
      "car": "Ferrari 296 GT3",
      "date": "2026-07-19",
@@ -12717,6 +12726,15 @@
      "name": "7 55",
      "recorded": "2026-10-12",
      "session": "results_20261010_222027_practice"
+    },
+    "5447146496078459418:7345030287710148512": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "7:30.813",
+     "ms": 450813,
+     "name": "Wujek SamoZlo",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_092654_practice"
     },
     "5447756516814845989:6591137657904771477": {
      "car": "BMW M4 GT3 Evo",
