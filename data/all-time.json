@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-27T10:50:12Z",
+  "/server1": "2026-10-27T22:53:09Z",
   "/server2": "2026-10-26T21:35:23Z",
   "/server3": "2026-10-25T20:57:43Z",
   "/server4": "2026-10-27T07:46:48Z",
   "/server5": "2026-10-27T08:20:33Z"
  },
- "generated": "2026-10-27T13:20:22Z",
+ "generated": "2026-10-27T23:49:55Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -81,6 +81,15 @@
      "name": "David Carrascosa",
      "recorded": "2026-10-12",
      "session": "results_20260806_101740_practice"
+    },
+    "4618187876426778563:4872143519982556307": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "6:47.421",
+     "ms": 407421,
+     "name": "Fabio Gregorutti",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "4618507039449925204:680105490019031687": {
      "car": "BMW M4 GT3 Evo",
@@ -183,12 +192,12 @@
     },
     "4623040797582250860:6561824278342907833": {
      "car": "BMW M4 GT3 Evo",
-     "date": "2026-10-21",
-     "lap": "6:46.503",
-     "ms": 406503,
+     "date": "2026-10-27",
+     "lap": "6:45.777",
+     "ms": 405777,
      "name": "josh riley",
      "recorded": "2026-10-12",
-     "session": "results_20261021_013642_practice"
+     "session": "results_20261027_225309_practice"
     },
     "4624538834814786076:15659713279073134765": {
      "car": "Porsche 911 GT3 RS (992)",
@@ -912,12 +921,12 @@
     },
     "4664054424589972107:6661494129711457410": {
      "car": "Porsche 911 GT3 RS (992)",
-     "date": "2026-10-21",
-     "lap": "7:11.964",
-     "ms": 431964,
+     "date": "2026-10-27",
+     "lap": "7:10.384",
+     "ms": 430384,
      "name": "Damien BESSE",
      "recorded": "2026-10-22",
-     "session": "results_20261021_223311_practice"
+     "session": "results_20261027_225309_practice"
     },
     "4664062690046242434:16498862312421652402": {
      "car": "Ford Mustang GT3",
@@ -1280,13 +1289,13 @@
      "session": "results_20261007_011345_practice"
     },
     "4686318540771543340:12542230946875761324": {
-     "car": "Ford Mustang GT3",
-     "date": "2026-08-23",
-     "lap": "7:15.807",
-     "ms": 435807,
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "7:09.015",
+     "ms": 429015,
      "name": "cyril le gal",
      "recorded": "2026-10-12",
-     "session": "results_20260823_221140_practice"
+     "session": "results_20261027_225309_practice"
     },
     "4686485148891709301:5449047142343655566": {
      "car": "Porsche 911 GT3 Cup (992)",
@@ -2486,13 +2495,13 @@
      "session": "results_20260722_222949_practice"
     },
     "4769080881951246596:6537115647717739958": {
-     "car": "Ferrari 296 GT3",
-     "date": "2026-10-10",
-     "lap": "7:14.178",
-     "ms": 434178,
+     "car": "Audi R8 LMS GT3 Evo II",
+     "date": "2026-10-27",
+     "lap": "7:09.204",
+     "ms": 429204,
      "name": "Gregory STOTE",
      "recorded": "2026-10-12",
-     "session": "results_20261010_002124_practice"
+     "session": "results_20261027_225309_practice"
     },
     "4769134256381446758:3301926025046761876": {
      "car": "Ferrari 296 GT3",
@@ -2664,6 +2673,15 @@
      "name": "Arttu Haapasalo",
      "recorded": "2026-10-12",
      "session": "results_20261009_004734_practice"
+    },
+    "4778154037956409192:10106269406421267113": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "6:45.786",
+     "ms": 405786,
+     "name": "Jeremy Chiocca",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "4778274428239616804:3410488197447546784": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -3070,6 +3088,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260723_225258_practice"
     },
+    "4805632254669131078:13957144360825941430": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "6:43.611",
+     "ms": 403611,
+     "name": "David Greco",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "4807142720033339839:17186370104095220900": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-10-12",
@@ -3474,6 +3501,15 @@
      "name": "Dr. sagobin",
      "recorded": "2026-10-12",
      "session": "results_20260726_232704_practice"
+    },
+    "4830922518489072975:9228920801037046154": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-10-27",
+     "lap": "6:52.290",
+     "ms": 412290,
+     "name": "Laurent Petit",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "4832091407006475409:13996403596241890490": {
      "car": "Ferrari 296 GT3",
@@ -4924,6 +4960,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260902_225311_practice"
     },
+    "4915196309169963374:16381475089209042336": {
+     "car": "Porsche 911 GT3 RS (992)",
+     "date": "2026-10-27",
+     "lap": "8:08.997",
+     "ms": 488997,
+     "name": "Konstantin Moshko",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "4915492598446738047:10406359956250949546": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
      "date": "2026-08-10",
@@ -5554,6 +5599,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260724_225740_practice"
     },
+    "4946453903652413190:1943002094423632823": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "6:55.437",
+     "ms": 415437,
+     "name": "pierrick garnier",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "4948616992475765557:13479326321977943716": {
      "car": "Ferrari 296 GT3",
      "date": "2026-08-01",
@@ -5742,6 +5796,15 @@
      "name": "Demshiro San",
      "recorded": "2026-10-12",
      "session": "results_20260718_043941_practice"
+    },
+    "4959987668040478545:14541786794422327733": {
+     "car": "Ford Mustang GT3",
+     "date": "2026-10-27",
+     "lap": "7:01.692",
+     "ms": 421692,
+     "name": "Noel Garcia",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "4961176786486532019:7845449438738521247": {
      "car": "Ford Mustang GT3",
@@ -6265,6 +6328,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260721_204121_practice"
     },
+    "4995392640835686386:17262386648970220169": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "7:02.712",
+     "ms": 422712,
+     "name": "Francesco Masciopinto",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "4996142898904665835:5684621816029082803": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-09-27",
@@ -6787,6 +6859,15 @@
      "recorded": "2026-10-13",
      "session": "results_20261012_230951_practice"
     },
+    "5033765316376765769:13899209469551885747": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "6:56.763",
+     "ms": 416763,
+     "name": "Dr Eibein",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5034088360704133716:10933709805681497002": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
      "date": "2026-09-06",
@@ -6931,6 +7012,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260726_152600_practice"
     },
+    "5043105755898229229:4613213981806582957": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "7:00.729",
+     "ms": 420729,
+     "name": "Jose Antonio Cantisano",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5044383963018732374:5284240011886689718": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-09-05",
@@ -7002,6 +7092,15 @@
      "name": "Mats Reuther",
      "recorded": "2026-10-13",
      "session": "results_20261012_230951_practice"
+    },
+    "5050014107677007668:12424853066023755692": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-10-27",
+     "lap": "7:04.227",
+     "ms": 424227,
+     "name": "yuaki nope",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "5050306652356028372:14700727835087488939": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -7894,6 +7993,24 @@
      "recorded": "2026-10-12",
      "session": "results_20260921_224131_practice"
     },
+    "5103981355441251265:16304710245176891787": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-10-27",
+     "lap": "6:58.239",
+     "ms": 418239,
+     "name": "KunaApex @IG",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
+    "5104225346933865358:13270909061835113389": {
+     "car": "Audi R8 LMS GT3 Evo II",
+     "date": "2026-10-27",
+     "lap": "6:59.838",
+     "ms": 419838,
+     "name": "Stefano Curcio",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5104543296218363482:15930226472632015767": {
      "car": "Ferrari 296 GT3",
      "date": "2026-09-01",
@@ -8211,12 +8328,12 @@
     },
     "5129301145849345723:14100327234353873063": {
      "car": "Ford Mustang GT3",
-     "date": "2026-10-25",
-     "lap": "7:01.545",
-     "ms": 421545,
+     "date": "2026-10-27",
+     "lap": "6:51.771",
+     "ms": 411771,
      "name": "Rob Maplethorpe",
      "recorded": "2026-10-25",
-     "session": "results_20261025_182605_practice"
+     "session": "results_20261027_225309_practice"
     },
     "5129302644328667772:17903044470054752441": {
      "car": "BMW M4 GT3 Evo",
@@ -9883,6 +10000,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260718_162038_practice"
     },
+    "5241337426028120413:17111591792584546952": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "6:45.708",
+     "ms": 405708,
+     "name": "Niko Barragan",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5241695947043291091:5850412295035997100": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-10-04",
@@ -10071,6 +10197,15 @@
      "name": "Timo Hebeisen",
      "recorded": "2026-10-12",
      "session": "results_20260711_221850_practice"
+    },
+    "5254894554586439102:3140292387608165290": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "6:47.331",
+     "ms": 407331,
+     "name": "alex captaine",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "5255338110299230659:7852552471361924771": {
      "car": "BMW M4 GT3 Evo",
@@ -10531,6 +10666,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260808_163805_practice"
     },
+    "5292117642897074329:3015647527807219130": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-10-27",
+     "lap": "6:52.890",
+     "ms": 412890,
+     "name": "BARBERO ANDREA",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5292246258287064715:3801813730836026538": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-10-04",
@@ -10867,11 +11011,11 @@
     "5317453807997052325:3559958192063049096": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
      "date": "2026-10-27",
-     "lap": "6:40.440",
-     "ms": 400440,
+     "lap": "6:40.398",
+     "ms": 400398,
      "name": "PsyhoZOOM",
      "recorded": "2026-10-12",
-     "session": "results_20261027_012404_practice"
+     "session": "results_20261027_225309_practice"
     },
     "5318272838764230592:4786853914584451": {
      "car": "Ferrari 296 GT3",
@@ -11322,6 +11466,15 @@
      "name": "V Arndt",
      "recorded": "2026-10-12",
      "session": "results_20260708_195601_race"
+    },
+    "5345503639156352574:17055185990596073607": {
+     "car": "Ford Mustang GT3",
+     "date": "2026-10-27",
+     "lap": "6:41.802",
+     "ms": 401802,
+     "name": "old shawn",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "5346257765004026400:12083027821510639780": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -12871,6 +13024,15 @@
      "recorded": "2026-10-12",
      "session": "results_20261009_004734_practice"
     },
+    "5455614050914049084:3877505304311489153": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "6:45.258",
+     "ms": 405258,
+     "name": "Tom Witt",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5456295887084764307:5445533305246478265": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-07-12",
@@ -13170,12 +13332,12 @@
     },
     "5475562101219099653:12766518169964685985": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
-     "date": "2026-10-25",
-     "lap": "6:53.715",
-     "ms": 413715,
+     "date": "2026-10-27",
+     "lap": "6:49.965",
+     "ms": 409965,
      "name": "Newt van Horn",
      "recorded": "2026-10-12",
-     "session": "results_20261025_182605_practice"
+     "session": "results_20261027_225309_practice"
     },
     "5475628223839963591:1369317125609822352": {
      "car": "Ferrari 296 GT3",
@@ -14734,6 +14896,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260719_225422_practice"
     },
+    "5571413067080271633:4636925457389648771": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-27",
+     "lap": "6:49.530",
+     "ms": 409530,
+     "name": "Filip Štindl",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
+    },
     "5571627322620367410:17617698340314167194": {
      "car": "Porsche 911 GT3 RS (992)",
      "date": "2026-07-25",
@@ -14742,6 +14913,15 @@
      "name": "BRUNO PADUA",
      "recorded": "2026-10-12",
      "session": "results_20260725_011019_practice"
+    },
+    "5571895805316217945:16258423848162909365": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "6:42.006",
+     "ms": 402006,
+     "name": "Thibault FOULLEY",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "5571940792140091927:1356810364476353976": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -15003,6 +15183,15 @@
      "name": "Guilherme de Paula",
      "recorded": "2026-10-12",
      "session": "results_20261011_194833_practice"
+    },
+    "5595554933911148563:111762366594341016": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-27",
+     "lap": "6:48.486",
+     "ms": 408486,
+     "name": "Brian O Sullivan",
+     "recorded": "2026-10-27",
+     "session": "results_20261027_225309_practice"
     },
     "5596135597825601048:17435830666907301783": {
      "car": "Ferrari 296 GT3",
@@ -16608,12 +16797,12 @@
     },
     "5713535393448599571:12851093395880322700": {
      "car": "BMW M4 GT3 Evo",
-     "date": "2026-10-26",
-     "lap": "6:49.818",
-     "ms": 409818,
+     "date": "2026-10-27",
+     "lap": "6:47.757",
+     "ms": 407757,
      "name": "Jaume Font",
      "recorded": "2026-10-12",
-     "session": "results_20261026_021619_practice"
+     "session": "results_20261027_225309_practice"
     },
     "5713801940187723091:17324835595480283523": {
      "car": "BMW M4 GT3 Evo",
