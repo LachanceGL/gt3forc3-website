@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-28T03:37:33Z",
-  "/server2": "2026-10-26T21:35:23Z",
+  "/server1": "2026-10-28T13:09:20Z",
+  "/server2": "2026-10-28T13:57:28Z",
   "/server3": "2026-10-25T20:57:43Z",
   "/server4": "2026-10-28T03:57:44Z",
   "/server5": "2026-10-27T08:20:33Z"
  },
- "generated": "2026-10-28T05:53:23Z",
+ "generated": "2026-10-28T18:54:59Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -17833,6 +17833,15 @@
      "name": "Kingsley Performance",
      "recorded": "2026-10-12",
      "session": "results_20260722_182740_practice"
+    },
+    "5750159868075403634:15344052504745291167": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-28",
+     "lap": "2:22.506",
+     "ms": 142506,
+     "name": "Bruno Carapinha",
+     "recorded": "2026-10-28",
+     "session": "results_20261028_135728_practice"
     },
     "5750641331763192490:8976881372580222639": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
