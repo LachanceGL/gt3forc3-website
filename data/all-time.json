@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-29T04:02:13Z",
+  "/server1": "2026-10-29T12:56:23Z",
   "/server2": "2026-10-28T13:57:28Z",
-  "/server3": "2026-10-25T20:57:43Z",
+  "/server3": "2026-10-29T07:24:12Z",
   "/server4": "2026-10-28T03:57:44Z",
   "/server5": "2026-10-27T08:20:33Z"
  },
- "generated": "2026-10-29T05:57:40Z",
+ "generated": "2026-10-29T13:16:26Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -3253,11 +3253,11 @@
     "4815816567152032511:4106845995625784236": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-10-29",
-     "lap": "6:56.382",
-     "ms": 416382,
+     "lap": "6:53.856",
+     "ms": 413856,
      "name": "Joao Completo",
      "recorded": "2026-10-27",
-     "session": "results_20261029_013908_practice"
+     "session": "results_20261029_125623_practice"
     },
     "4815975309328258927:16842779533416339885": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -13989,12 +13989,12 @@
     },
     "5507528169069490719:7355269624863799951": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
-     "date": "2026-10-24",
-     "lap": "6:37.275",
-     "ms": 397275,
+     "date": "2026-10-29",
+     "lap": "6:36.084",
+     "ms": 396084,
      "name": "Jakob Sternler",
      "recorded": "2026-10-24",
-     "session": "results_20261024_212540_practice"
+     "session": "results_20261029_084944_practice"
     },
     "5507958855204848834:10920827101418027919": {
      "car": "BMW M4 GT3 Evo",
@@ -14040,6 +14040,15 @@
      "name": "Jelani Dorlandt",
      "recorded": "2026-10-12",
      "session": "results_20260910_211954_practice"
+    },
+    "5512892389422865263:14983641844238480043": {
+     "car": "Audi R8 LMS GT3 Evo II",
+     "date": "2026-10-29",
+     "lap": "7:05.409",
+     "ms": 425409,
+     "name": "Gerhard Butch",
+     "recorded": "2026-10-29",
+     "session": "results_20261029_111228_practice"
     },
     "5513045104916932732:8514150854405007773": {
      "car": "Ford Mustang GT3",
