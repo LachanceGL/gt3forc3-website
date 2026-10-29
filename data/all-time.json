@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-10-29T12:56:23Z",
-  "/server2": "2026-10-28T13:57:28Z",
+  "/server1": "2026-10-29T16:54:20Z",
+  "/server2": "2026-10-29T18:57:21Z",
   "/server3": "2026-10-29T07:24:12Z",
-  "/server4": "2026-10-28T03:57:44Z",
+  "/server4": "2026-10-29T18:34:11Z",
   "/server5": "2026-10-27T08:20:33Z"
  },
- "generated": "2026-10-29T13:16:26Z",
+ "generated": "2026-10-29T19:01:14Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -3251,13 +3251,13 @@
      "session": "results_20260717_203736_practice"
     },
     "4815816567152032511:4106845995625784236": {
-     "car": "BMW M4 GT3 Evo",
+     "car": "Porsche 911 GT3 R Rennsport (992)",
      "date": "2026-10-29",
-     "lap": "6:53.856",
-     "ms": 413856,
+     "lap": "6:48.687",
+     "ms": 408687,
      "name": "Joao Completo",
      "recorded": "2026-10-27",
-     "session": "results_20261029_125623_practice"
+     "session": "results_20261029_141957_practice"
     },
     "4815975309328258927:16842779533416339885": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -17632,6 +17632,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260816_165206_practice"
     },
+    "5754693998081795738:5779458911675277711": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-10-29",
+     "lap": "7:03.435",
+     "ms": 423435,
+     "name": "Tony lellex",
+     "recorded": "2026-10-29",
+     "session": "results_20261029_155216_practice"
+    },
     "5755161263587386314:8377306866755644598": {
      "car": "Ferrari 296 GT3",
      "date": "2026-09-22",
@@ -18502,6 +18511,15 @@
      "recorded": "2026-10-21",
      "session": "results_20261021_064953_practice"
     },
+    "4667488977398035479:13364047725417510829": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-29",
+     "lap": "2:21.546",
+     "ms": 141546,
+     "name": "Gil André",
+     "recorded": "2026-10-29",
+     "session": "results_20261029_183411_practice"
+    },
     "4667681660176239685:7544780321343525008": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-10-12",
@@ -18708,6 +18726,15 @@
      "name": "Michel Beaulieu",
      "recorded": "2026-10-12",
      "session": "results_20261011_144214_practice"
+    },
+    "5491322454267298241:7996760407243058823": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-10-29",
+     "lap": "2:25.417",
+     "ms": 145417,
+     "name": "leo leo",
+     "recorded": "2026-10-29",
+     "session": "results_20261029_183411_practice"
     },
     "5526185434687528831:17138240473300269450": {
      "car": "BMW M4 GT3 Evo",
