@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-02T04:48:00Z",
+  "/server1": "2026-11-02T16:42:27Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-01T12:55:55Z",
   "/server4": "2026-10-30T01:16:46Z",
   "/server5": "2026-11-01T17:23:29Z"
  },
- "generated": "2026-11-02T06:22:11Z",
+ "generated": "2026-11-02T17:11:11Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -2583,6 +2583,15 @@
      "name": "Russ Wheeler",
      "recorded": "2026-10-12",
      "session": "results_20260717_203736_practice"
+    },
+    "4761668926656560339:1957923170753071759": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-11-02",
+     "lap": "7:21.867",
+     "ms": 441867,
+     "name": "Liera Dario",
+     "recorded": "2026-11-02",
+     "session": "results_20261102_092613_practice"
     },
     "4762293799077274436:16894183366258451116": {
      "car": "Ford Mustang GT3",
@@ -7317,6 +7326,15 @@
      "name": "Max Maranello",
      "recorded": "2026-10-12",
      "session": "results_20261029_013908_practice"
+    },
+    "5032844350078898890:8330685015020364434": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-02",
+     "lap": "6:49.320",
+     "ms": 409320,
+     "name": "YJ Choi",
+     "recorded": "2026-11-02",
+     "session": "results_20261102_121328_practice"
     },
     "5033240361633411138:8997501702629524650": {
      "car": "BMW M4 GT3 Evo",
