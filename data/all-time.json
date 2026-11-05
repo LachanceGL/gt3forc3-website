@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-04T23:46:04Z",
+  "/server1": "2026-11-05T04:28:27Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-10-30T01:16:46Z",
   "/server5": "2026-11-04T13:59:34Z"
  },
- "generated": "2026-11-05T00:24:48Z",
+ "generated": "2026-11-05T07:56:55Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -1512,6 +1512,15 @@
      "name": "Sam Njoroge9BHP",
      "recorded": "2026-10-12",
      "session": "results_20261003_000719_practice"
+    },
+    "4695693241745688107:10355301444828227766": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-05",
+     "lap": "6:47.982",
+     "ms": 407982,
+     "name": "Jusuf Livadic",
+     "recorded": "2026-11-05",
+     "session": "results_20261105_042827_practice"
     },
     "4695776549924005647:11989979519270004356": {
      "car": "Ferrari 296 GT3",
@@ -9795,12 +9804,12 @@
     },
     "5166257283222610988:13687692421102512562": {
      "car": "Audi R8 LMS GT3 Evo II",
-     "date": "2026-10-03",
-     "lap": "6:56.757",
-     "ms": 416757,
+     "date": "2026-11-05",
+     "lap": "6:54.963",
+     "ms": 414963,
      "name": "MIGUEL DOMINGUEZ",
      "recorded": "2026-10-12",
-     "session": "results_20261003_031551_practice"
+     "session": "results_20261105_042827_practice"
     },
     "5166556116399919853:2811776878910820226": {
      "car": "Porsche 911 GT3 RS (992)",
