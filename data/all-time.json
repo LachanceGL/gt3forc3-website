@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-06T23:17:37Z",
+  "/server1": "2026-11-07T05:54:24Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-10-30T01:16:46Z",
   "/server5": "2026-11-05T19:50:49Z"
  },
- "generated": "2026-11-07T00:08:35Z",
+ "generated": "2026-11-07T06:10:04Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -10189,6 +10189,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260723_225258_practice"
     },
+    "5178046468640275245:18098708692986777785": {
+     "car": "Porsche 911 GT3 RS (992)",
+     "date": "2026-11-07",
+     "lap": "7:38.682",
+     "ms": 458682,
+     "name": "Austin Pool",
+     "recorded": "2026-11-07",
+     "session": "results_20261107_021156_practice"
+    },
     "5178516294825619296:10204092575863990707": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
      "date": "2026-09-29",
@@ -11511,6 +11520,15 @@
      "name": "luc sunny",
      "recorded": "2026-10-12",
      "session": "results_20260805_171219_practice"
+    },
+    "5259863004724924779:12014214018544492969": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-11-07",
+     "lap": "6:59.076",
+     "ms": 419076,
+     "name": "Dominik Tronicke",
+     "recorded": "2026-11-07",
+     "session": "results_20261107_055424_practice"
     },
     "5260633719097836573:1201336299779119767": {
      "car": "Ferrari 296 GT3",
@@ -15519,12 +15537,12 @@
     },
     "5507528169069490719:7355269624863799951": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
-     "date": "2026-11-06",
-     "lap": "6:34.446",
-     "ms": 394446,
+     "date": "2026-11-07",
+     "lap": "6:33.720",
+     "ms": 393720,
      "name": "Jakob Sternler",
      "recorded": "2026-10-24",
-     "session": "results_20261106_231308_practice"
+     "session": "results_20261107_021156_practice"
     },
     "5507703206401816422:12941782626631803279": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
