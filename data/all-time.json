@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-11T21:10:28Z",
+  "/server1": "2026-11-12T02:48:14Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-11-07T23:41:08Z",
   "/server5": "2026-11-10T20:05:46Z"
  },
- "generated": "2026-11-11T22:46:11Z",
+ "generated": "2026-11-12T03:53:24Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -10874,13 +10874,13 @@
      "session": "results_20261009_004734_practice"
     },
     "5198005046337855015:15459063323323136950": {
-     "car": "Ford Mustang GT3",
-     "date": "2026-10-30",
-     "lap": "6:52.368",
-     "ms": 412368,
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-11",
+     "lap": "6:45.168",
+     "ms": 405168,
      "name": "Kamil nv",
      "recorded": "2026-10-29",
-     "session": "results_20261030_045635_practice"
+     "session": "results_20261111_232110_practice"
     },
     "5199132395403552941:6555154870302249653": {
      "car": "Ford Mustang GT3",
@@ -14841,6 +14841,15 @@
      "name": "Victor Hedlund",
      "recorded": "2026-10-24",
      "session": "results_20261024_212540_practice"
+    },
+    "5445305310603248751:8510577352432034205": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-11",
+     "lap": "6:41.766",
+     "ms": 401766,
+     "name": "yoan pelletier",
+     "recorded": "2026-11-12",
+     "session": "results_20261111_232110_practice"
     },
     "5445768443056378267:10978299985462955667": {
      "car": "BMW M4 GT3 Evo",
@@ -19053,6 +19062,15 @@
      "name": "Max D",
      "recorded": "2026-10-12",
      "session": "results_20261011_043943_practice"
+    },
+    "5687491568036392422:13052633230154494899": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-11",
+     "lap": "6:51.069",
+     "ms": 411069,
+     "name": "Andre Luiz666",
+     "recorded": "2026-11-12",
+     "session": "results_20261111_232110_practice"
     },
     "5687894493937682157:9115908544216649877": {
      "car": "BMW M4 GT3 Evo",
