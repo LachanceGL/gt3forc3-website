@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-13T01:47:20Z",
+  "/server1": "2026-11-13T15:35:56Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-11-07T23:41:08Z",
   "/server5": "2026-11-12T23:38:51Z"
  },
- "generated": "2026-11-13T01:55:05Z",
+ "generated": "2026-11-13T17:50:49Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -3279,12 +3279,12 @@
     },
     "4787579983155158452:17346575673288679099": {
      "car": "Audi R8 LMS GT3 Evo II",
-     "date": "2026-11-01",
-     "lap": "6:42.939",
-     "ms": 402939,
+     "date": "2026-11-13",
+     "lap": "6:42.858",
+     "ms": 402858,
      "name": "John Yeanah",
      "recorded": "2026-10-31",
-     "session": "results_20261101_045629_practice"
+     "session": "results_20261113_124207_practice"
     },
     "4788011905334025869:3683046950754427558": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -13969,6 +13969,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260719_002150_practice"
     },
+    "5389675200629608384:10136048803690199184": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-13",
+     "lap": "6:52.200",
+     "ms": 412200,
+     "name": "Chris Dee",
+     "recorded": "2026-11-13",
+     "session": "results_20261113_124207_practice"
+    },
     "5390086908159092339:944582861462576800": {
      "car": "Ferrari 296 GT3",
      "date": "2026-10-09",
@@ -14634,6 +14643,15 @@
      "name": "Joe Day",
      "recorded": "2026-10-12",
      "session": "results_20260719_082350_practice"
+    },
+    "5429509606156259436:364790614006727815": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-11-13",
+     "lap": "6:39.732",
+     "ms": 399732,
+     "name": "Jonathan Otto",
+     "recorded": "2026-11-13",
+     "session": "results_20261113_124207_practice"
     },
     "5430155445165961290:12139027182340830631": {
      "car": "BMW M4 GT3 Evo",
