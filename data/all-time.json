@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-13T22:47:18Z",
+  "/server1": "2026-11-14T05:59:40Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-11-13T23:29:44Z",
   "/server5": "2026-11-13T22:51:02Z"
  },
- "generated": "2026-11-13T23:39:49Z",
+ "generated": "2026-11-14T06:40:17Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -2549,13 +2549,13 @@
      "session": "results_20260719_225422_practice"
     },
     "4742791764691074057:14731162516637638794": {
-     "car": "Ferrari 296 GT3",
-     "date": "2026-11-11",
-     "lap": "6:52.509",
-     "ms": 412509,
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-13",
+     "lap": "6:51.855",
+     "ms": 411855,
      "name": "Eloi Bartrina",
      "recorded": "2026-11-11",
-     "session": "results_20261111_211028_practice"
+     "session": "results_20261113_234329_practice"
     },
     "4743562511497334525:14047213640244070836": {
      "car": "Ferrari 296 GT3",
@@ -2835,6 +2835,15 @@
      "name": "tiktok mafia590x",
      "recorded": "2026-10-12",
      "session": "results_20260914_011658_practice"
+    },
+    "4760998049003824428:11038058254608380801": {
+     "car": "Ford Mustang GT3",
+     "date": "2026-11-13",
+     "lap": "6:55.806",
+     "ms": 415806,
+     "name": "Angel Villalon",
+     "recorded": "2026-11-14",
+     "session": "results_20261113_234329_practice"
     },
     "4761534412655003050:11146225033443611828": {
      "car": "Ford Mustang GT3",
