@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-14T23:07:22Z",
+  "/server1": "2026-11-15T11:01:46Z",
   "/server2": "2026-10-30T01:16:52Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-11-13T23:29:44Z",
   "/server5": "2026-11-14T20:49:42Z"
  },
- "generated": "2026-11-14T23:09:45Z",
+ "generated": "2026-11-15T11:10:56Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -4718,13 +4718,13 @@
      "session": "results_20260729_181952_practice"
     },
     "4862050047261476223:16145115968426065567": {
-     "car": "Porsche 911 GT3 RS (992)",
-     "date": "2026-10-24",
-     "lap": "7:18.588",
-     "ms": 438588,
+     "car": "Porsche 911 GT3 Cup (992)",
+     "date": "2026-11-15",
+     "lap": "7:14.605",
+     "ms": 434605,
      "name": "Yasu Mimoyato",
      "recorded": "2026-10-12",
-     "session": "results_20261024_012755_practice"
+     "session": "results_20261115_025955_practice"
     },
     "4862267901219524944:11116577008463356553": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -11925,6 +11925,15 @@
      "name": "Chillby C",
      "recorded": "2026-10-12",
      "session": "results_20260927_021933_practice"
+    },
+    "5255672201012667771:3828684809595895975": {
+     "car": "Ford Mustang GT3",
+     "date": "2026-11-15",
+     "lap": "9:23.827",
+     "ms": 563827,
+     "name": "alexandre lemans",
+     "recorded": "2026-11-15",
+     "session": "results_20261115_094703_practice"
     },
     "5255861445840213709:9431982443405243054": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -19460,13 +19469,13 @@
      "session": "results_20261018_101911_practice"
     },
     "5701497182586333401:5237635289369435562": {
-     "car": "Porsche 911 GT3 RS (992)",
-     "date": "2026-10-29",
-     "lap": "7:27.693",
-     "ms": 447693,
+     "car": "Audi R8 LMS GT3 Evo II",
+     "date": "2026-11-15",
+     "lap": "7:04.560",
+     "ms": 424560,
      "name": "louis54 louis54",
      "recorded": "2026-10-29",
-     "session": "results_20261029_013908_practice"
+     "session": "results_20261115_094703_practice"
     },
     "5702553153554254794:15762265230144380586": {
      "car": "BMW M4 GT3 Evo",
