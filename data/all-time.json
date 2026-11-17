@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-17T03:14:29Z",
-  "/server2": "2026-10-30T01:16:52Z",
+  "/server1": "2026-11-17T14:07:47Z",
+  "/server2": "2026-11-17T12:20:22Z",
   "/server3": "2026-11-04T15:18:53Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-14T20:49:42Z"
  },
- "generated": "2026-11-17T04:38:18Z",
+ "generated": "2026-11-17T14:36:43Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -10773,6 +10773,15 @@
      "name": "c h",
      "recorded": "2026-10-12",
      "session": "results_20260724_225740_practice"
+    },
+    "5176461749536243473:1303330718040785074": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-17",
+     "lap": "6:52.299",
+     "ms": 412299,
+     "name": "Alexander Betasch",
+     "recorded": "2026-11-17",
+     "session": "results_20261117_043829_practice"
     },
     "5177154049111025403:13698822151652528303": {
      "car": "BMW M4 GT3 Evo",
