@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-17T14:07:47Z",
-  "/server2": "2026-11-17T12:20:22Z",
-  "/server3": "2026-11-04T15:18:53Z",
+  "/server1": "2026-11-17T22:24:04Z",
+  "/server2": "2026-11-17T18:04:02Z",
+  "/server3": "2026-11-17T20:42:46Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-14T20:49:42Z"
  },
- "generated": "2026-11-17T14:36:43Z",
+ "generated": "2026-11-17T22:58:04Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -1080,6 +1080,15 @@
      "name": "bryan grauss",
      "recorded": "2026-10-12",
      "session": "results_20261005_211212_practice"
+    },
+    "4664253003558222308:13504504833217927841": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-17",
+     "lap": "7:00.711",
+     "ms": 420711,
+     "name": "James Draper",
+     "recorded": "2026-11-17",
+     "session": "results_20261117_201009_practice"
     },
     "4664541308044801969:8128669455586716849": {
      "car": "BMW M4 GT3 Evo",
@@ -4059,6 +4068,15 @@
      "name": "salvatore sciumbata",
      "recorded": "2026-10-12",
      "session": "results_20260926_020329_practice"
+    },
+    "4825165131228578262:12685340059498569367": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-17",
+     "lap": "7:39.603",
+     "ms": 459603,
+     "name": "SixdaYs Thepsila",
+     "recorded": "2026-11-17",
+     "session": "results_20261117_201009_practice"
     },
     "4826418109239839047:18297977066237183114": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -9558,6 +9576,15 @@
      "name": "Lasse Hinsen",
      "recorded": "2026-10-25",
      "session": "results_20261026_021619_practice"
+    },
+    "5111889833773187029:17422887545642530998": {
+     "car": "Porsche 911 GT3 RS (992)",
+     "date": "2026-11-17",
+     "lap": "7:11.736",
+     "ms": 431736,
+     "name": "Tim Stelten",
+     "recorded": "2026-11-17",
+     "session": "results_20261117_220257_practice"
     },
     "5112421745558669798:1633504105033268146": {
      "car": "Porsche 911 GT3 RS (992)",
@@ -15400,6 +15427,15 @@
      "recorded": "2026-10-12",
      "session": "results_20261011_194833_practice"
     },
+    "5454791176690853855:11905809663647986305": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-17",
+     "lap": "6:57.252",
+     "ms": 417252,
+     "name": "Gianluca Napo",
+     "recorded": "2026-11-17",
+     "session": "results_20261117_201009_practice"
+    },
     "5454801909523165351:8672073614819327896": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-10-10",
@@ -21095,6 +21131,15 @@
      "name": "Stella Schober",
      "recorded": "2026-10-12",
      "session": "results_20261006_194803_practice"
+    },
+    "4661144600171351920:6574059310250899855": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-17",
+     "lap": "6:43.317",
+     "ms": 403317,
+     "name": "King Ananas",
+     "recorded": "2026-11-17",
+     "session": "results_20261117_180402_practice"
     },
     "4700393006512520891:8423746347220578713": {
      "car": "Dallara EXP",
