@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-17T22:24:04Z",
+  "/server1": "2026-11-18T02:01:22Z",
   "/server2": "2026-11-17T18:04:02Z",
   "/server3": "2026-11-17T20:42:46Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-14T20:49:42Z"
  },
- "generated": "2026-11-17T22:58:04Z",
+ "generated": "2026-11-18T04:31:23Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -234,6 +234,15 @@
      "name": "James Healey",
      "recorded": "2026-10-12",
      "session": "results_20260718_162038_practice"
+    },
+    "4622376490261030290:17384084942899945874": {
+     "car": "Ford Mustang GT3",
+     "date": "2026-11-18",
+     "lap": "7:08.232",
+     "ms": 428232,
+     "name": "Samuel Pinto",
+     "recorded": "2026-11-18",
+     "session": "results_20261118_020122_practice"
     },
     "4622709574865745729:2541347725350056381": {
      "car": "Porsche 911 GT3 RS (992)",
