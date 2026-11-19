@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-19T13:24:05Z",
-  "/server2": "2026-11-19T08:38:27Z",
+  "/server1": "2026-11-19T19:51:06Z",
+  "/server2": "2026-11-19T18:40:39Z",
   "/server3": "2026-11-18T20:54:37Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-19T13:26:33Z",
+ "generated": "2026-11-19T22:15:25Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -10153,6 +10153,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260912_233248_practice"
     },
+    "5142052982192417416:8352193173962489518": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-19",
+     "lap": "7:06.405",
+     "ms": 426405,
+     "name": "Tommaso Sensi",
+     "recorded": "2026-11-19",
+     "session": "results_20261119_190026_practice"
+    },
     "5142515369302544486:13290769726082608541": {
      "car": "Audi R8 LMS GT3 Evo II",
      "date": "2026-07-19",
@@ -12330,6 +12339,15 @@
      "name": "Dr Anton  Hahnenkamm",
      "recorded": "2026-10-12",
      "session": "results_20260722_222949_practice"
+    },
+    "5266833396721284847:1747619245828521116": {
+     "car": "Audi R8 LMS GT3 Evo II",
+     "date": "2026-11-19",
+     "lap": "7:27.804",
+     "ms": 447804,
+     "name": "Thibault Christophe",
+     "recorded": "2026-11-19",
+     "session": "results_20261119_143929_practice"
     },
     "5267417786734564104:12658940400256447634": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
