@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-19T19:51:06Z",
-  "/server2": "2026-11-19T18:40:39Z",
+  "/server1": "2026-11-20T19:24:34Z",
+  "/server2": "2026-11-20T14:48:32Z",
   "/server3": "2026-11-18T20:54:37Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-19T22:15:25Z",
+ "generated": "2026-11-20T21:15:27Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -18810,6 +18810,15 @@
      "name": "Raouf DZGunner31",
      "recorded": "2026-10-16",
      "session": "results_20261024_212540_practice"
+    },
+    "5648997608871881962:8262196784112723133": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-20",
+     "lap": "6:49.848",
+     "ms": 409848,
+     "name": "riccardo cestari",
+     "recorded": "2026-11-20",
+     "session": "results_20261120_181446_practice"
     },
     "5649005738939690181:16191162663522622891": {
      "car": "BMW M4 GT3 Evo",
