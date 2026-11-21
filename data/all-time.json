@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-20T19:24:34Z",
+  "/server1": "2026-11-21T00:42:32Z",
   "/server2": "2026-11-20T14:48:32Z",
   "/server3": "2026-11-18T20:54:37Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-20T21:15:27Z",
+ "generated": "2026-11-21T02:32:32Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -3684,12 +3684,12 @@
     },
     "4805664251852653217:400009775972324483": {
      "car": "Audi R8 LMS GT3 Evo II",
-     "date": "2026-11-15",
-     "lap": "6:57.507",
-     "ms": 417507,
+     "date": "2026-11-20",
+     "lap": "6:56.952",
+     "ms": 416952,
      "name": "Andi Andi",
      "recorded": "2026-11-10",
-     "session": "results_20261115_225701_practice"
+     "session": "results_20261120_223631_practice"
     },
     "4807142720033339839:17186370104095220900": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -19333,6 +19333,15 @@
      "recorded": "2026-10-16",
      "session": "results_20261016_193141_practice"
     },
+    "5673156480997212356:10336061229424188818": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-20",
+     "lap": "6:49.890",
+     "ms": 409890,
+     "name": "Dominik Kmiecik",
+     "recorded": "2026-11-21",
+     "session": "results_20261120_223631_practice"
+    },
     "5673241422826232987:806831839909924539": {
      "car": "Porsche 911 GT3 Cup (992)",
      "date": "2026-10-04",
@@ -20511,6 +20520,15 @@
      "name": "João Cavaca",
      "recorded": "2026-10-12",
      "session": "results_20261030_231539_practice"
+    },
+    "5740262187720658655:6789786107288211389": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-20",
+     "lap": "6:54.525",
+     "ms": 414525,
+     "name": "berre nies",
+     "recorded": "2026-11-21",
+     "session": "results_20261120_223631_practice"
     },
     "5740640501824159925:11890207542778306704": {
      "car": "Ferrari 296 GT3",
