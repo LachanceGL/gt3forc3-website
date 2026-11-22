@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-21T19:24:33Z",
+  "/server1": "2026-11-21T23:59:19Z",
   "/server2": "2026-11-21T18:44:33Z",
-  "/server3": "2026-11-18T20:54:37Z",
+  "/server3": "2026-11-21T20:38:28Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-21T19:26:19Z",
+ "generated": "2026-11-22T00:25:11Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -18226,6 +18226,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260910_211954_practice"
     },
+    "5605675698615655423:14351999079866076812": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-11-21",
+     "lap": "7:02.859",
+     "ms": 422859,
+     "name": "George Sfakiotis",
+     "recorded": "2026-11-22",
+     "session": "results_20261121_222949_practice"
+    },
     "5605878160270553310:17434806936644298165": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-07-09",
@@ -21526,6 +21535,15 @@
      "name": "Max Friesen",
      "recorded": "2026-10-12",
      "session": "results_20260828_194634_qualify"
+    },
+    "5041736854163172914:4215630060947374266": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-21",
+     "lap": "1:59.673",
+     "ms": 119673,
+     "name": "Tobias Distler",
+     "recorded": "2026-11-22",
+     "session": "results_20261121_203701_qualify"
     },
     "5044032232926207884:16704383859323687814": {
      "car": "BMW M4 GT3 Evo",
