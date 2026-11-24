@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-24T02:12:17Z",
+  "/server1": "2026-11-24T13:22:57Z",
   "/server2": "2026-11-21T18:44:33Z",
   "/server3": "2026-11-23T22:47:50Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-24T02:18:24Z",
+ "generated": "2026-11-24T13:54:54Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -543,12 +543,12 @@
     },
     "4636720217532375309:5937797294517738431": {
      "car": "Ferrari 296 GT3",
-     "date": "2026-11-23",
-     "lap": "6:48.675",
-     "ms": 408675,
+     "date": "2026-11-24",
+     "lap": "6:48.096",
+     "ms": 408096,
      "name": "Alexander Jost",
      "recorded": "2026-11-01",
-     "session": "results_20261123_090214_practice"
+     "session": "results_20261124_132257_practice"
     },
     "4636798881669967858:17869683672451460996": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -19902,12 +19902,12 @@
     },
     "5701497182586333401:5237635289369435562": {
      "car": "Audi R8 LMS GT3 Evo II",
-     "date": "2026-11-15",
-     "lap": "7:04.560",
-     "ms": 424560,
+     "date": "2026-11-24",
+     "lap": "6:56.937",
+     "ms": 416937,
      "name": "louis54 louis54",
      "recorded": "2026-10-29",
-     "session": "results_20261115_094703_practice"
+     "session": "results_20261124_112805_practice"
     },
     "5702553153554254794:15762265230144380586": {
      "car": "BMW M4 GT3 Evo",
