@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-24T19:51:51Z",
+  "/server1": "2026-11-25T07:05:16Z",
   "/server2": "2026-11-21T18:44:33Z",
-  "/server3": "2026-11-23T22:47:50Z",
+  "/server3": "2026-11-25T01:10:54Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-24T23:30:50Z",
+ "generated": "2026-11-25T08:47:55Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -21644,6 +21644,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260828_194634_qualify"
     },
+    "4991653380267538435:6283852050698757532": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-25",
+     "lap": "1:58.942",
+     "ms": 118942,
+     "name": "Spirit Jaysis",
+     "recorded": "2026-11-25",
+     "session": "results_20261125_011054_qualify"
+    },
     "5041736854163172914:4215630060947374266": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-11-21",
@@ -21688,6 +21697,15 @@
      "name": "Pony Chocolony",
      "recorded": "2026-10-12",
      "session": "results_20260915_092733_race"
+    },
+    "5227329958451014146:16187585603266578862": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-25",
+     "lap": "1:55.965",
+     "ms": 115965,
+     "name": "Marc Weinand",
+     "recorded": "2026-11-25",
+     "session": "results_20261125_004953_qualify"
     },
     "5263558543420245221:12151066165315745964": {
      "car": "BMW M4 GT3 Evo",
@@ -21769,6 +21787,15 @@
      "name": "Thomas Larcher",
      "recorded": "2026-10-31",
      "session": "results_20261031_145537_qualify"
+    },
+    "5537904904199442264:8036134268225146292": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-25",
+     "lap": "2:01.164",
+     "ms": 121164,
+     "name": "Filz Stift",
+     "recorded": "2026-11-25",
+     "session": "results_20261125_011054_qualify"
     },
     "5537924507461323160:8502717023030692481": {
      "car": "BMW M4 GT3 Evo",
