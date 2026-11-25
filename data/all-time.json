@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-25T07:05:16Z",
+  "/server1": "2026-11-25T19:06:30Z",
   "/server2": "2026-11-21T18:44:33Z",
   "/server3": "2026-11-25T01:10:54Z",
   "/server4": "2026-11-15T20:17:34Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-25T08:47:55Z",
+ "generated": "2026-11-25T19:24:16Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -4836,12 +4836,12 @@
     },
     "4862050047261476223:16145115968426065567": {
      "car": "Porsche 911 GT3 Cup (992)",
-     "date": "2026-11-15",
-     "lap": "7:05.682",
-     "ms": 425682,
+     "date": "2026-11-25",
+     "lap": "7:05.328",
+     "ms": 425328,
      "name": "Yasu Mimoyato",
      "recorded": "2026-10-12",
-     "session": "results_20261115_225701_practice"
+     "session": "results_20261125_155416_practice"
     },
     "4862267901219524944:11116577008463356553": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -6489,6 +6489,15 @@
      "name": "Aurel Memel",
      "recorded": "2026-10-12",
      "session": "results_20261024_012755_practice"
+    },
+    "4937108918476491798:6853859939518278841": {
+     "car": "Ferrari 296 GT3",
+     "date": "2026-11-25",
+     "lap": "7:23.622",
+     "ms": 443622,
+     "name": "GRAND SRATE",
+     "recorded": "2026-11-25",
+     "session": "results_20261125_185753_practice"
     },
     "4937168599559813350:11709647940257400982": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -13647,12 +13656,12 @@
     },
     "5342052366473022732:14960192626930671550": {
      "car": "BMW M4 GT3 Evo",
-     "date": "2026-11-24",
-     "lap": "6:39.324",
-     "ms": 399324,
+     "date": "2026-11-25",
+     "lap": "6:37.932",
+     "ms": 397932,
      "name": "D Rak",
      "recorded": "2026-11-08",
-     "session": "results_20261124_195151_practice"
+     "session": "results_20261125_185753_practice"
     },
     "5342603281624503418:17167426892396845989": {
      "car": "Ferrari 296 GT3",
