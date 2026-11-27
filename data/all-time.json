@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-27T04:13:52Z",
+  "/server1": "2026-11-27T23:07:20Z",
   "/server2": "2026-11-25T21:36:53Z",
   "/server3": "2026-11-25T21:20:55Z",
   "/server4": "2026-11-26T23:17:54Z",
-  "/server5": "2026-11-18T23:50:32Z"
+  "/server5": "2026-11-27T14:14:44Z"
  },
- "generated": "2026-11-27T05:07:27Z",
+ "generated": "2026-11-27T23:33:01Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -543,12 +543,12 @@
     },
     "4636720217532375309:5937797294517738431": {
      "car": "Ferrari 296 GT3",
-     "date": "2026-11-24",
-     "lap": "6:48.096",
-     "ms": 408096,
+     "date": "2026-11-27",
+     "lap": "6:47.854",
+     "ms": 407854,
      "name": "Alexander Jost",
      "recorded": "2026-11-01",
-     "session": "results_20261124_132257_practice"
+     "session": "results_20261127_230720_practice"
     },
     "4636798881669967858:17869683672451460996": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -4978,6 +4978,15 @@
      "recorded": "2026-10-12",
      "session": "results_20260827_212443_practice"
     },
+    "4872569967926527334:9756134260675617682": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-27",
+     "lap": "7:24.330",
+     "ms": 444330,
+     "name": "Stefan Eleven",
+     "recorded": "2026-11-27",
+     "session": "results_20261127_230720_practice"
+    },
     "4873014703940875276:13096770434337081501": {
      "car": "BMW M4 GT3 Evo",
      "date": "2026-10-04",
@@ -6310,6 +6319,15 @@
      "recorded": "2026-10-18",
      "session": "results_20261018_101911_practice"
     },
+    "4928496046815155652:6129240605549152948": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-27",
+     "lap": "6:48.273",
+     "ms": 408273,
+     "name": "DTM Destroyer | GR",
+     "recorded": "2026-11-27",
+     "session": "results_20261127_230720_practice"
+    },
     "4928787521117601590:15991489485423535029": {
      "car": "Ferrari 296 GT3",
      "date": "2026-10-21",
@@ -6966,6 +6984,15 @@
      "name": "Noel Garcia",
      "recorded": "2026-10-27",
      "session": "results_20261027_225309_practice"
+    },
+    "4960367204444457403:7983475733828644743": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-27",
+     "lap": "6:49.113",
+     "ms": 409113,
+     "name": "Stefan M",
+     "recorded": "2026-11-27",
+     "session": "results_20261127_230720_practice"
     },
     "4960835834131652953:15908627572439880121": {
      "car": "Audi R8 LMS GT3 Evo II",
@@ -10233,6 +10260,15 @@
      "name": "PLANCKS NOT",
      "recorded": "2026-10-12",
      "session": "results_20260912_233248_practice"
+    },
+    "5142001112512188739:17273466573455894165": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-27",
+     "lap": "7:02.439",
+     "ms": 422439,
+     "name": "Gin Tonic",
+     "recorded": "2026-11-27",
+     "session": "results_20261127_230720_practice"
     },
     "5142052982192417416:8352193173962489518": {
      "car": "Porsche 911 GT3 R Rennsport (992)",
@@ -15247,6 +15283,15 @@
      "recorded": "2026-10-31",
      "session": "results_20261031_025232_practice"
     },
+    "5436301101832586851:17077949162804926629": {
+     "car": "Porsche 911 GT3 R Rennsport (992)",
+     "date": "2026-11-27",
+     "lap": "6:54.076",
+     "ms": 414076,
+     "name": "Stephan Heußen",
+     "recorded": "2026-11-27",
+     "session": "results_20261127_230720_practice"
+    },
     "5436637484974984378:2296743158094204069": {
      "car": "Ferrari 296 GT3",
      "date": "2026-11-24",
@@ -19451,13 +19496,13 @@
      "session": "results_20260718_162038_practice"
     },
     "5672379235511216164:7936638137429128578": {
-     "car": "Porsche 911 GT3 RS (992)",
-     "date": "2026-11-22",
-     "lap": "7:22.941",
-     "ms": 442941,
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-27",
+     "lap": "7:02.025",
+     "ms": 422025,
      "name": "Radek Vesely",
      "recorded": "2026-11-23",
-     "session": "results_20261122_231256_practice"
+     "session": "results_20261127_230720_practice"
     },
     "5672530621421170534:3046474855792087954": {
      "car": "Audi R8 LMS GT3 Evo II",
