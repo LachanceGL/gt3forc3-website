@@ -1,12 +1,12 @@
 {
  "cursors": {
-  "/server1": "2026-11-26T21:59:59Z",
+  "/server1": "2026-11-27T04:13:52Z",
   "/server2": "2026-11-25T21:36:53Z",
   "/server3": "2026-11-25T21:20:55Z",
-  "/server4": "2026-11-15T20:17:34Z",
+  "/server4": "2026-11-26T23:17:54Z",
   "/server5": "2026-11-18T23:50:32Z"
  },
- "generated": "2026-11-26T22:24:56Z",
+ "generated": "2026-11-27T05:07:27Z",
  "tracks": {
   "/server1|Nurburgring|Nordschleife": {
    "drivers": {
@@ -22156,6 +22156,15 @@
      "recorded": "2026-10-12",
      "session": "results_20261012_050959_practice"
     },
+    "5254506643675336670:17672618983433096076": {
+     "car": "BMW M4 GT3 Evo",
+     "date": "2026-11-26",
+     "lap": "2:28.692",
+     "ms": 148692,
+     "name": "Mariano Falconi",
+     "recorded": "2026-11-27",
+     "session": "results_20261126_231754_practice"
+    },
     "5276315604724721979:12634016965684148383": {
      "car": "Ferrari 296 GT3",
      "date": "2026-10-13",
@@ -22254,6 +22263,15 @@
      "name": "Joao Santos",
      "recorded": "2026-11-08",
      "session": "results_20261107_222434_practice"
+    },
+    "5572012467038437983:17853426650831222163": {
+     "car": "Ford Mustang GT3",
+     "date": "2026-11-26",
+     "lap": "2:32.616",
+     "ms": 152616,
+     "name": "Jim Thompson",
+     "recorded": "2026-11-27",
+     "session": "results_20261126_231754_practice"
     },
     "5606161271971460949:10414234914310523523": {
      "car": "Porsche 911 GT3 Cup (992)",
